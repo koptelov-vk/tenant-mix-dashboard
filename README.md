@@ -4,6 +4,8 @@
 
 Рабочая версия: [GitHub Pages](https://koptelov-vk.github.io/tenant-mix-dashboard/)
 
+PDF-версия: [tenant-mix-dashboard-readme.pdf](docs/tenant-mix-dashboard-readme.pdf)
+
 ## Текущий охват
 
 Снимок данных на 16.07.2026:
