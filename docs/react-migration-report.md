@@ -25,3 +25,6 @@
 - Playwright: 23 passing tests, 1 intentionally skipped desktop duplicate of mobile overflow.
 - URL history: Back, Forward, Reload, focus mall, and active section are verified on desktop, 390 px, and 320 px.
 - Viewports: 1366x768, 390x844, and 320x568 in automated QA; five screenshots in `artifacts/react/`.
+- GitHub Actions quality job: passed on Ubuntu for commit `3f0ee43`.
+- Lighthouse runs: Performance 95/96/96, Accessibility 100/100/100, Best Practices 96/96/96, SEO 100/100/100.
+- Lighthouse medians: Performance 96, Accessibility 100, Best Practices 96, SEO 100.

@@ -133,6 +133,8 @@ pnpm test:lighthouse
 
 Playwright проверяет desktop, 390 px и 320 px, URL/reload, разделы, единый категорийный срез, CSV, keyboard navigation, axe и отсутствие page overflow. Lighthouse выполняется трижды; CI требует Performance 90+, Accessibility 95+, Best Practices 90+ и SEO 90+.
 
+Последний подтвержденный Ubuntu CI: Performance 95/96/96, Accessibility 100/100/100, Best Practices 96/96/96, SEO 100/100/100; медианы 96/100/96/100.
+
 ## Deployment
 
 Workflow `.github/workflows/pages.yml` выполняет:
