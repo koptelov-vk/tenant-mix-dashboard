@@ -19,7 +19,7 @@ export default function BrandsPage({ context, data }: { context: AnalysisContext
     let values = context.filteredRows;
     if (debounced.trim()) {
       const matches = fuzzysort.go(debounced, values, { keys: ['brand', 'brandNormalized', 'mall', 'category'], threshold: -10000 });
-      values = matches.map((match) => match.obj);
+      values = matches.map((match: { obj: TenantRow }) => match.obj);
     }
     return [...values].sort((a, b) => (sort === 'brand' ? a.brand.localeCompare(b.brand, 'ru') : sort === 'mall' ? a.mall.localeCompare(b.mall, 'ru') : a.category.localeCompare(b.category, 'ru')));
   }, [context.filteredRows, debounced, sort]);

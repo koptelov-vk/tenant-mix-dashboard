@@ -2,6 +2,7 @@
   "name": "tenant-mix-dashboard",
   "version": "3.0.0-alpha.1",
   "private": true,
+  "packageManager": "pnpm@11.9.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,6 +15,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:react:e2e": "playwright test --config=playwright.react.config.mjs",
+    "test:lighthouse": "lhci autorun --config=lighthouserc.cjs",
     "test:legacy": "node --test tests/*.test.mjs"
   },
   "dependencies": {
@@ -35,6 +37,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
+    "@lhci/cli": "^0.14.0",
     "@playwright/test": "^1.61.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",

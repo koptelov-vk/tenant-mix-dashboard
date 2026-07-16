@@ -20,6 +20,22 @@ test('focus and tab survive URL and reload', async ({ page }) => {
   await expect(page.locator('select').first()).toHaveValue('Небо');
 });
 
+test('Back and Forward restore the shared analysis state', async ({ page }) => {
+  await page.goto('');
+  await page.locator('select').first().selectOption('Небо');
+  await expect.poll(() => new URL(page.url()).searchParams.get('focus')).toBe('Небо');
+  await page.getByRole('button', { name: 'Категории' }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('tab')).toBe('categories');
+
+  await page.goBack();
+  await expect(page.locator('select').first()).toHaveValue('Небо');
+  await expect(page.getByRole('button', { name: 'Обзор' })).toHaveAttribute('aria-current', 'page');
+
+  await page.goForward();
+  await expect(page.locator('select').first()).toHaveValue('Небо');
+  await expect(page.getByRole('button', { name: 'Категории' })).toHaveAttribute('aria-current', 'page');
+});
+
 test('category filter updates the same KPI slice', async ({ page }) => {
   await page.goto('');
   const before = await page.locator('.kpi strong').first().innerText();

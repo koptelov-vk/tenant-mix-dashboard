@@ -45,18 +45,26 @@ function toUrl(state: DashboardFilters): string {
 
 export function useUrlState() {
   const hydrated = useRef(false);
+  const restoringHistory = useRef(false);
   const state = useDashboardStore();
 
   useEffect(() => {
     state.hydrate(readUrl());
     hydrated.current = true;
-    const onPopState = () => state.hydrate(readUrl());
+    const onPopState = () => {
+      restoringHistory.current = true;
+      state.hydrate(readUrl());
+    };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
   useEffect(() => {
     if (!hydrated.current) return;
+    if (restoringHistory.current) {
+      restoringHistory.current = false;
+      return;
+    }
     const next = toUrl(state);
     if (`${window.location.pathname}${window.location.search}` !== next) window.history.pushState(null, '', next);
   }, [state.focusMall, state.category, state.metric, state.activePage, state.peerGroup, state.selectedMalls, state.cities, state.sourceQualities, state.gapN, state.glaMin, state.glaMax, state.gbaMin, state.gbaMax]);
