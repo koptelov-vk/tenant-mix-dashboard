@@ -6,3 +6,8 @@ test-results/
 playwright-report/
 node_modules/
 output/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
+artifacts/*.log
+artifacts/lighthouse/tmp/

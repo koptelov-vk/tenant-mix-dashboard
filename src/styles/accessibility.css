@@ -1,0 +1,9 @@
+* { min-width: 0; }
+.skip-link { position: fixed; left: 12px; top: 8px; z-index: 200; padding: 10px 14px; border-radius: 8px; background: #0f172a; color: #fff; transform: translateY(-150%); }
+.skip-link:focus { transform: none; }
+.navigation button { flex: 0 0 auto; }
+@media (max-width: 430px) {
+  .filter-bar label:nth-child(3),
+  .filter-bar label:nth-child(4) { display: grid; }
+  .panel-title { flex-direction: column; }
+}
