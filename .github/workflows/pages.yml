@@ -73,7 +73,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dashboard-migration-qa
+          name: dashboard-v2-qa
           path: |
             playwright-report/
             test-results/
@@ -81,12 +81,14 @@ jobs:
           if-no-files-found: ignore
 
       - name: Prepare Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           mkdir -p site
           cp index.html site/index.html
           touch site/.nojekyll
 
       - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
