@@ -7,13 +7,13 @@ Snapshot: 2026-07-16. Production data: 4,997 tenant rows, 30 malls, 2,578 normal
 | Focus mall, default Fantastika | `GlobalFilters`, `dashboardStore` | `mallSummary` | In progress | Default focus and focus change |
 | Comparison group and geography | `GlobalFilters`, `useAnalysisContext` | `mallSummary` | In progress | Focus outside peer group |
 | URL state and browser navigation | `useUrlState` | URL query | In progress | Reload, Back, Forward |
-| Slice-consistent KPI and benchmark | `useAnalysisContext`, `KpiGrid` | Filtered tenant rows | In progress | Category and source filters update all metrics |
-| Global, group, and focus uniqueness | `uniqueness.ts`, uniqueness table | `brandPresence`, current slice | Pending | Three scopes against fixtures |
-| Intersections | `intersections.ts` | Current slice | Pending | Focus overlap against fixtures |
-| Jaccard similarity | `jaccard.ts`, comparability page | Current slice | Pending | Controlled A/B sets |
-| Category medians and deviations | `median.ts`, `BulletChart` | Current peer group | Pending | Focus excluded from peer median when required |
-| Density per 10,000 sqm GLA | `density.ts` | Confirmed GLA only | In progress | Missing GLA returns no data |
-| Gap analysis | `gaps.ts`, `PotentialBrandsTable` | Current competitors and sources | Pending | Focus brands excluded; `gapN` works |
+| Slice-consistent KPI and benchmark | `useAnalysisContext`, `KpiGrid` | Filtered tenant rows | Calculation complete | Category and source filters update all metrics |
+| Global, group, and focus uniqueness | `uniqueness.ts`, uniqueness table | `brandPresence`, current slice | Calculation complete | Three scopes against fixtures |
+| Intersections | `intersections.ts` | Current slice | Calculation complete | Focus overlap against fixtures |
+| Jaccard similarity | `jaccard.ts`, comparability page | Current slice | Calculation complete | Controlled A/B sets |
+| Category medians and deviations | `median.ts`, `BulletChart` | Current peer group | Calculation complete | Focus excluded from peer median when required |
+| Density per 10,000 sqm GLA | `density.ts` | Confirmed GLA only | Calculation complete | Missing GLA returns no data |
+| Gap analysis | `gaps.ts`, `PotentialBrandsTable` | Current competitors and sources | Calculation complete | Focus brands excluded; `gapN` works |
 | Executive summary | `ExecutiveSummary` | Unified analysis context | Pending | Every statement is reproducible |
 | Tenant mix profile | `TenantMixStackedBar` | Current slice | Pending | Shares total 100% per mall |
 | Category heatmap | `CategoryHeatmap` | Current slice | Pending | Absolute, share, and density modes |
@@ -38,4 +38,3 @@ Snapshot: 2026-07-16. Production data: 4,997 tenant rows, 30 malls, 2,578 normal
 - Density: distinct normalized brands divided by confirmed GLA, multiplied by 10,000. GBA is never a substitute.
 - Peer median: median of the current peer slice. A focus mall added outside the group is excluded.
 - Gap brand: absent from focus, present in at least `N` selected competitors, category and source-quality filters satisfied.
-
