@@ -1,0 +1,13 @@
+:root {
+  --ink:#10213f; --muted:#60708d; --subtle:#8b98ad; --line:#e4e9f1; --canvas:#f5f7fa;
+  --panel:#fff; --focus:#05652f; --focus-dark:#034a22; --competitor:#2867d8; --neutral:#8996aa;
+  --amber:#b76a00; --amber-bg:#fff5df; --danger:#c43d3d; --danger-bg:#fff0f0;
+  --green-bg:#eaf7ef; --blue-bg:#edf4ff; --radius:14px; --shadow:0 4px 16px rgba(15,23,42,.04);
+  --font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+}
+*{box-sizing:border-box} html{color-scheme:light;scroll-behavior:smooth} body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45}
+button,select,input{font:inherit;color:inherit} button,select,input,[role="button"]{min-height:40px} a{color:var(--competitor)}
+:focus-visible{outline:3px solid rgba(40,103,216,.35);outline-offset:2px}.skip-link{position:fixed;left:12px;top:-60px;z-index:100;background:#fff;padding:10px 14px;border-radius:8px}.skip-link:focus{top:12px}
+h1,h2,h3,p{margin-top:0} h1{font-size:28px;line-height:1.1} h2{font-size:20px;line-height:1.2} h3{font-size:15px;line-height:1.25}.eyebrow{text-transform:uppercase;font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.04em}
+.mono-number{font-variant-numeric:tabular-nums}.muted{color:var(--muted)}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.stack-label.focus{color:var(--focus-dark)}
