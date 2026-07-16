@@ -11,6 +11,7 @@ function copyDashboardData(): Plugin {
       const target = resolve('dist/data');
       mkdirSync(target, { recursive: true });
       cpSync(resolve('data/aggregates/dashboard_data.json'), resolve(target, 'dashboard_data.json'));
+      cpSync(resolve('dist/index-react.html'), resolve('dist/index.html'));
     },
   };
 }
@@ -22,7 +23,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     rollupOptions: {
-      input: resolve('index-react.html'),
+      input: { index: resolve('index-react.html') },
     },
   },
   test: {
