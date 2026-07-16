@@ -1,4 +1,4 @@
-name: Validate, build and deploy Dashboard 2.0
+name: Validate legacy and React migration
 
 on:
   workflow_dispatch:
@@ -43,7 +43,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Install Node.js dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
@@ -57,8 +57,14 @@ jobs:
       - name: Build standalone Dashboard 2.0
         run: python scripts/build_dashboard_v2.py
 
-      - name: Unit tests
+      - name: Legacy unit tests
+        run: pnpm test:legacy
+
+      - name: React unit tests
         run: pnpm test
+
+      - name: Build React migration preview
+        run: pnpm build
 
       - name: Desktop, mobile and accessibility tests
         run: pnpm test:e2e
@@ -67,10 +73,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dashboard-v2-qa
+          name: dashboard-migration-qa
           path: |
             playwright-report/
             test-results/
+            dist/
           if-no-files-found: ignore
 
       - name: Prepare Pages artifact
