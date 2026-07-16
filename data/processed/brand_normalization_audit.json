@@ -1,0 +1,32 @@
+{
+  "rows": 4997,
+  "malls": 30,
+  "brands_display": 2578,
+  "brands_normalized": 2578,
+  "suspicious": [],
+  "skeleton_collisions": [
+    {
+      "skeleton": "mo",
+      "brands": [
+        "MO",
+        "Мо"
+      ],
+      "count": 2
+    },
+    {
+      "skeleton": "xc",
+      "brands": [
+        "XC",
+        "ХС"
+      ],
+      "count": 2
+    }
+  ],
+  "multi_display_norms": [],
+  "duplicate_mall_brand_keys": 0,
+  "empty_brand_names": 0,
+  "empty_normalized_keys": 0,
+  "display_to_norm_max_cardinality": 1,
+  "norm_to_display_max_cardinality": 1,
+  "unique_flag_mismatches": 0
+}

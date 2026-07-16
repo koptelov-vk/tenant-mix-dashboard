@@ -1,0 +1,8 @@
+.codex/secrets/
+__pycache__/
+*.pyc
+dist/
+test-results/
+playwright-report/
+node_modules/
+output/

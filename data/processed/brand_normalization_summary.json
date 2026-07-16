@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-07-16",
+  "rows_before": 4997,
+  "rows_after": 4997,
+  "internal_rows_removed": 0,
+  "duplicates_removed_after_merge": 0,
+  "display_names_before": 2591,
+  "display_names_after": 2578,
+  "normalized_brands_before": 2591,
+  "normalized_brands_after": 2578,
+  "name_or_key_changes": 209,
+  "category_rows_harmonized": 70,
+  "malls": 30,
+  "duplicate_mall_brand_keys": 0,
+  "empty_brand_names": 0,
+  "empty_normalized_keys": 0
+}

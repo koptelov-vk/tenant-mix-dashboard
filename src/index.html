@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Управленческий анализ tenant mix торговых центров">
+  <title>Tenant Mix Dashboard 2.0</title>
+  <!-- INLINE_STYLES -->
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">К основному содержанию</a>
+  <header class="app-header">
+    <div class="shell header-row">
+      <div class="brand-lockup">
+        <span class="product-mark" aria-hidden="true">TM</span>
+        <div><strong>Tenant Mix</strong><span>Dashboard 2.0</span></div>
+      </div>
+      <nav class="top-nav" aria-label="Основная навигация" id="topNav"></nav>
+      <div class="freshness"><span>Снимок данных</span><strong id="snapshotDate">—</strong></div>
+    </div>
+  </header>
+
+  <section class="filter-shell" aria-label="Фильтры анализа">
+    <div class="shell filter-row">
+      <label class="field focus-field"><span>Фокусный ТЦ</span><select id="focusSelect"></select></label>
+      <label class="field"><span>Группа сравнения</span><select id="groupSelect"></select></label>
+      <label class="field"><span>География</span><select id="geoSelect"></select></label>
+      <label class="field"><span>Категория</span><select id="categorySelect"></select></label>
+      <button class="button secondary" id="moreFilters" type="button" aria-controls="filterDrawer" aria-expanded="false">Ещё фильтры</button>
+      <button class="button ghost" id="resetAll" type="button">Сбросить всё</button>
+    </div>
+    <div class="shell filter-meta-row">
+      <div class="active-tags" id="activeTags" aria-live="polite"></div>
+      <div class="slice-meta" id="sliceMeta"></div>
+    </div>
+  </section>
+
+  <main id="mainContent" class="shell main-content" tabindex="-1">
+    <section class="tab-page" id="tab-overview" data-tab="overview"></section>
+    <section class="tab-page" id="tab-comparison" data-tab="comparison" hidden></section>
+    <section class="tab-page" id="tab-tenant-mix" data-tab="tenant-mix" hidden></section>
+    <section class="tab-page" id="tab-tenants" data-tab="tenants" hidden></section>
+    <section class="tab-page" id="tab-upcoming" data-tab="upcoming" hidden></section>
+  </main>
+
+    <aside class="drawer" id="filterDrawer" aria-hidden="true" aria-label="Расширенные фильтры" inert>
+    <div class="drawer-head"><div><span class="eyebrow">Настройка среза</span><h2>Расширенные фильтры</h2></div><button class="icon-button" id="closeDrawer" aria-label="Закрыть фильтры">×</button></div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-actions"><button class="button ghost" id="clearDrawer">Очистить</button><button class="button primary" id="applyDrawer">Применить</button></div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <dialog class="detail-dialog" id="detailDialog"><div id="dialogContent"></div><button class="icon-button dialog-close" id="dialogClose" aria-label="Закрыть карточку">×</button></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- INLINE_DATA -->
+  <!-- INLINE_SCRIPTS -->
+</body>
+</html>
