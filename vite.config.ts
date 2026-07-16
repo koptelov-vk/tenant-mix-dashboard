@@ -1,6 +1,7 @@
 import { cpSync, mkdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { defineConfig, type Plugin } from 'vite';
+import type { Plugin } from 'vite';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 function copyDashboardData(): Plugin {
@@ -23,5 +24,8 @@ export default defineConfig({
     rollupOptions: {
       input: resolve('index-react.html'),
     },
+  },
+  test: {
+    include: ['src/**/*.test.{ts,tsx}'],
   },
 });
