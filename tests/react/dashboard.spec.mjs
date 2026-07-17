@@ -47,6 +47,7 @@ test('category filter updates the same KPI slice', async ({ page }) => {
 test('all sections open', async ({ page }) => {
   await page.goto('');
   for (const [button, heading] of [['Сопоставимость', 'Сопоставимость ТЦ'], ['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Скоро открытие', 'Скоро открытие'], ['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
+    if (button === 'Качество данных' || button === 'Динамика') await page.getByRole('button', { name: 'Ещё' }).click();
     await page.getByRole('button', { name: button }).click(); await expect(page.getByRole('heading', { name: heading }).first()).toBeVisible();
   }
 });
