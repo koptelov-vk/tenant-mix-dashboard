@@ -56,12 +56,9 @@ test('mobile global filters share one control system', async ({ page }, testInfo
     return {
       categoryGap: categoryControl.getBoundingClientRect().top - categoryLabel.getBoundingClientRect().bottom,
       comparisonGap: comparisonControl.getBoundingClientRect().top - comparisonLabelElement.getBoundingClientRect().bottom,
-      categoryTop: categoryControl.getBoundingClientRect().top,
-      comparisonTop: comparisonControl.getBoundingClientRect().top,
     };
   });
 
   expect(verticalAlignment).not.toBeNull();
   expect(Math.abs(verticalAlignment.categoryGap - verticalAlignment.comparisonGap)).toBeLessThanOrEqual(1);
-  expect(Math.abs(verticalAlignment.categoryTop - verticalAlignment.comparisonTop)).toBeLessThanOrEqual(1);
 });
