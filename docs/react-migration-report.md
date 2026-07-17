@@ -12,7 +12,7 @@
 
 ## Current limitations
 
-- Saved views and PDF export are deferred until core parity, accessibility, and CI are accepted.
+- PDF export remains deferred; saved views are implemented locally in the browser.
 - The current data has one snapshot, so history remains an empty state.
 - Local Lighthouse is blocked by a Windows Chrome temporary-profile cleanup error; Ubuntu CI remains authoritative.
 - New five-viewport screenshots could not be regenerated in this iteration because the local Chrome execution quota was exhausted. Playwright still verified desktop, 390 px and 320 px behavior.
@@ -23,12 +23,13 @@
 - Expanded scenarios with load, rename, copy, delete, JSON import/export and schema validation.
 - Scenario calculations now reproducibly recalculate brand count, category counts and shares, focus exclusives, intersections and Jaccard against every peer mall without mutating baseline.
 - Scenario files retain the source snapshot date and warn when loaded against another snapshot.
+- Added schema-validated saved views for the complete dashboard filter state, with load, rename, copy and delete actions.
 
 ## QA evidence
 
 - Production Zod validation covers 4,997 rows, 30 malls, and 2,578 normalized brands.
-- Vitest: 10 passing tests.
-- Playwright: 29 passing tests, 1 intentionally skipped desktop duplicate of mobile overflow.
+- Vitest: 12 passing tests.
+- Playwright: 32 passing tests, 1 intentionally skipped desktop duplicate of mobile overflow.
 - URL history: Back, Forward, Reload, focus mall, and active section are verified on desktop, 390 px, and 320 px.
 - Viewports: 1366x768, 390x844, and 320x568 in automated QA; five screenshots in `artifacts/react/`.
 - GitHub Actions quality job: passed on Ubuntu for commit `3f0ee43`.

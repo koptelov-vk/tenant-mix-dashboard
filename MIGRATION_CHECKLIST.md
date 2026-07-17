@@ -24,8 +24,9 @@ Snapshot: 2026-07-16. Production data: 4,997 tenant rows, 30 malls, 2,578 normal
 | Upcoming openings | `UpcomingPage`, `UpcomingTable` | Upcoming aggregate | Complete | Overdue does not imply opened |
 | Data quality | `DataQualityPage` | `dataQualitySummary` | Complete | Critical errors block deploy |
 | Scenarios | `ScenariosPage`, `scenarioStore`, `calculations/scenarios` | Baseline plus local changes | Complete for available tenant-mix metrics | Baseline immutable; category, uniqueness, intersections and Jaccard recalculate |
+| Saved views | `SavedViewsMenu`, `savedViewStore` | Complete dashboard filter state | Complete | Save, change state, restore filters and URL |
 | History | `HistoryPage` | Snapshot collection | Complete empty state | One snapshot renders an empty state |
-| GitHub Pages deployment | quality-gated workflow | `dist` | Pending | No deploy after failed quality job |
+| GitHub Pages deployment | quality-gated workflow | `dist` | Complete | No deploy after failed quality job |
 
 ## Calculation contract
 

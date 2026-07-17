@@ -3,6 +3,7 @@ import type { DashboardData } from '../../types/dashboard';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { Button } from '../ui/Button';
 import { Navigation } from './Navigation';
+import { SavedViewsMenu } from './SavedViewsMenu';
 
 export function AppHeader({ data, refreshing, onRefresh }: { data: DashboardData; refreshing: boolean; onRefresh: () => void }) {
   const focus = useDashboardStore((state) => state.focusMall);
@@ -12,6 +13,7 @@ export function AppHeader({ data, refreshing, onRefresh }: { data: DashboardData
     <div className="header-top">
       <div className="brand"><span className="brand-mark"><Building2 size={20} /></span><div><strong>Tenant Mix Analytics</strong><small>Срез {data.meta.snapshotDate} · {focus}</small></div></div>
       <div className="header-actions">
+        <SavedViewsMenu snapshotDate={data.meta.snapshotDate} />
         <Button variant="ghost" onClick={copyLink} aria-label="Скопировать ссылку"><Copy size={17} /><span className="desktop-label">Ссылка</span></Button>
         <Button variant="ghost" onClick={reset} aria-label="Сбросить фильтры"><RotateCcw size={17} /></Button>
         <Button variant="outline" onClick={onRefresh} disabled={refreshing} aria-label="Обновить данные"><RefreshCw size={17} className={refreshing ? 'spin' : ''} /><span className="desktop-label">Обновить</span></Button>

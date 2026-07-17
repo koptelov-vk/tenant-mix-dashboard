@@ -85,3 +85,23 @@ test('scenario page recalculates without changing baseline', async ({ page }) =>
   await expect(page.locator('.scenario-changes button')).toHaveCount(1);
   await expect(page.locator('.scenario-kpis-wide small').first()).toHaveText(baseline);
 });
+
+test('saved view restores filters, focus and active section', async ({ page }) => {
+  await page.goto('?focus=Небо&tab=categories&category=Обувь&metric=share');
+  await page.getByRole('button', { name: 'Сохранённые представления' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Сохранённые представления' });
+  await dialog.getByLabel('Название нового представления').fill('Контрольный срез');
+  await dialog.getByRole('button', { name: 'Сохранить' }).click();
+  await expect(dialog.getByRole('status')).toContainText('сохранён');
+  await dialog.getByRole('button', { name: 'Закрыть' }).click();
+
+  await page.locator('.filter-bar select').first().selectOption('Фантастика');
+  await page.getByRole('button', { name: 'Обзор' }).click();
+  await page.getByRole('button', { name: 'Сохранённые представления' }).click();
+  await page.getByRole('dialog', { name: 'Сохранённые представления' }).getByRole('button', { name: 'Открыть' }).click();
+
+  await expect(page.locator('.filter-bar select').first()).toHaveValue('Небо');
+  await expect(page.getByRole('button', { name: 'Категории' })).toHaveAttribute('aria-current', 'page');
+  await expect.poll(() => new URL(page.url()).searchParams.get('category')).toBe('Обувь');
+  await expect.poll(() => new URL(page.url()).searchParams.get('metric')).toBe('share');
+});
