@@ -98,7 +98,7 @@ test('manual comparison selection is stored in URL and excludes focus', async ({
 
 test('comparison table supports explicit sorting', async ({ page }) => {
   await page.goto('?tab=comparability');
-  const header = page.getByRole('button', { name: /Бренды/ }).first();
+  const header = page.locator('.data-table thead').getByRole('button', { name: 'Бренды' });
   await header.click();
   await expect(header.locator('xpath=..')).toHaveAttribute('aria-sort', 'ascending');
   await header.click();
