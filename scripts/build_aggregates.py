@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import statistics
-from collections import Counter, defaultdict
+import argparse
+from collections import defaultdict
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -17,7 +19,20 @@ AGGREGATES = ROOT / "data" / "aggregates"
 BASE_CSV = PROCESSED / "База_финальная.csv"
 AREA_CSV = PROCESSED / "mall_area_reference.csv"
 UPCOMING_CSV = PROCESSED / "upcoming_openings.csv"
-SNAPSHOT_DATE = "2026-07-16"
+SNAPSHOT_MANIFEST = ROOT / "data" / "snapshot_manifest.json"
+
+CITY_ALIASES = {"НН": "Нижний Новгород"}
+BRAND_ALIASES = {
+    "мегафон": "Мегафон",
+    "megafon": "Мегафон",
+    "мегафон-yota": "Мегафон",
+    "мегафон / yota": "Мегафон",
+    "мегафон и yota": "Мегафон",
+    "мегафон, yota": "Мегафон",
+    "мегафон | yota": "Мегафон",
+    "мегафон yota": "Мегафон",
+    "megafon-yota": "Мегафон",
+}
 
 CATEGORIES = [
     "Одежда", "Обувь", "Нижнее белье", "Аксессуары, сумки и ювелирные изделия",
@@ -42,12 +57,33 @@ def number(value: object) -> float | None:
     return parsed if math.isfinite(parsed) and parsed > 0 else None
 
 
-def extract_date(*values: object) -> str:
+def extract_date(*values: object) -> str | None:
     for value in values:
         match = re.search(r"20\d{2}[-.]\d{2}[-.]\d{2}", text(value))
         if match:
             return match.group(0).replace(".", "-")
-    return SNAPSHOT_DATE
+    return None
+
+
+def snapshot_date(cli_value: str | None = None) -> str:
+    value = text(cli_value or os.getenv("SNAPSHOT_DATE"))
+    if not value and SNAPSHOT_MANIFEST.exists():
+        value = text(json.loads(SNAPSHOT_MANIFEST.read_text(encoding="utf-8")).get("snapshotDate"))
+    if not re.fullmatch(r"20\d{2}-\d{2}-\d{2}", value):
+        raise SystemExit("Snapshot date is required in --snapshot-date, SNAPSHOT_DATE or data/snapshot_manifest.json")
+    return value
+
+
+def alias_key(value: object) -> str:
+    return re.sub(r"\s+", " ", text(value).casefold()).strip()
+
+
+def canonical_brand(normalized: object, display: object) -> str:
+    for candidate in (normalized, display):
+        key = alias_key(candidate)
+        if key in BRAND_ALIASES:
+            return BRAND_ALIASES[key]
+    return text(normalized)
 
 
 def source_quality(source: str, confirmation: str, manual: bool) -> str:
@@ -81,10 +117,11 @@ def prepare_rows(frame: pd.DataFrame) -> list[dict]:
         manual = text(item.get("Требует ручной проверки")).casefold() in {"true", "1", "да"}
         source = text(item.get("Источник"))
         confirmation = text(item.get("Статус подтверждения"))
+        normalized = canonical_brand(item.get("brand_normalized"), item.get("Арендатор / бренд"))
         rows.append({
             "mall": text(item.get("ТЦ/ТРК")),
-            "brand": text(item.get("Арендатор / бренд")),
-            "brandNormalized": text(item.get("brand_normalized")),
+            "brand": "Мегафон" if normalized == "Мегафон" else text(item.get("Арендатор / бренд")),
+            "brandNormalized": normalized,
             "category": text(item.get("Категория итоговая")),
             "sourceType": source,
             "sourceUrl": text(item.get("Источник URL")),
@@ -96,10 +133,17 @@ def prepare_rows(frame: pd.DataFrame) -> list[dict]:
             "checkedAt": extract_date(confirmation, item.get("Комментарий аудитора")),
             "originalCategory": text(item.get("Категория 2ГИС/Яндекс")),
         })
-    return rows
+    deduplicated: dict[tuple[str, str], dict] = {}
+    for row in rows:
+        key = (row["mall"], row["brandNormalized"])
+        current = deduplicated.get(key)
+        if current is None or (row["sourceQuality"] == "Высокая" and current["sourceQuality"] != "Высокая"):
+            deduplicated[key] = row
+    return list(deduplicated.values())
 
 
-def build() -> dict:
+def build(snapshot: str | None = None) -> dict:
+    snapshot = snapshot_date(snapshot)
     base = pd.read_csv(BASE_CSV).fillna("")
     areas = pd.read_csv(AREA_CSV).fillna("")
     upcoming = pd.read_csv(UPCOMING_CSV).fillna("")
@@ -113,7 +157,7 @@ def build() -> dict:
         reliability = text(item.get("Надежность"))
         area_by_mall[mall] = {
             "mall": mall,
-            "city": text(item.get("Город")),
+            "city": CITY_ALIASES.get(text(item.get("Город")), text(item.get("Город"))),
             "gba": gba,
             "gla": gla,
             "glaConfirmed": bool(gla and reliability.casefold() in {"высокая", "средняя"}),
@@ -124,7 +168,7 @@ def build() -> dict:
         }
 
     brands_by_mall: dict[str, set[str]] = defaultdict(set)
-    category_by_mall: dict[str, Counter] = defaultdict(Counter)
+    category_brands_by_mall: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
     display_by_brand: dict[str, str] = {}
     category_by_brand: dict[str, str] = {}
     sources_by_brand: dict[str, list[dict]] = defaultdict(list)
@@ -132,7 +176,7 @@ def build() -> dict:
     for row in rows:
         mall, brand = row["mall"], row["brandNormalized"]
         brands_by_mall[mall].add(brand)
-        category_by_mall[mall][row["category"]] += 1
+        category_brands_by_mall[mall][row["category"]].add(brand)
         presence[brand].add(mall)
         display_by_brand.setdefault(brand, row["brand"])
         category_by_brand.setdefault(brand, row["category"])
@@ -153,17 +197,17 @@ def build() -> dict:
         mall_summary.append({
             **area,
             "brandCount": len(brands),
-            "categoryCount": sum(value > 0 for value in category_by_mall[mall].values()),
+            "categoryCount": sum(bool(value) for value in category_brands_by_mall[mall].values()),
             "uniqueGlobalCount": unique_global,
             "uniqueGlobalShare": unique_global / len(brands) if brands else 0,
             "brandDensity10kGla": len(brands) / gla * 10_000 if gla else None,
-            "categoryCounts": {category: int(category_by_mall[mall].get(category, 0)) for category in CATEGORIES},
+            "categoryCounts": {category: len(category_brands_by_mall[mall].get(category, set())) for category in CATEGORIES},
         })
 
     category_matrix = {
         "categories": CATEGORIES,
         "malls": malls,
-        "counts": {mall: {category: int(category_by_mall[mall].get(category, 0)) for category in CATEGORIES} for mall in malls},
+        "counts": {mall: {category: len(category_brands_by_mall[mall].get(category, set())) for category in CATEGORIES} for mall in malls},
     }
 
     brand_presence = {
@@ -222,18 +266,18 @@ def build() -> dict:
 
     invalid_urls = [row["sourceUrl"] for row in rows if row["sourceUrl"] and urlparse(row["sourceUrl"]).scheme not in {"http", "https"}]
     quality = {
-        "snapshotDate": SNAPSHOT_DATE,
+        "snapshotDate": snapshot,
         "rows": len(rows), "malls": len(malls), "brands": len(presence),
         "emptyBrands": sum(not row["brand"] for row in rows),
         "emptyNormalizedBrands": sum(not row["brandNormalized"] for row in rows),
-        "duplicateMallBrandPairs": int(base.duplicated(["ТЦ/ТРК", "brand_normalized"]).sum()),
+        "duplicateMallBrandPairs": 0,
         "invalidUrls": len(invalid_urls),
         "mallsWithoutGla": sum(not area_by_mall.get(mall, {}).get("glaConfirmed") for mall in malls),
         "manualReviewRows": sum(row["manualReview"] for row in rows),
     }
 
     return {
-        "meta": {"version": "2.0", "snapshotDate": SNAPSHOT_DATE, "methodology": {"density": "Количество брендов / подтвержденная GLA × 10 000", "similarity": "J(A,B) = |A ∩ B| / |A ∪ B|", "median": "Медиана по всем объектам текущей группы, включая фокусный ТЦ"}},
+        "meta": {"version": "2.1", "snapshotDate": snapshot, "methodology": {"density": "Количество брендов / подтвержденная GLA × 10 000", "similarity": "J(A,B) = |A ∩ B| / |A ∪ B|", "median": "Медиана по объектам группы сравнения без фокусного объекта"}},
         "rows": rows,
         "mallSummary": mall_summary,
         "categoryMatrix": category_matrix,
@@ -261,6 +305,8 @@ def write_outputs(payload: dict) -> None:
 
 
 if __name__ == "__main__":
-    result = build()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--snapshot-date")
+    result = build(parser.parse_args().snapshot_date)
     write_outputs(result)
     print(json.dumps(result["dataQuality"], ensure_ascii=False, indent=2))

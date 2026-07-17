@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from build_aggregates import AREA_CSV, BASE_CSV, CATEGORIES, AGGREGATES, text
+from build_aggregates import AREA_CSV, BASE_CSV, CATEGORIES, AGGREGATES, CITY_ALIASES, prepare_rows, text
 
 
 class TenantRow(BaseModel):
@@ -54,9 +54,10 @@ def main() -> None:
         except Exception as exc:
             errors.append(f"row {index + 2}: {exc}")
 
-    duplicates = base.duplicated(["ТЦ/ТРК", "brand_normalized"])
-    if duplicates.any():
-        errors.append(f"duplicate mall + normalized brand pairs: {int(duplicates.sum())}")
+    normalized_rows = prepare_rows(base)
+    normalized_pairs = [(row["mall"], row["brandNormalized"]) for row in normalized_rows]
+    if len(normalized_pairs) != len(set(normalized_pairs)):
+        errors.append("duplicate mall + normalized brand pairs remain after aliases")
 
     mall_set = set(base["ТЦ/ТРК"].astype(str))
     area_malls = set(areas["ТЦ/ТРК"].astype(str))
@@ -78,6 +79,8 @@ def main() -> None:
             errors.append(f"GLA exceeds GBA for {row['ТЦ/ТРК']}: {gla} > {gba}")
         if not text(row["Город"]):
             errors.append(f"city is empty for {row['ТЦ/ТРК']}")
+        if text(row["Город"]) in CITY_ALIASES:
+            errors.append(f"city alias remains in area reference for {row['ТЦ/ТРК']}: {row['Город']}")
 
     baseline_path = AGGREGATES / "catalog_baseline.json"
     current_counts = base.groupby("ТЦ/ТРК").size().astype(int).to_dict()

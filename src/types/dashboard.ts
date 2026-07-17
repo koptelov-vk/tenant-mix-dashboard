@@ -10,7 +10,7 @@ export interface TenantRow {
   sourceUrl: string;
   sourceType: string;
   sourceQuality?: SourceQuality;
-  checkedAt?: string;
+  checkedAt?: string | null;
   rowStatus?: string;
   confirmation?: string;
   originalCategory?: string;
@@ -39,7 +39,7 @@ export interface BrandSource {
   url: string;
   type: string;
   quality: SourceQuality;
-  checkedAt: string;
+  checkedAt: string | null;
 }
 
 export interface BrandPresence {
