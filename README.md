@@ -6,7 +6,7 @@
 
 ## Статус React-миграции
 
-React-версия реализована в ветке `agent/react-dashboard-migration` и публикуется только после успешного quality job и ручного merge draft PR. Предыдущий Dashboard 2.0 сохранён в `legacy/dashboard-v2-pre-react.html`; он не удаляется при миграции.
+React-версия опубликована из `main`. Каждое изменение проходит отдельную ветку, pull request и обязательный quality job до слияния. Предыдущий Dashboard 2.0 сохранён в `legacy/dashboard-v2-pre-react.html` и остаётся доступным как fallback.
 
 Реализовано:
 
@@ -14,7 +14,7 @@ React-версия реализована в ветке `agent/react-dashboard-m
 - единый `AnalysisContext` для KPI, медиан, графиков, таблиц, уникальности, Жаккара, gap-анализа и экспорта;
 - страницы «Обзор», «Сопоставимость», «Категории», «Бренды», «Сценарии», «Скоро открытие», «Качество данных» и empty state истории;
 - URL-state фокуса, раздела, группы, категории, городов, ТЦ, качества источника, `gapN`, GLA/GBA и метрики;
-- CSV и lazy XLSX текущего среза;
+- CSV, lazy XLSX и многостраничный PDF текущего среза;
 - mobile layout 320/390 px без горизонтального overflow;
 - Zod-валидация production JSON, Vitest, Playwright и axe smoke;
 - quality-gated GitHub Pages deployment.
@@ -104,7 +104,7 @@ tests/{react}/
 legacy/dashboard-v2-pre-react.html
 ```
 
-Страницы загружаются лениво. Реестр использует TanStack Virtual, поиск имеет debounce, XLSX загружается только при экспорте. `MIGRATION_CHECKLIST.md` сопоставляет функции старой и новой версий.
+Страницы загружаются лениво. Реестр использует TanStack Virtual, поиск имеет debounce, а XLSX, jsPDF и html2canvas загружаются только при соответствующем экспорте. `MIGRATION_CHECKLIST.md` сопоставляет функции старой и новой версий.
 
 ## Локальный запуск
 
@@ -132,6 +132,12 @@ pnpm test:lighthouse
 ```
 
 Playwright проверяет desktop, 390 px и 320 px, URL/reload, разделы, единый категорийный срез, CSV, keyboard navigation, axe и отсутствие page overflow. Lighthouse выполняется трижды; CI требует Performance 90+, Accessibility 95+, Best Practices 90+ и SEO 90+.
+
+## PDF-экспорт
+
+Кнопка `PDF` в шапке формирует A4 landscape из отображаемого раздела и текущего `AnalysisContext`. Экспорт не пересчитывает показатели отдельно, поэтому фокусный объект, peer group, категория и остальные активные фильтры совпадают с экраном. На странице «Обзор» смысловые ряды разнесены по отдельным листам, чтобы карточки не разрывались границей страницы.
+
+`jsPDF` и `html2canvas` загружаются динамически только после нажатия кнопки и не входят в initial bundle. На узком мобильном экране кнопка скрыта, чтобы не перегружать шапку; сам анализ и остальные экспорты остаются доступны.
 
 Последний подтвержденный Ubuntu CI: Performance 95/96/96, Accessibility 100/100/100, Best Practices 96/96/96, SEO 100/100/100; медианы 96/100/96/100.
 

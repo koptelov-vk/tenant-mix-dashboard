@@ -12,10 +12,10 @@
 
 ## Current limitations
 
-- PDF export remains deferred; saved views are implemented locally in the browser.
+- PDF export captures the displayed analysis in A4 landscape; PDF libraries are loaded only on demand.
 - The current data has one snapshot, so history remains an empty state.
 - Local Lighthouse is blocked by a Windows Chrome temporary-profile cleanup error; Ubuntu CI remains authoritative.
-- New five-viewport screenshots could not be regenerated in this iteration because the local Chrome execution quota was exhausted. Playwright still verified desktop, 390 px and 320 px behavior.
+- Five-viewport screenshots are maintained in `artifacts/react/`; Playwright verifies desktop, 390 px and 320 px behavior.
 
 ## Completed in the follow-up iteration
 
@@ -24,14 +24,16 @@
 - Scenario calculations now reproducibly recalculate brand count, category counts and shares, focus exclusives, intersections and Jaccard against every peer mall without mutating baseline.
 - Scenario files retain the source snapshot date and warn when loaded against another snapshot.
 - Added schema-validated saved views for the complete dashboard filter state, with load, rename, copy and delete actions.
+- Added lazy multi-page PDF export of the current displayed slice with semantic page boundaries that keep analytical cards intact.
 
 ## QA evidence
 
 - Production Zod validation covers 4,997 rows, 30 malls, and 2,578 normalized brands.
-- Vitest: 12 passing tests.
-- Playwright: 32 passing tests, 1 intentionally skipped desktop duplicate of mobile overflow.
+- Vitest: 15 passing tests.
+- Playwright: 33 passing tests, 3 expected project-specific skips.
 - URL history: Back, Forward, Reload, focus mall, and active section are verified on desktop, 390 px, and 320 px.
 - Viewports: 1366x768, 390x844, and 320x568 in automated QA; five screenshots in `artifacts/react/`.
 - GitHub Actions quality job: passed on Ubuntu for commit `3f0ee43`.
 - Lighthouse runs: Performance 95/96/96, Accessibility 100/100/100, Best Practices 96/96/96, SEO 100/100/100.
 - Lighthouse medians: Performance 96, Accessibility 100, Best Practices 96, SEO 100.
+- Initial JavaScript: 297.95 kB (89.32 kB gzip). PDF code is split into separate wrapper, html2canvas and jsPDF chunks and is not loaded at startup.

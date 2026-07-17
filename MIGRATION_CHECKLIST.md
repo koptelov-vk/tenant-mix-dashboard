@@ -21,6 +21,7 @@ Snapshot: 2026-07-16. Production data: 4,997 tenant rows, 30 malls, 2,578 normal
 | Brand registry | `BrandRegistryTable`, `BrandSheet` | Tenant rows | Complete | Virtualization, filters, mobile cards |
 | CSV export | `export/csv.ts` | Current filtered rows | Complete | UTF-8 BOM and filtered rows only |
 | XLSX export | `export/xlsx.ts` | Current filtered rows | Complete | Lazy-loaded workbook |
+| PDF export | `PdfExportButton`, `export/pdf.ts` | Displayed page and unified analysis context | Complete | Lazy chunks, valid multi-page PDF, semantic page boundaries |
 | Upcoming openings | `UpcomingPage`, `UpcomingTable` | Upcoming aggregate | Complete | Overdue does not imply opened |
 | Data quality | `DataQualityPage` | `dataQualitySummary` | Complete | Critical errors block deploy |
 | Scenarios | `ScenariosPage`, `scenarioStore`, `calculations/scenarios` | Baseline plus local changes | Complete for available tenant-mix metrics | Baseline immutable; category, uniqueness, intersections and Jaccard recalculate |

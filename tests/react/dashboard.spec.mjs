@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { readFile } from 'node:fs/promises';
 
 test('loads production data without JavaScript errors and defaults to Fantastika', async ({ page }) => {
   const errors = []; page.on('pageerror', (error) => errors.push(error.message));
@@ -104,4 +105,18 @@ test('saved view restores filters, focus and active section', async ({ page }) =
   await expect(page.getByRole('button', { name: 'Категории' })).toHaveAttribute('aria-current', 'page');
   await expect.poll(() => new URL(page.url()).searchParams.get('category')).toBe('Обувь');
   await expect.poll(() => new URL(page.url()).searchParams.get('metric')).toBe('share');
+});
+
+test('PDF export downloads a valid current-analysis document', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop');
+  await page.goto('?focus=Фантастика&tab=overview');
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Скачать текущий анализ в PDF' }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe('tenant-mix-фантастика-2026-07-16.pdf');
+  const path = await download.path();
+  expect(path).not.toBeNull();
+  const file = await readFile(path);
+  expect(file.subarray(0, 5).toString()).toBe('%PDF-');
+  expect(file.length).toBeGreaterThan(20_000);
 });
