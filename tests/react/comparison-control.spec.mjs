@@ -16,7 +16,6 @@ test('mobile global filters share one control system', async ({ page }, testInfo
     const style = getComputedStyle(element);
     const box = element.getBoundingClientRect();
     return {
-      tagName: element.tagName,
       height: box.height,
       fontSize: style.fontSize,
       borderRadius: style.borderRadius,
@@ -45,7 +44,7 @@ test('mobile global filters share one control system', async ({ page }, testInfo
   expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
 
   const verticalAlignment = await page.evaluate(() => {
-    const categoryField = Array.from(document.querySelectorAll('.filter-field')).find((field) => field.querySelector('.filter-label')?.textContent === 'Категория');
+    const categoryField = Array.from(document.querySelectorAll('.filter-field')).find((field) => field.querySelector('.filter-label')?.textContent === 'Категории');
     const comparisonField = document.querySelector('.comparison-field');
     if (!(categoryField instanceof HTMLElement) || !(comparisonField instanceof HTMLElement)) return null;
     const categoryLabel = categoryField.querySelector('.filter-label');
