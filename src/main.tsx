@@ -9,6 +9,8 @@ import './styles/saved-views.css';
 import './styles/pdf-export.css';
 import './styles/qa-fixes.css';
 import './styles/tooltip.css';
+import './styles/category-heatmap.css';
+import './styles/comparison-field.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
