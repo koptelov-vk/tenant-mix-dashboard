@@ -17,18 +17,15 @@
 .filter-bar .comparison-field > button.comparison-trigger {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
   block-size: 40px;
   min-block-size: 40px;
   max-block-size: 40px;
-  padding-block: 0;
-  padding-inline: 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  background: #fff;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #0f172a;
   font: inherit;
   font-weight: 400;
@@ -39,25 +36,42 @@
   -webkit-appearance: none;
 }
 
-.filter-bar .comparison-field > button.comparison-trigger:hover {
-  border-color: #94a3b8;
+.comparison-trigger-surface {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  block-size: 40px;
+  padding-inline: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
   background: #fff;
 }
 
+.filter-bar .comparison-field > button.comparison-trigger:hover .comparison-trigger-surface {
+  border-color: #94a3b8;
+}
+
 .filter-bar .comparison-field > button.comparison-trigger:focus-visible {
+  outline: none;
+}
+
+.filter-bar .comparison-field > button.comparison-trigger:focus-visible .comparison-trigger-surface {
   border-color: #2563eb;
   outline: 3px solid rgba(37, 99, 235, 0.22);
   outline-offset: 1px;
 }
 
-.filter-bar .comparison-field > button.comparison-trigger > span {
+.comparison-trigger-surface > span {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.filter-bar .comparison-field > button.comparison-trigger > svg {
+.comparison-trigger-surface > svg {
   flex: 0 0 auto;
   margin-left: 8px;
   color: #0f172a;
@@ -69,7 +83,12 @@
     block-size: 44px;
     min-block-size: 44px;
     max-block-size: 44px;
-    padding-block: 0;
+  }
+
+  .comparison-trigger-surface {
+    block-size: 30px;
+    min-block-size: 30px;
+    max-block-size: 30px;
     padding-inline: 12px;
     border-radius: 10px;
     font-size: 16px;
