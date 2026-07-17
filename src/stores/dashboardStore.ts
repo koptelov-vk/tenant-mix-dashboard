@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import type { MetricMode, SourceQuality } from '../types/dashboard';
 
-export type DashboardPage = 'overview' | 'comparability' | 'categories' | 'brands' | 'scenarios' | 'upcoming' | 'quality' | 'history';
-export type PeerGroupMode = 'same-class' | 'all';
+export type DashboardPage = 'overview' | 'comparability' | 'categories' | 'brands' | 'upcoming' | 'quality' | 'history';
+export type PeerGroupMode = 'same-class' | 'all' | 'custom';
 
 export interface DashboardFilters {
   focusMall: string;
@@ -50,7 +50,7 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   setMetric: (metric) => set({ metric }),
   setActivePage: (activePage) => set({ activePage }),
   setPeerGroup: (peerGroup) => set({ peerGroup }),
-  setSelectedMalls: (selectedMalls) => set({ selectedMalls }),
+  setSelectedMalls: (selectedMalls) => set({ selectedMalls, peerGroup: 'custom' }),
   setCities: (cities) => set({ cities }),
   setSourceQualities: (sourceQualities) => set({ sourceQualities }),
   setGapN: (gapN) => set({ gapN: Math.max(1, Math.round(gapN)) }),

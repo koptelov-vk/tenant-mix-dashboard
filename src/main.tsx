@@ -5,7 +5,6 @@ import { App } from './TenantMixApp';
 import './styles/globals.css';
 import './styles/accessibility.css';
 import './styles/mall-sheet.css';
-import './styles/scenarios.css';
 import './styles/saved-views.css';
 import './styles/pdf-export.css';
 

@@ -46,7 +46,7 @@ test('category filter updates the same KPI slice', async ({ page }) => {
 
 test('all sections open', async ({ page }) => {
   await page.goto('');
-  for (const [button, heading] of [['Сопоставимость', 'Сопоставимость ТЦ'], ['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Сценарии', 'Сценарии'], ['Скоро открытие', 'Скоро открытие'], ['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
+  for (const [button, heading] of [['Сопоставимость', 'Сопоставимость ТЦ'], ['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Скоро открытие', 'Скоро открытие'], ['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
     await page.getByRole('button', { name: button }).click(); await expect(page.getByRole('heading', { name: heading }).first()).toBeVisible();
   }
 });
@@ -78,13 +78,10 @@ test('mall details open from comparability and close with Escape', async ({ page
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
-test('scenario page recalculates without changing baseline', async ({ page }) => {
+test('legacy scenarios URL opens the overview', async ({ page }) => {
   await page.goto('?tab=scenarios');
-  const baseline = await page.locator('.scenario-kpis-wide small').first().innerText();
-  await page.locator('.scenario-editors select').first().selectOption({ index: 1 });
-  await page.locator('.scenario-editors .button').first().click();
-  await expect(page.locator('.scenario-changes button')).toHaveCount(1);
-  await expect(page.locator('.scenario-kpis-wide small').first()).toHaveText(baseline);
+  await expect(page.getByRole('button', { name: 'Обзор' })).toHaveAttribute('aria-current', 'page');
+  await expect.poll(() => new URL(page.url()).searchParams.get('tab')).toBe('overview');
 });
 
 test('saved view restores filters, focus and active section', async ({ page }) => {

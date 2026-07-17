@@ -12,7 +12,6 @@ const OverviewPage = lazy(() => import('./pages/OverviewPage'));
 const ComparabilityPage = lazy(() => import('./pages/ComparabilityPage'));
 const CategoriesPage = lazy(() => import('./pages/CategoriesPage'));
 const BrandsPage = lazy(() => import('./pages/BrandsPage'));
-const ScenariosPage = lazy(() => import('./pages/ScenariosPage'));
 const UpcomingPage = lazy(() => import('./pages/UpcomingPage'));
 const DataQualityPage = lazy(() => import('./pages/DataQualityPage'));
 const HistoryPage = lazy(() => import('./pages/HistoryPage'));
@@ -35,7 +34,6 @@ function Dashboard({ data, refreshing, refetch }: { data: NonNullable<ReturnType
     {activePage === 'comparability' ? <ComparabilityPage context={context} data={data} /> : null}
     {activePage === 'categories' ? <CategoriesPage context={context} /> : null}
     {activePage === 'brands' ? <BrandsPage context={context} data={data} /> : null}
-    {activePage === 'scenarios' ? <ScenariosPage context={context} data={data} /> : null}
     {activePage === 'upcoming' ? <UpcomingPage context={context} data={data} /> : null}
     {activePage === 'quality' ? <DataQualityPage data={data} /> : null}
     {activePage === 'history' ? <HistoryPage /> : null}

@@ -7,12 +7,10 @@ export function useAnalysisContext(data: DashboardData) {
   const state = useDashboardStore();
   return useMemo(() => {
     const focus = data.mallSummary.find((mall) => mall.mall === state.focusMall) ?? data.mallSummary[0];
-    const peerMalls = data.mallSummary
+    const presetPeers = data.mallSummary
       .filter((mall) => state.peerGroup === 'all' || mall.mallClass === focus?.mallClass)
       .map((mall) => mall.mall);
-    const constrainedPeers = state.selectedMalls.length
-      ? peerMalls.filter((mall) => state.selectedMalls.includes(mall))
-      : peerMalls;
+    const constrainedPeers = state.peerGroup === 'custom' ? state.selectedMalls : presetPeers;
     return createAnalysisContext(data, {
       focusMall: state.focusMall,
       category: state.category,
