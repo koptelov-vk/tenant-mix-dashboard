@@ -37,8 +37,9 @@ function readUrl(): Partial<DashboardFilters> {
 
 function toUrl(state: DashboardFilters): string {
   const params = new URLSearchParams();
+  const categories = state.categories ?? (state.category !== 'Все категории' ? [state.category] : []);
   params.set('focus', state.focusMall); params.set('tab', state.activePage); params.set('group', state.peerGroup); params.set('metric', state.metric);
-  if (state.categories.length) params.set('categories', state.categories.join(','));
+  if (categories.length) params.set('categories', categories.join(','));
   if (state.selectedMalls.length) params.set('malls', state.selectedMalls.join(','));
   if (state.cities.length) params.set('cities', state.cities.join(','));
   if (state.sourceQualities.length) params.set('quality', state.sourceQualities.join(','));
