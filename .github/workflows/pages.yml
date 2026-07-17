@@ -59,20 +59,60 @@ jobs:
             playwright-report/
             test-results/
             artifacts/lighthouse/
-            dist/
           if-no-files-found: ignore
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with: { path: dist }
+      - name: Preserve verified production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 2
 
-  deploy:
+  maintenance:
     needs: quality
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-      - name: Deploy to GitHub Pages
+      - name: Prepare maintenance artifact
+        run: |
+          mkdir -p maintenance-dist
+          cp deploy/maintenance/index.html maintenance-dist/index.html
+          cp deploy/maintenance/index.html maintenance-dist/404.html
+      - name: Upload maintenance Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: maintenance-pages
+          path: maintenance-dist
+      - name: Publish maintenance page
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: maintenance-pages
+
+  deploy:
+    needs: maintenance
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Download verified production build
+        uses: actions/download-artifact@v4
+        with:
+          name: production-dist
+          path: dist
+      - name: Upload production Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: production-pages
+          path: dist
+      - name: Deploy verified dashboard
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: production-pages
