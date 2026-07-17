@@ -2,6 +2,7 @@
 
 Updated: 2026-07-17
 Production branch: `main`
+Production SHA: `c0f371971a24ef94d991bfd3b4656b6576de1c05`
 Production URL: https://koptelov-vk.github.io/tenant-mix-dashboard/
 
 ## Implemented
@@ -11,6 +12,7 @@ Production URL: https://koptelov-vk.github.io/tenant-mix-dashboard/
 - Manual comparison-object selection and URL state.
 - Pages: Overview, Comparability, Categories, Brands, Upcoming openings, Data quality and History empty state.
 - CSV/XLSX/PDF exports, brand and mall details, mobile layout, Playwright, axe and Lighthouse CI.
+- Persistent Codex context in `AGENTS.md`, scoped task files, accepted ADRs, compact fixtures and path-aware pull-request quality checks.
 
 ## Approved terminology
 - Фокусный объект
@@ -25,6 +27,10 @@ Production URL: https://koptelov-vk.github.io/tenant-mix-dashboard/
 - Density uses confirmed GLA only.
 - Jaccard measures brand-set similarity only.
 - Gap brands are candidates for analysis, not commercial recommendations.
+
+## Active task
+- `TM-001` — build the aggregated brand-table model from `docs/tasks/TM-001-brand-table-model.md`.
+- Do not begin `TM-002` until the model and its targeted tests are complete.
 
 ## Known improvement areas
 - Brand table should use one aggregated row per normalized brand.
