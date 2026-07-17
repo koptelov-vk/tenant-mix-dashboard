@@ -1,0 +1,57 @@
+name: Codex task
+description: Scoped implementation task designed to minimise context and limit usage
+title: "TM-XXX: "
+labels: []
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: One user-visible result.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: In scope
+      description: Exact functions and business rules to implement.
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Allowed files
+      description: List files Codex may read and modify.
+      placeholder: |
+        - src/...
+        - tests/...
+    validations:
+      required: true
+  - type: textarea
+    id: excluded
+    attributes:
+      label: Do not modify
+      description: Explicit exclusions such as CI, data pipeline, legacy or unrelated pages.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Targeted tests
+      description: Narrow tests to run during implementation. Full checks run in CI.
+  - type: checkboxes
+    id: discipline
+    attributes:
+      label: Scope discipline
+      options:
+        - label: Unrelated findings go to docs/BACKLOG.md and are not fixed in this task.
+          required: true
+        - label: The task does not require a full repository audit.
+          required: true
