@@ -37,7 +37,7 @@ export function useAnalysisContext(data: DashboardData) {
       gbaMin: state.gbaMin,
       gbaMax: state.gbaMax,
     });
-    const focusMatchesFilterCriteria = Boolean(focus)
+    const focusMatchesFilterCriteria = focus != null
       && (!state.cities.length || state.cities.includes(focus.city))
       && matchesArea(focus, state.glaMin, state.glaMax, 'gla')
       && matchesArea(focus, state.gbaMin, state.gbaMax, 'gba');
