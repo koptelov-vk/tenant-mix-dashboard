@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta http-equiv="cache-control" content="no-store, no-cache, must-revalidate, max-age=0" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="refresh" content="30" />
+    <title>Tenant Mix — обновление</title>
+    <style>
+      :root { color-scheme: light; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: #f4f7f5; color: #10211a; }
+      main { width: min(560px, 100%); padding: 40px; border: 1px solid #dfe8e3; border-radius: 24px; background: rgba(255,255,255,.94); box-shadow: 0 18px 60px rgba(15, 56, 39, .10); text-align: center; }
+      .mark { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 24px; border-radius: 18px; background: #087443; color: white; font-size: 24px; font-weight: 800; letter-spacing: .04em; }
+      h1 { margin: 0 0 12px; font-size: clamp(28px, 6vw, 42px); line-height: 1.08; }
+      p { margin: 0 auto; max-width: 420px; color: #5f7068; font-size: 17px; line-height: 1.55; }
+      .status { display: inline-flex; align-items: center; gap: 10px; margin-top: 28px; padding: 10px 14px; border-radius: 999px; background: #edf8f2; color: #087443; font-weight: 700; }
+      .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; animation: pulse 1.25s ease-in-out infinite; }
+      small { display: block; margin-top: 18px; color: #89968f; }
+      @keyframes pulse { 50% { opacity: .25; transform: scale(.8); } }
+      @media (max-width: 480px) { main { padding: 32px 22px; border-radius: 20px; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">TM</div>
+      <h1>Дашборд обновляется</h1>
+      <p>Мы публикуем новую версию Tenant Mix Dashboard. Страница обновится автоматически после завершения публикации.</p>
+      <div class="status" role="status"><span class="dot" aria-hidden="true"></span>Идёт обновление</div>
+      <small>Обычно это занимает несколько минут.</small>
+    </main>
+  </body>
+</html>
