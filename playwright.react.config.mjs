@@ -15,5 +15,6 @@ export default defineConfig({
     { name: 'desktop', use: { viewport: { width: 1366, height: 768 } } },
     { name: 'mobile-390', use: { viewport: { width: 390, height: 844 }, isMobile: true } },
     { name: 'mobile-320', use: { viewport: { width: 320, height: 568 }, isMobile: true } },
+    ...(process.env.CI ? [{ name: 'mobile-webkit-390', use: { browserName: 'webkit', viewport: { width: 390, height: 844 }, isMobile: true } }] : []),
   ],
 });

@@ -1,12 +1,31 @@
+.filter-bar .comparison-field {
+  display: grid;
+  align-self: end;
+  gap: 4px;
+  min-width: 0;
+}
+
+.filter-bar .comparison-field > span {
+  margin: 0;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
 .filter-bar .comparison-field > button.comparison-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   min-width: 0;
-  height: 40px;
-  min-height: 40px;
-  padding: 0 10px;
+  box-sizing: border-box;
+  block-size: 40px;
+  min-block-size: 40px;
+  max-block-size: 40px;
+  padding-block: 0;
+  padding-inline: 10px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
   background: #fff;
@@ -17,6 +36,7 @@
   text-align: left;
   box-shadow: none;
   appearance: none;
+  -webkit-appearance: none;
 }
 
 .filter-bar .comparison-field > button.comparison-trigger:hover {
@@ -46,13 +66,11 @@
 
 @media (max-width: 768px) {
   .filter-bar .comparison-field > button.comparison-trigger {
-    box-sizing: border-box;
-    height: 44px;
-    min-height: 44px;
-    max-height: 44px;
+    block-size: 44px;
+    min-block-size: 44px;
+    max-block-size: 44px;
     padding-block: 0;
     padding-inline: 12px;
-    align-items: center;
     border-radius: 10px;
     font-size: 16px;
   }
