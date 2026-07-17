@@ -6,6 +6,7 @@ import './styles/globals.css';
 import './styles/accessibility.css';
 import './styles/mall-sheet.css';
 import './styles/scenarios.css';
+import './styles/mobile-fixes.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
