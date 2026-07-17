@@ -1,0 +1,15 @@
+node_modules/
+dist/
+legacy/
+artifacts/
+playwright-report/
+test-results/
+coverage/
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.xlsx
+*.pptx
+data/raw/
+data/aggregates/*.json
