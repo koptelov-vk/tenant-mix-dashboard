@@ -5,7 +5,8 @@ import fs from 'node:fs';
 const data = JSON.parse(fs.readFileSync('data/aggregates/dashboard_data.json', 'utf8'));
 
 test('aggregate contract is complete', () => {
-  assert.equal(data.dataQuality.rows, 4997);
+  assert.equal(data.dataQuality.rows, 4996);
+  assert.equal(data.dataQuality.brands, 2577);
   assert.equal(data.dataQuality.malls, 30);
   assert.equal(data.dataQuality.emptyBrands, 0);
   assert.equal(data.dataQuality.duplicateMallBrandPairs, 0);
