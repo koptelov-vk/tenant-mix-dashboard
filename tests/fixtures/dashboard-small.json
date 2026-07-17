@@ -1,0 +1,25 @@
+{
+  "meta": {"version": "fixture-1", "snapshotDate": "2026-07-01"},
+  "rows": [
+    {"mall":"Фантастика","city":"Нижний Новгород","brand":"Мегафон","brandNormalized":"Мегафон","category":"Электроника, техника и связь","sourceUrl":"https://example.com/mega","sourceType":"Официальный сайт","sourceQuality":"Высокая","checkedAt":"2026-07-01"},
+    {"mall":"Небо","city":"Нижний Новгород","brand":"Мегафон-Yota","brandNormalized":"Мегафон","category":"Электроника, техника и связь","sourceUrl":"https://example.com/mega","sourceType":"Официальный сайт","sourceQuality":"Высокая","checkedAt":"2026-07-01"},
+    {"mall":"Фантастика","city":"Нижний Новгород","brand":"Фокус Бренд","brandNormalized":"Фокус Бренд","category":"Одежда","sourceUrl":"https://example.com/focus","sourceType":"Официальный сайт","sourceQuality":"Высокая","checkedAt":null},
+    {"mall":"Небо","city":"Нижний Новгород","brand":"Общий бренд","brandNormalized":"Общий бренд","category":"Одежда","sourceUrl":"https://example.com/common","sourceType":"Сайт ТЦ","sourceQuality":"Средняя","checkedAt":"2026-06-01"},
+    {"mall":"Фантастика","city":"Нижний Новгород","brand":"Общий бренд","brandNormalized":"Общий бренд","category":"Одежда","sourceUrl":"https://example.com/common","sourceType":"Сайт ТЦ","sourceQuality":"Средняя","checkedAt":"2026-06-01"},
+    {"mall":"Планета","city":"Казань","brand":"Gap бренд","brandNormalized":"Gap бренд","category":"Кафе и рестораны","sourceUrl":"https://example.com/gap","sourceType":"Официальный сайт","sourceQuality":"Высокая","checkedAt":"2026-05-01"},
+    {"mall":"Небо","city":"Нижний Новгород","brand":"Gap бренд","brandNormalized":"Gap бренд","category":"Кафе и рестораны","sourceUrl":"https://example.com/gap","sourceType":"Официальный сайт","sourceQuality":"Высокая","checkedAt":"2026-05-01"},
+    {"mall":"Без GLA","city":"Тестовый город","brand":"Уникальный бренд","brandNormalized":"Уникальный бренд","category":"Услуги","sourceUrl":"","sourceType":"","sourceQuality":"Низкая","checkedAt":null}
+  ],
+  "mallSummary": [
+    {"mall":"Фантастика","city":"Нижний Новгород","mallClass":"Суперрегиональный","gla":92000,"gba":160000,"glaConfirmed":true,"brandCount":3,"categoryCounts":{"Одежда":2,"Электроника, техника и связь":1,"Кафе и рестораны":0,"Услуги":0}},
+    {"mall":"Небо","city":"Нижний Новгород","mallClass":"Суперрегиональный","gla":71000,"gba":142000,"glaConfirmed":true,"brandCount":3,"categoryCounts":{"Одежда":1,"Электроника, техника и связь":1,"Кафе и рестораны":1,"Услуги":0}},
+    {"mall":"Планета","city":"Казань","mallClass":"Суперрегиональный","gla":75000,"gba":154000,"glaConfirmed":true,"brandCount":1,"categoryCounts":{"Одежда":0,"Электроника, техника и связь":0,"Кафе и рестораны":1,"Услуги":0}},
+    {"mall":"Без GLA","city":"Тестовый город","mallClass":"Региональный","gla":null,"gba":60000,"glaConfirmed":false,"brandCount":1,"categoryCounts":{"Одежда":0,"Электроника, техника и связь":0,"Кафе и рестораны":0,"Услуги":1}}
+  ],
+  "categoryMatrix": {"categories":["Одежда","Электроника, техника и связь","Кафе и рестораны","Услуги"]},
+  "brandPresence": {},
+  "mallSimilarity": [],
+  "brandGaps": {},
+  "upcoming": [],
+  "dataQuality": {"snapshotDate":"2026-07-01","rows":8,"malls":4,"brands":5,"emptyBrands":0,"emptyNormalizedBrands":0,"duplicateMallBrandPairs":0,"invalidUrls":0,"mallsWithoutGla":1,"manualReviewRows":0}
+}
