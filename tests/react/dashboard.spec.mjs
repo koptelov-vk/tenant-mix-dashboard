@@ -46,7 +46,7 @@ test('category filter updates the same KPI slice', async ({ page }) => {
 
 test('all sections open', async ({ page }) => {
   await page.goto('');
-  for (const [button, heading] of [['Сопоставимость', 'Сопоставимость ТЦ'], ['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Скоро открытие', 'Скоро открытие'], ['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
+  for (const [button, heading] of [['Сопоставимость', 'Сопоставимость объектов'], ['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Скоро открытие', 'Скоро открытие'], ['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
     const secondary = button === 'Качество данных' || button === 'Динамика';
     if (secondary) await page.getByRole('button', { name: 'Ещё', exact: true }).click();
     await page.getByRole(secondary ? 'menuitem' : 'button', { name: button }).click(); await expect(page.getByRole('heading', { name: heading }).first()).toBeVisible();
@@ -97,6 +97,14 @@ test('manual comparison selection is stored in URL and excludes focus', async ({
   await expect.poll(() => new URL(page.url()).searchParams.get('malls')).toContain('Небо');
 });
 
+test('primary filters use the revised comparison terminology', async ({ page }) => {
+  await page.goto('');
+  await expect(page.getByLabel('Параметры анализа').getByText('Объекты сравнения', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Параметры анализа').getByRole('option', { name: 'Сопоставимые' })).toBeAttached();
+  await expect(page.getByRole('button', { name: 'Расширенные фильтры' })).toHaveCount(0);
+  await expect(page.locator('.focus-hero')).toHaveCount(0);
+});
+
 test('comparison table supports explicit sorting', async ({ page }) => {
   await page.goto('?tab=comparability');
   const header = page.locator('.data-table thead').getByRole('button', { name: 'Бренды', exact: true });
@@ -114,6 +122,14 @@ test('brand registry local filters do not change the global URL state', async ({
   await page.locator('.registry-filter').filter({ hasText: 'Категория' }).getByText('Снять все').click();
   const after = new URL(page.url());
   expect(after.searchParams.toString()).toBe(before.searchParams.toString());
+});
+
+test('upcoming openings provide local column filters', async ({ page }) => {
+  await page.goto('?tab=upcoming');
+  const filters = page.getByLabel('Фильтры таблицы скоро открытие');
+  await expect(filters.locator('.registry-filter')).toHaveCount(8);
+  await filters.locator('.registry-filter').filter({ hasText: 'Категория' }).locator('summary').click();
+  await expect(filters.locator('.registry-filter').filter({ hasText: 'Категория' }).getByText('Выбрать все')).toBeVisible();
 });
 
 test('saved view restores filters, focus and active section', async ({ page }) => {
