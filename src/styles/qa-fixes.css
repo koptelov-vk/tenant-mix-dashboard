@@ -1,0 +1,38 @@
+.sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: inherit;
+  text-align: left;
+}
+
+.kpi-detail-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.kpi-gap-details { margin-top: -2px; }
+.gap-chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+@media (min-width: 1101px) {
+  .kpi-grid-five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+}
