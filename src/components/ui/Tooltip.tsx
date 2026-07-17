@@ -1,5 +1,5 @@
 import { Info } from 'lucide-react';
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 
 type Position = {
@@ -87,6 +87,12 @@ export function Tooltip({ label }: { label: string }) {
     };
   }, [open, updatePosition]);
 
+  const floatingStyle = position ? {
+    left: `${position.left}px`,
+    top: `${position.top}px`,
+    '--tooltip-arrow-left': `${position.arrowLeft}px`,
+  } as CSSProperties : undefined;
+
   return (
     <span
       className={open ? 'tooltip tooltip-open' : 'tooltip'}
@@ -112,11 +118,7 @@ export function Tooltip({ label }: { label: string }) {
               id={id}
               role="tooltip"
               className={`tooltip-popover tooltip-popover-${position?.placement ?? 'top'}${position ? ' tooltip-popover-ready' : ''}`}
-              style={position ? {
-                left: `${position.left}px`,
-                top: `${position.top}px`,
-                '--tooltip-arrow-left': `${position.arrowLeft}px`,
-              } as React.CSSProperties : undefined}
+              style={floatingStyle}
             >
               {label}
             </div>,
