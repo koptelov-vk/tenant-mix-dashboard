@@ -8,8 +8,8 @@ export interface DashboardFilters {
   focusMall: string;
   /** Legacy single-category value retained for compatible page controls. */
   category: string;
-  /** Empty means all categories. */
-  categories: string[];
+  /** Empty means all categories. Optional for snapshots created before package 1. */
+  categories?: string[];
   metric: MetricMode;
   activePage: DashboardPage;
   peerGroup: PeerGroupMode;
@@ -26,6 +26,7 @@ export interface DashboardFilters {
 }
 
 interface DashboardState extends DashboardFilters {
+  categories: string[];
   setFocusMall: (mall: string) => void;
   setCategory: (category: string) => void;
   setCategories: (categories: string[]) => void;
@@ -42,7 +43,7 @@ interface DashboardState extends DashboardFilters {
   reset: () => void;
 }
 
-export const defaultDashboardFilters: DashboardFilters = {
+export const defaultDashboardFilters: DashboardFilters & { categories: string[] } = {
   focusMall: 'Фантастика', category: 'Все категории', categories: [], metric: 'absolute', activePage: 'overview', peerGroup: 'same-class',
   selectedMalls: [], cities: [], sourceQualities: [], gapN: 3,
   glaMin: null, glaMax: null, gbaMin: null, gbaMax: null, hideSmallCategories: true,
@@ -65,6 +66,9 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   setGapN: (gapN) => set({ gapN: Math.max(1, Math.round(gapN)) }),
   setAreaFilter: (key, value) => set({ [key]: value }),
   setHideSmallCategories: (hideSmallCategories) => set({ hideSmallCategories }),
-  hydrate: (state) => set(state),
+  hydrate: (state) => set((current) => ({
+    ...state,
+    categories: state.categories ?? (state.category && state.category !== 'Все категории' ? [state.category] : current.categories),
+  })),
   reset: () => set(defaultDashboardFilters),
 }));
