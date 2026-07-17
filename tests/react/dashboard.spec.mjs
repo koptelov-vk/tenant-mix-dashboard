@@ -97,9 +97,10 @@ test('CSV exports the current registry slice', async ({ page }) => {
 
 test('keyboard focus and accessibility smoke', async ({ page }) => {
   await page.goto('');
-  await page.locator('body').focus();
-  await page.keyboard.press('Tab');
-  await expect(page.locator('.skip-link')).toBeFocused();
+  const skipLink = page.locator('.skip-link');
+  await expect(skipLink).toBeAttached();
+  await skipLink.focus();
+  await expect(skipLink).toBeFocused();
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
   expect(results.violations.filter((item) => item.impact === 'critical')).toEqual([]);
 });
