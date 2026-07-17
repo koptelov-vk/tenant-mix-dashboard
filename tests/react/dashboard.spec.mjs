@@ -44,6 +44,25 @@ test('category filter updates the same KPI slice', async ({ page }) => {
   await expect(page.locator('.kpi strong').first()).not.toHaveText(before);
 });
 
+test('overview gap threshold recalculates immediately and uses concise headings', async ({ page }) => {
+  await page.goto('');
+  const threshold = page.getByLabel('Минимум объектов для списка брендов');
+  const resultCount = page.locator('.gap-result-count');
+  await expect(threshold).toBeVisible();
+  const maximum = await threshold.evaluate((element) => element.options.item(element.options.length - 1)?.value);
+  expect(maximum).toBeTruthy();
+
+  await threshold.selectOption('1');
+  const broadCount = Number.parseInt((await resultCount.innerText()).replace(/\D/g, ''), 10);
+  await threshold.selectOption(maximum);
+  await expect.poll(() => new URL(page.url()).searchParams.get('gapN')).toBe(maximum);
+  await expect.poll(async () => Number.parseInt((await resultCount.innerText()).replace(/\D/g, ''), 10)).toBeLessThanOrEqual(broadCount);
+
+  await expect(page.getByText('Executive summary', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Gap-анализ', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('Сходство брендов', { exact: true })).toHaveCount(0);
+});
+
 test('all sections open', async ({ page }) => {
   await page.goto('');
   for (const [button, heading] of [['Сопоставимость', 'Сопоставимость объектов'], ['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Скоро открытие', 'Скоро открытие'], ['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
