@@ -7,6 +7,7 @@ import './styles/accessibility.css';
 import './styles/mall-sheet.css';
 import './styles/scenarios.css';
 import './styles/saved-views.css';
+import './styles/pdf-export.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
