@@ -56,7 +56,7 @@ test('all sections open', async ({ page }) => {
 test('CSV exports the current registry slice', async ({ page }) => {
   await page.goto('?tab=brands&category=Обувь');
   const download = page.waitForEvent('download'); await page.getByRole('button', { name: 'CSV' }).click();
-  expect((await download).suggestedFilename()).toBe('tenant-mix-slice.csv');
+  expect((await download).suggestedFilename()).toBe('brands-slice.csv');
 });
 
 test('keyboard focus and accessibility smoke', async ({ page }) => {
@@ -124,23 +124,41 @@ test('comparison table provides a filter in every column header', async ({ page 
   await expect(page.locator('.comparison-table tbody')).not.toContainText('KazanMall');
 });
 
-test('brand registry column filters and sorting do not change global URL state', async ({ page }) => {
+test('brand registry column filters and sorting do not change global URL state', async ({ page }, testInfo) => {
   await page.goto('?tab=brands');
   await expect.poll(() => new URL(page.url()).searchParams.get('focus')).toBe('Фантастика');
   const before = new URL(page.url());
-  await expect(page.locator('.registry-head .registry-filter-header')).toHaveCount(7);
-  const categoryFilter = page.getByLabel('Фильтр: Категория');
+  await expect(page.locator('.registry-head .registry-filter-header')).toHaveCount(5);
+  for (const [index, label] of ['Бренд', 'Характеристика', 'Категория', 'Объекты', 'Источник'].entries()) await expect(page.locator('.registry-head [role="columnheader"]').nth(index)).toContainText(label);
+  const categoryFilter = testInfo.project.name === 'desktop' ? page.locator('.registry-head').getByLabel('Фильтр: Категория') : page.locator('.brand-mobile-controls').getByLabel('Фильтр: Категория');
   await categoryFilter.click();
   await page.getByRole('button', { name: 'Снять все' }).click();
-  await expect(page.locator('.registry-filter-header[open]')).toHaveCount(1);
+  await expect(testInfo.project.name === 'desktop' ? page.locator('.registry-filter-header[open]') : page.locator('.brand-mobile-controls .registry-filter[open]')).toHaveCount(1);
   await expect(page.locator('.registry-row')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /Категория: ничего/ })).toBeVisible();
   await page.getByRole('button', { name: 'Выбрать все' }).click();
   await page.getByRole('button', { name: 'Закрыть фильтр' }).click();
-  const brandHeader = page.locator('.registry-head').getByRole('button', { name: 'Бренд', exact: true });
-  await brandHeader.click();
-  await expect(brandHeader.locator('xpath=../..')).toHaveAttribute('aria-sort', 'descending');
+  if (testInfo.project.name === 'desktop') {
+    const brandHeader = page.locator('.registry-head').getByRole('button', { name: 'Бренд', exact: true });
+    await brandHeader.click();
+    await expect(brandHeader.locator('xpath=../..')).toHaveAttribute('aria-sort', 'descending');
+  } else {
+    await page.locator('.brand-mobile-controls select').selectOption('brand');
+    await page.locator('.brand-mobile-controls').getByRole('button', { name: 'По возрастанию' }).click();
+    await expect(page.locator('.brand-mobile-controls').getByRole('button', { name: 'По убыванию' })).toBeVisible();
+  }
   const after = new URL(page.url());
   expect(after.searchParams.toString()).toBe(before.searchParams.toString());
+});
+
+test('brand registry aggregates brands and opens the brand card', async ({ page }, testInfo) => {
+  await page.goto('?tab=brands');
+  await expect(page.locator('.brand-registry-row').first()).toBeVisible();
+  const names = await page.locator('.brand-registry-row .brand-button').allTextContents();
+  expect(new Set(names).size).toBe(names.length);
+  await page.locator('.brand-registry-row .brand-button').first().click();
+  await expect(page.locator('.sheet[role="dialog"]')).toBeVisible();
+  if (testInfo.project.name !== 'desktop') await expect(page.locator('.brand-table .registry-head')).toBeHidden();
 });
 
 test('upcoming openings provide sortable filters in every column header', async ({ page }) => {
