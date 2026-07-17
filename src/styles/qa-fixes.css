@@ -85,6 +85,9 @@
 .registry-filter-tools button { min-height: 36px; border: 0; border-radius: 8px; background: #f1f5f9; color: #1e3a5f; font-weight: 700; }
 .registry-date-filter { display: grid; gap: 3px; color: #64748b; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 .registry-date-filter select { min-height: 40px; padding: 0 9px; border: 1px solid #cbd5e1; border-radius: 9px; background: white; color: #0f172a; text-transform: none; }
+.nav-more { position: relative; }
+.nav-more > div { position: absolute; top: 44px; right: 0; z-index: 90; min-width: 210px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 10px; background: white; box-shadow: 0 14px 38px rgba(15,23,42,.16); }
+.nav-more > div button { width: 100%; min-height: 40px; border-radius: 7px; }
 
 @media (min-width: 1101px) {
   .kpi-grid-five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
@@ -95,8 +98,16 @@
   .registry-local-filters { display: grid; grid-template-columns: 1fr 1fr; }
   .registry-filter summary, .registry-date-filter select { width: 100%; }
   .registry-filter[open] > div { position: fixed; left: 12px; right: 12px; top: auto; bottom: 12px; width: auto; max-height: 70vh; border-radius: 14px; }
+  .app-header .navigation { display: grid; grid-template-columns: repeat(6, minmax(54px, 1fr)); width: 100%; padding: 0 6px; overflow: visible; }
+  .app-header .navigation > button, .app-header .nav-more > button { justify-content: center; min-width: 0; padding: 0 4px; }
+  .app-header .navigation > button span, .app-header .nav-more > button span { display: none; }
+  .nav-more > div { position: fixed; left: 12px; right: 12px; top: 106px; }
+  .filter-shell { position: sticky; top: 106px; max-height: calc(100vh - 106px); overflow: auto; }
 }
 
 @media (max-width: 430px) {
   .registry-local-filters { grid-template-columns: 1fr; }
+  .header-actions > :nth-child(-n+3) { display: none; }
+  .header-top { width: calc(100% - 16px); }
+  .brand strong { max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }

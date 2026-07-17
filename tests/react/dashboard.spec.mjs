@@ -6,7 +6,7 @@ test('loads production data without JavaScript errors and defaults to Fantastika
   const errors = []; page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('');
   await expect(page.locator('select').first()).toHaveValue('Фантастика');
-  await expect(page.locator('.kpi')).toHaveCount(6);
+  await expect(page.locator('.kpi')).toHaveCount(5);
   expect(errors).toEqual([]);
 });
 
@@ -82,6 +82,34 @@ test('legacy scenarios URL opens the overview', async ({ page }) => {
   await page.goto('?tab=scenarios');
   await expect(page.getByRole('button', { name: 'Обзор' })).toHaveAttribute('aria-current', 'page');
   await expect.poll(() => new URL(page.url()).searchParams.get('tab')).toBe('overview');
+});
+
+test('manual comparison selection is stored in URL and excludes focus', async ({ page }) => {
+  await page.goto('');
+  await page.getByRole('button', { name: /Объекты сравнения/ }).click();
+  const dialog = page.getByRole('dialog', { name: 'Выбор объектов' });
+  await dialog.getByRole('button', { name: 'Снять все' }).click();
+  await dialog.getByText('Небо', { exact: true }).click();
+  await dialog.getByRole('button', { name: 'Применить' }).click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('group')).toBe('custom');
+  await expect.poll(() => new URL(page.url()).searchParams.get('malls')).toContain('Небо');
+});
+
+test('comparison table supports explicit sorting', async ({ page }) => {
+  await page.goto('?tab=comparability');
+  const header = page.getByRole('button', { name: /Бренды/ }).first();
+  await header.click();
+  await expect(header.locator('xpath=..')).toHaveAttribute('aria-sort', 'ascending');
+  await header.click();
+  await expect(header.locator('xpath=..')).toHaveAttribute('aria-sort', 'descending');
+});
+
+test('brand registry local filters do not change the global URL state', async ({ page }) => {
+  await page.goto('?tab=brands');
+  const before = page.url();
+  await page.locator('.registry-filter').filter({ hasText: 'Категория' }).locator('summary').click();
+  await page.locator('.registry-filter').filter({ hasText: 'Категория' }).getByText('Снять все').click();
+  expect(page.url()).toBe(before);
 });
 
 test('saved view restores filters, focus and active section', async ({ page }) => {
