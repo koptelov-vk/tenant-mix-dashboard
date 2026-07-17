@@ -47,7 +47,7 @@ test('category filter updates the same KPI slice', async ({ page }) => {
 test('all sections open', async ({ page }) => {
   await page.goto('');
   for (const [button, heading] of [['Сопоставимость', 'Сопоставимость ТЦ'], ['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Скоро открытие', 'Скоро открытие'], ['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
-    if (button === 'Качество данных' || button === 'Динамика') await page.getByRole('button', { name: 'Ещё' }).click();
+    if (button === 'Качество данных' || button === 'Динамика') await page.getByRole('button', { name: 'Ещё', exact: true }).click();
     await page.getByRole('button', { name: button }).click(); await expect(page.getByRole('heading', { name: heading }).first()).toBeVisible();
   }
 });
@@ -90,7 +90,7 @@ test('manual comparison selection is stored in URL and excludes focus', async ({
   await page.getByRole('button', { name: /Объекты сравнения/ }).click();
   const dialog = page.getByRole('dialog', { name: 'Выбор объектов' });
   await dialog.getByRole('button', { name: 'Снять все' }).click();
-  await dialog.getByText('Небо', { exact: true }).click();
+  await dialog.getByRole('checkbox', { name: /Небо/ }).check();
   await dialog.getByRole('button', { name: 'Применить' }).click();
   await expect.poll(() => new URL(page.url()).searchParams.get('group')).toBe('custom');
   await expect.poll(() => new URL(page.url()).searchParams.get('malls')).toContain('Небо');
@@ -98,7 +98,7 @@ test('manual comparison selection is stored in URL and excludes focus', async ({
 
 test('comparison table supports explicit sorting', async ({ page }) => {
   await page.goto('?tab=comparability');
-  const header = page.locator('.data-table thead').getByRole('button', { name: 'Бренды' });
+  const header = page.locator('.data-table thead').getByRole('button', { name: 'Бренды', exact: true });
   await header.click();
   await expect(header.locator('xpath=..')).toHaveAttribute('aria-sort', 'ascending');
   await header.click();
@@ -107,10 +107,12 @@ test('comparison table supports explicit sorting', async ({ page }) => {
 
 test('brand registry local filters do not change the global URL state', async ({ page }) => {
   await page.goto('?tab=brands');
-  const before = page.url();
+  await expect.poll(() => new URL(page.url()).searchParams.get('focus')).toBe('Фантастика');
+  const before = new URL(page.url());
   await page.locator('.registry-filter').filter({ hasText: 'Категория' }).locator('summary').click();
   await page.locator('.registry-filter').filter({ hasText: 'Категория' }).getByText('Снять все').click();
-  expect(page.url()).toBe(before);
+  const after = new URL(page.url());
+  expect(after.searchParams.toString()).toBe(before.searchParams.toString());
 });
 
 test('saved view restores filters, focus and active section', async ({ page }) => {

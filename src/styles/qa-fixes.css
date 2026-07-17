@@ -103,11 +103,16 @@
   .app-header .navigation > button span, .app-header .nav-more > button span { display: none; }
   .nav-more > div { position: fixed; left: 12px; right: 12px; top: 106px; }
   .filter-shell { position: sticky; top: 106px; max-height: calc(100vh - 106px); overflow: auto; }
+  .modal-backdrop { isolation: isolate; }
+  .comparison-selector { min-height: 0; height: min(94dvh, 760px); overflow: hidden; }
+  .selector-list { min-height: 0; scroll-padding-block: 8px; }
 }
 
 @media (max-width: 430px) {
   .registry-local-filters { grid-template-columns: 1fr; }
-  .header-actions > :nth-child(-n+3) { display: none; }
+  .header-actions > :nth-child(2),
+  .header-actions > :nth-child(3),
+  .header-actions > :nth-child(4) { display: none; }
   .header-top { width: calc(100% - 16px); }
   .brand strong { max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
