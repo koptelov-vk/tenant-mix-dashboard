@@ -18,7 +18,34 @@ env:
   SNAPSHOT_DATE: '2026-07-16'
 
 jobs:
+  maintenance:
+    if: github.event_name == 'push'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Prepare maintenance artifact
+        run: |
+          mkdir -p maintenance-dist
+          cp deploy/maintenance/index.html maintenance-dist/index.html
+          cp deploy/maintenance/index.html maintenance-dist/404.html
+      - name: Upload maintenance Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: maintenance-pages
+          path: maintenance-dist
+      - name: Publish maintenance page
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: maintenance-pages
+
   quality:
+    needs: maintenance
+    if: always() && (needs.maintenance.result == 'success' || needs.maintenance.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -68,33 +95,9 @@ jobs:
           if-no-files-found: error
           retention-days: 2
 
-  maintenance:
-    needs: quality
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - name: Prepare maintenance artifact
-        run: |
-          mkdir -p maintenance-dist
-          cp deploy/maintenance/index.html maintenance-dist/index.html
-          cp deploy/maintenance/index.html maintenance-dist/404.html
-      - name: Upload maintenance Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          name: maintenance-pages
-          path: maintenance-dist
-      - name: Publish maintenance page
-        id: deployment
-        uses: actions/deploy-pages@v4
-        with:
-          artifact_name: maintenance-pages
-
   deploy:
-    needs: maintenance
+    needs: quality
+    if: needs.quality.result == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -116,3 +119,44 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: production-pages
+
+  restore-previous:
+    needs: [maintenance, quality]
+    if: >-
+      always() &&
+      github.event_name == 'push' &&
+      needs.maintenance.result == 'success' &&
+      needs.quality.result == 'failure' &&
+      github.event.before != '0000000000000000000000000000000000000000'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out previous production commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.before }}
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12', cache: pip }
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.9.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - uses: actions/configure-pages@v5
+      - name: Rebuild previous working dashboard
+        run: |
+          pip install -r requirements.txt
+          pnpm install --frozen-lockfile
+          python scripts/build_aggregates.py
+          pnpm build
+      - name: Upload rollback Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: rollback-pages
+          path: dist
+      - name: Restore previous dashboard
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: rollback-pages

@@ -46,10 +46,13 @@ test('group uniqueness changes with the selected comparison set', () => {
   assert.notEqual(small, large);
 });
 
-test('publication workflow is gated by the quality job', () => {
+test('publication workflow shows maintenance before quality and restores on failure', () => {
   const workflow = fs.readFileSync('.github/workflows/pages.yml', 'utf8');
-  assert.match(workflow, /maintenance:\s+[\s\S]*needs: quality/);
-  assert.match(workflow, /deploy:\s+[\s\S]*needs: maintenance/);
+  assert.match(workflow, /maintenance:\s+[\s\S]*Publish maintenance page/);
+  assert.match(workflow, /quality:\s+[\s\S]*needs: maintenance/);
+  assert.match(workflow, /deploy:\s+[\s\S]*needs: quality/);
+  assert.match(workflow, /restore-previous:\s+[\s\S]*needs: \[maintenance, quality\]/);
+  assert.match(workflow, /github\.event\.before/);
   assert.match(workflow, /Validate source data/);
   assert.match(workflow, /Desktop, mobile and accessibility tests/);
 });
