@@ -1,0 +1,27 @@
+name: Legacy tests
+
+on:
+  pull_request:
+    paths:
+      - 'tests/**'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+
+jobs:
+  legacy-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.9.0'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run legacy tests
+        run: pnpm test:legacy
