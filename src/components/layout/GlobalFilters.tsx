@@ -1,5 +1,5 @@
-import { Check, Search, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Check, ChevronDown, Search, X } from 'lucide-react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import type { AnalysisContext, DashboardData } from '../../types/dashboard';
@@ -12,18 +12,47 @@ export function GlobalFilters({ data, context }: { data: DashboardData; context:
   const applyPreset = (mode: 'same-class' | 'all') => {
     state.hydrate({ peerGroup: mode, selectedMalls: [] });
   };
+
   return <section className="filter-shell" aria-label="Параметры анализа">
     <div className="filter-bar">
-      <label><span>Фокусный объект</span><select value={context.focusMall.mall} onChange={(event) => state.setFocusMall(event.target.value)}>{data.mallSummary.map((mall) => <option key={mall.mall}>{mall.mall}</option>)}</select></label>
-      <label><span>Группа сравнения</span><select value={state.peerGroup} onChange={(event) => applyPreset(event.target.value as 'same-class' | 'all')}><option value="same-class">Сопоставимые</option><option value="all">Все объекты</option>{state.peerGroup === 'custom' ? <option value="custom">Ручной состав</option> : null}</select></label>
-      <label><span>География</span><select value={state.cities.length === 1 ? state.cities[0] : ''} onChange={(event) => state.setCities(event.target.value ? [event.target.value] : [])}><option value="">Все города</option>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>
-      <label><span>Категория</span><select value={state.category} onChange={(event) => state.setCategory(event.target.value)}><option>Все категории</option>{data.categoryMatrix.categories.map((category) => <option key={category}>{category}</option>)}</select></label>
-      <div className="comparison-field"><span id="comparison-field-label">Объекты сравнения</span><button className="comparison-trigger" type="button" onClick={() => setMallSelector(true)} aria-haspopup="dialog" aria-labelledby="comparison-field-label comparison-field-value"><span className="comparison-trigger-surface"><span id="comparison-field-value">{context.peerMalls.length} выбрано</span><Check size={16} /></span></button></div>
+      <FilterSelect label="Фокусный объект" value={context.focusMall.mall} onChange={state.setFocusMall}>
+        {data.mallSummary.map((mall) => <option key={mall.mall}>{mall.mall}</option>)}
+      </FilterSelect>
+      <FilterSelect label="Группа сравнения" value={state.peerGroup} onChange={(value) => applyPreset(value as 'same-class' | 'all')}>
+        <option value="same-class">Сопоставимые</option>
+        <option value="all">Все объекты</option>
+        {state.peerGroup === 'custom' ? <option value="custom">Ручной состав</option> : null}
+      </FilterSelect>
+      <FilterSelect label="География" value={state.cities.length === 1 ? state.cities[0] : ''} onChange={(value) => state.setCities(value ? [value] : [])}>
+        <option value="">Все города</option>
+        {cities.map((city) => <option key={city}>{city}</option>)}
+      </FilterSelect>
+      <FilterSelect label="Категория" value={state.category} onChange={state.setCategory}>
+        <option>Все категории</option>
+        {data.categoryMatrix.categories.map((category) => <option key={category}>{category}</option>)}
+      </FilterSelect>
+      <div className="filter-field comparison-field">
+        <span className="filter-label" id="comparison-field-label">Выбрать объекты</span>
+        <button className="filter-control comparison-trigger" type="button" onClick={() => setMallSelector(true)} aria-haspopup="dialog" aria-labelledby="comparison-field-label comparison-field-value">
+          <span id="comparison-field-value">{context.peerMalls.length} выбрано</span>
+          <Check className="filter-control-icon-static" size={16} aria-hidden="true" />
+        </button>
+      </div>
     </div>
     <div className="context-strip"><span>{context.peerMalls.length} объектов в группе сравнения</span><span>{new Set(context.displayMalls.map((mall) => mall.city)).size} городов</span><span>{context.filteredRows.length.toLocaleString('ru-RU')} строк</span>{!context.focusMatchesPeerCriteria ? <strong>Фокусный объект не соответствует текущим критериям группы и добавлен отдельно для сравнения.</strong> : null}</div>
     <div className="active-tags">{state.category !== 'Все категории' ? <button onClick={() => state.setCategory('Все категории')}>{state.category}<X size={13} /></button> : null}{state.cities.map((city) => <button key={city} onClick={() => state.setCities(state.cities.filter((item) => item !== city))}>{city}<X size={13} /></button>)}</div>
     {mallSelector ? createPortal(<MallSelector data={data} focusMall={context.focusMall.mall} selected={state.peerGroup === 'custom' ? state.selectedMalls : context.peerMalls.map((mall) => mall.mall)} onClose={() => setMallSelector(false)} onApply={(malls) => { state.setSelectedMalls(malls); setMallSelector(false); }} />, document.body) : null}
   </section>;
+}
+
+function FilterSelect({ label, value, onChange, children }: { label: string; value: string; onChange: (value: string) => void; children: ReactNode }) {
+  return <label className="filter-field">
+    <span className="filter-label">{label}</span>
+    <span className="filter-control-frame">
+      <select className="filter-control" value={value} onChange={(event) => onChange(event.target.value)}>{children}</select>
+      <ChevronDown className="filter-control-icon" size={16} aria-hidden="true" />
+    </span>
+  </label>;
 }
 
 function MallSelector({ data, focusMall, selected, onClose, onApply }: { data: DashboardData; focusMall: string; selected: string[]; onClose: () => void; onApply: (malls: string[]) => void }) {
