@@ -106,7 +106,10 @@
   z-index: 80;
   top: calc(100% + 8px);
   left: 0;
+  display: flex;
+  flex-direction: column;
   width: min(360px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
   overflow: hidden;
   border: 1px solid #dbe3ee;
   border-radius: 14px;
@@ -116,6 +119,7 @@
 
 .filter-popover-search {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 8px;
   padding: 10px 12px;
@@ -136,6 +140,7 @@
 
 .filter-popover-tools {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -156,7 +161,9 @@
 }
 
 .filter-options {
+  min-height: 0;
   max-height: 280px;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 6px;
@@ -227,6 +234,7 @@
 }
 
 .filter-popover-close {
+  flex: 0 0 auto;
   width: 100%;
   padding: 11px 12px;
   border-top: 1px solid #e2e8f0;
@@ -243,17 +251,27 @@
 
   .filter-popover {
     position: fixed;
-    z-index: 120;
-    top: auto;
+    z-index: 1000;
+    top: calc(112px + env(safe-area-inset-top));
     right: 12px;
     bottom: max(12px, env(safe-area-inset-bottom));
     left: 12px;
     width: auto;
-    max-height: min(70vh, 620px);
+    max-width: calc(100vw - 24px);
+    max-height: none;
+    box-sizing: border-box;
     border-radius: 18px;
+    contain: layout paint;
+  }
+
+  .filter-popover-search input {
+    /* iOS Safari zooms the visual viewport when focused text is below 16px. */
+    font-size: 16px;
   }
 
   .filter-options {
-    max-height: min(48vh, 420px);
+    flex: 1 1 auto;
+    max-height: none;
+    -webkit-overflow-scrolling: touch;
   }
 }
