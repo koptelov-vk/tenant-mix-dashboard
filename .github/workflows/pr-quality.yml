@@ -1,0 +1,140 @@
+name: Targeted pull request quality
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-quality-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+      data: ${{ steps.filter.outputs.data }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      browser: ${{ steps.filter.outputs.browser }}
+      performance: ${{ steps.filter.outputs.performance }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            docs:
+              - '**/*.md'
+              - '.codexignore'
+              - '.github/ISSUE_TEMPLATE/**'
+              - '.github/pull_request_template.md'
+            data:
+              - 'data/processed/**'
+              - 'scripts/**'
+              - 'tests/test_data_pipeline.py'
+              - 'requirements.txt'
+            frontend:
+              - 'src/**'
+              - 'public/**'
+              - 'index-react.html'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'vite.config.ts'
+              - 'tsconfig*.json'
+            browser:
+              - 'src/pages/**'
+              - 'src/components/**'
+              - 'src/styles/**'
+              - 'tests/react/**'
+              - 'playwright.react.config.mjs'
+            performance:
+              - 'src/styles/**'
+              - 'src/components/charts/**'
+              - 'src/main.tsx'
+              - 'src/TenantMixApp.tsx'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'vite.config.ts'
+
+  docs-only:
+    needs: changes
+    if: needs.changes.outputs.docs == 'true' && needs.changes.outputs.data != 'true' && needs.changes.outputs.frontend != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate documentation structure
+        run: |
+          test -f AGENTS.md
+          test -f docs/CURRENT_STATE.md
+          test -f docs/tasks/TASK_TEMPLATE.md
+
+  data-quality:
+    needs: changes
+    if: needs.changes.outputs.data == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12', cache: pip }
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Validate and test data pipeline
+        run: |
+          python scripts/validate_data.py
+          python scripts/build_aggregates.py
+          python tests/test_data_pipeline.py
+
+  frontend-quality:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.browser == 'true' || needs.changes.outputs.performance == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.9.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: TypeScript, unit tests and build
+        run: |
+          pnpm exec tsc --noEmit
+          pnpm test
+          pnpm build
+
+  browser-qa:
+    needs: [changes, frontend-quality]
+    if: needs.changes.outputs.browser == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.9.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Browser and accessibility tests
+        run: pnpm test:react:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: targeted-browser-qa
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
+  lighthouse:
+    needs: [changes, frontend-quality]
+    if: needs.changes.outputs.performance == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.9.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:lighthouse
