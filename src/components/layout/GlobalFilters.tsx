@@ -23,7 +23,7 @@ export function GlobalFilters({ data, context }: { data: DashboardData; context:
         <option value="all">Все объекты</option>
         {state.peerGroup === 'custom' ? <option value="custom">Ручной состав</option> : null}
       </FilterSelect>
-      <FilterSelect label="География" value={state.cities.length === 1 ? state.cities[0] : ''} onChange={(value) => state.setCities(value ? [value] : [])}>
+      <FilterSelect label="География" value={state.cities.length === 1 ? (state.cities[0] ?? '') : ''} onChange={(value) => state.setCities(value ? [value] : [])}>
         <option value="">Все города</option>
         {cities.map((city) => <option key={city}>{city}</option>)}
       </FilterSelect>
