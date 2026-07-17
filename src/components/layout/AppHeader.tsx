@@ -7,12 +7,11 @@ import { SavedViewsMenu } from './SavedViewsMenu';
 import { PdfExportButton } from './PdfExportButton';
 
 export function AppHeader({ data, refreshing, onRefresh }: { data: DashboardData; refreshing: boolean; onRefresh: () => void }) {
-  const focus = useDashboardStore((state) => state.focusMall);
   const reset = useDashboardStore((state) => state.reset);
   const copyLink = async () => navigator.clipboard.writeText(window.location.href);
   return <header className="app-header">
     <div className="header-top">
-      <div className="brand"><span className="brand-mark"><Building2 size={20} /></span><div><strong>Tenant Mix Analytics</strong><small>Срез {data.meta.snapshotDate} · {focus}</small></div></div>
+      <div className="brand"><span className="brand-mark"><Building2 size={20} /></span><div><strong>Tenant Mix Analytics</strong><small>Срез данных: {data.meta.snapshotDate}</small></div></div>
       <div className="header-actions">
         <SavedViewsMenu snapshotDate={data.meta.snapshotDate} />
         <PdfExportButton snapshotDate={data.meta.snapshotDate} />
