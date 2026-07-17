@@ -86,11 +86,12 @@
   }
 
   .comparison-trigger-surface {
-    block-size: 30px;
-    min-block-size: 30px;
-    max-block-size: 30px;
-    padding-inline: 12px;
-    border-radius: 10px;
-    font-size: 16px;
+    block-size: 28px;
+    min-block-size: 28px;
+    max-block-size: 28px;
+    padding-inline: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.2;
   }
 }
