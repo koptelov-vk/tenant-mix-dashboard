@@ -242,6 +242,21 @@
 }
 
 @media (max-width: 768px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .filter-shell,
+  .filter-bar,
+  .filter-field {
+    max-width: 100%;
+    min-width: 0;
+  }
+
   .filter-bar {
     --filter-control-height: 44px;
     --filter-control-radius: 10px;
