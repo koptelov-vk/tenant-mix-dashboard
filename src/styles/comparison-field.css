@@ -1,4 +1,4 @@
-.comparison-field > button {
+.filter-bar .comparison-field > button.comparison-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -19,25 +19,25 @@
   appearance: none;
 }
 
-.comparison-field > button:hover {
+.filter-bar .comparison-field > button.comparison-trigger:hover {
   border-color: #94a3b8;
   background: #fff;
 }
 
-.comparison-field > button:focus-visible {
+.filter-bar .comparison-field > button.comparison-trigger:focus-visible {
   border-color: #2563eb;
   outline: 3px solid rgba(37, 99, 235, 0.22);
   outline-offset: 1px;
 }
 
-.comparison-field > button > span {
+.filter-bar .comparison-field > button.comparison-trigger > span {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.comparison-field > button > svg {
+.filter-bar .comparison-field > button.comparison-trigger > svg {
   flex: 0 0 auto;
   margin-left: 8px;
   color: #0f172a;
@@ -45,10 +45,14 @@
 }
 
 @media (max-width: 768px) {
-  .comparison-field > button {
+  .filter-bar .comparison-field > button.comparison-trigger {
+    box-sizing: border-box;
     height: 44px;
     min-height: 44px;
-    padding: 0 12px;
+    max-height: 44px;
+    padding-block: 0;
+    padding-inline: 12px;
+    align-items: center;
     border-radius: 10px;
     font-size: 16px;
   }
