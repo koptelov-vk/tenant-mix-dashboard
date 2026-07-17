@@ -48,7 +48,8 @@ test('group uniqueness changes with the selected comparison set', () => {
 
 test('publication workflow is gated by the quality job', () => {
   const workflow = fs.readFileSync('.github/workflows/pages.yml', 'utf8');
-  assert.match(workflow, /deploy:\s+[\s\S]*needs: quality/);
+  assert.match(workflow, /maintenance:\s+[\s\S]*needs: quality/);
+  assert.match(workflow, /deploy:\s+[\s\S]*needs: maintenance/);
   assert.match(workflow, /Validate source data/);
   assert.match(workflow, /Desktop, mobile and accessibility tests/);
 });
