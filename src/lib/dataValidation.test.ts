@@ -10,5 +10,12 @@ describe('production dashboard data', () => {
     expect(data.mallSummary).toHaveLength(data.dataQuality.malls);
     expect(Object.keys(data.brandPresence)).toHaveLength(data.dataQuality.brands);
     expect(data.rows.every((row) => row.brand.length > 0 && row.brandNormalized.length > 0)).toBe(true);
+    const allCities = data.mallSummary.map((mall) => mall.city);
+    expect(allCities).not.toContain('НН');
+    expect(allCities).toContain('Нижний Новгород');
+    expect(data.brandPresence['Мегафон']).toBeDefined();
+    expect(data.brandPresence['мегафон yota']).toBeUndefined();
+    expect(data.rows.filter((row) => row.mall === 'Фантастика' && row.brandNormalized === 'Мегафон')).toHaveLength(1);
+    expect(data.rows.some((row) => row.checkedAt == null)).toBe(true);
   });
 });

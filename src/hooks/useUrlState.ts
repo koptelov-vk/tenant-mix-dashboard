@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import { defaultDashboardFilters, useDashboardStore, type DashboardFilters, type DashboardPage, type PeerGroupMode } from '../stores/dashboardStore';
 import type { MetricMode, SourceQuality } from '../types/dashboard';
 
-const pages: DashboardPage[] = ['overview', 'comparability', 'categories', 'brands', 'scenarios', 'upcoming', 'quality', 'history'];
+const pages: DashboardPage[] = ['overview', 'comparability', 'categories', 'brands', 'upcoming', 'quality', 'history'];
 const metrics: MetricMode[] = ['absolute', 'share', 'density'];
-const peerGroups: PeerGroupMode[] = ['same-class', 'all'];
+const peerGroups: PeerGroupMode[] = ['same-class', 'all', 'custom'];
 const qualities: SourceQuality[] = ['Высокая', 'Средняя', 'Низкая'];
 const list = (params: URLSearchParams, key: string) => params.get(key)?.split(',').filter(Boolean) ?? [];
 const number = (params: URLSearchParams, key: string) => {

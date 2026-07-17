@@ -1,4 +1,5 @@
-import { BarChart3, Building2, Database, FlaskConical, Grid3X3, History, Sparkles, Store, type LucideIcon } from 'lucide-react';
+import { BarChart3, Building2, Database, Grid3X3, History, MoreHorizontal, Sparkles, Store, type LucideIcon } from 'lucide-react';
+import { useState } from 'react';
 import { useDashboardStore, type DashboardPage } from '../../stores/dashboardStore';
 
 const items: Array<{ id: DashboardPage; label: string; icon: LucideIcon }> = [
@@ -6,16 +7,16 @@ const items: Array<{ id: DashboardPage; label: string; icon: LucideIcon }> = [
   { id: 'comparability', label: 'Сопоставимость', icon: Building2 },
   { id: 'categories', label: 'Категории', icon: Grid3X3 },
   { id: 'brands', label: 'Бренды', icon: Store },
-  { id: 'scenarios', label: 'Сценарии', icon: FlaskConical },
   { id: 'upcoming', label: 'Скоро открытие', icon: BarChart3 },
-  { id: 'quality', label: 'Качество данных', icon: Database },
-  { id: 'history', label: 'Динамика', icon: History },
 ];
+const secondary: Array<{ id: DashboardPage; label: string; icon: LucideIcon }> = [{ id: 'quality', label: 'Качество данных', icon: Database }, { id: 'history', label: 'Динамика', icon: History }];
 
 export function Navigation() {
   const activePage = useDashboardStore((state) => state.activePage);
   const setActivePage = useDashboardStore((state) => state.setActivePage);
+  const [moreOpen, setMoreOpen] = useState(false);
   return <nav className="navigation" aria-label="Основные разделы">
-    {items.map(({ id, label, icon: Icon }) => <button key={id} className={activePage === id ? 'nav-active' : ''} onClick={() => setActivePage(id)} aria-current={activePage === id ? 'page' : undefined}><Icon size={16} aria-hidden="true" /><span>{label}</span></button>)}
+    {items.map(({ id, label, icon: Icon }) => <button key={id} aria-label={label} className={activePage === id ? 'nav-active' : ''} onClick={() => setActivePage(id)} aria-current={activePage === id ? 'page' : undefined}><Icon size={16} aria-hidden="true" /><span>{label}</span></button>)}
+    <div className="nav-more"><button aria-label="Ещё" className={secondary.some((item) => item.id === activePage) ? 'nav-active' : ''} onClick={() => setMoreOpen((value) => !value)} aria-expanded={moreOpen} aria-haspopup="menu"><MoreHorizontal size={17} /><span>Ещё</span></button>{moreOpen ? <div role="menu">{secondary.map(({ id, label, icon: Icon }) => <button key={id} aria-label={label} role="menuitem" onClick={() => { setActivePage(id); setMoreOpen(false); }}><Icon size={16} />{label}</button>)}</div> : null}</div>
   </nav>;
 }

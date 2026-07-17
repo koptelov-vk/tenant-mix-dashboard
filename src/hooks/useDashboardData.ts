@@ -13,7 +13,7 @@ const tenantRowSchema = z.object({
   sourceUrl: z.string().optional().default(''),
   sourceType: z.string().optional().default(''),
   sourceQuality: sourceQualitySchema.optional(),
-  checkedAt: z.string().optional(),
+  checkedAt: z.string().nullable().optional(),
   rowStatus: z.string().optional(),
   confirmation: z.string().optional(),
   originalCategory: z.string().optional(),
@@ -46,7 +46,7 @@ const brandSourceSchema = z.object({
   url: z.string().default(''),
   type: z.string().default(''),
   quality: sourceQualitySchema,
-  checkedAt: z.string().default(''),
+  checkedAt: z.string().nullable().default(null),
 });
 
 const brandPresenceSchema = z.object({

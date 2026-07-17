@@ -10,7 +10,7 @@ export default defineConfig({
     trace: 'retain-on-failure', screenshot: 'only-on-failure',
     launchOptions: process.env.CI ? {} : { executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe' },
   },
-  webServer: { command: 'pnpm build && pnpm preview --host 127.0.0.1 --port 4174', port: 4174, reuseExistingServer: false, timeout: 120_000 },
+  webServer: { command: 'pnpm build && pnpm preview --host 127.0.0.1 --port 4174', port: 4174, reuseExistingServer: !process.env.CI, timeout: 120_000 },
   projects: [
     { name: 'desktop', use: { viewport: { width: 1366, height: 768 } } },
     { name: 'mobile-390', use: { viewport: { width: 390, height: 844 }, isMobile: true } },

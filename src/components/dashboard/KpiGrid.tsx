@@ -1,19 +1,20 @@
-import { CircleHelp } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisContext } from '../../types/dashboard';
 import { formatNumber, formatPercent } from '../../lib/utils';
 import { Tooltip } from '../ui/Tooltip';
 
 export function KpiGrid({ context }: { context: AnalysisContext }) {
+  const [showGaps, setShowGaps] = useState(false);
   const focusCount = context.benchmark.focusBrandCount;
   const exclusiveCount = context.uniqueness.focusExclusive.size;
   const intersectionCount = context.intersections.intersecting.size;
   const items = [
-    { label: 'Бренды фокусного ТЦ', value: formatNumber.format(focusCount), note: context.benchmark.peerMedian == null ? 'медиана н/д' : `медиана группы ${formatNumber.format(context.benchmark.peerMedian)}`, formula: 'Различные нормализованные бренды фокусного ТЦ в текущем срезе.' },
-    { label: 'Позиция в peer group', value: context.benchmark.rank == null ? 'н/д' : `${context.benchmark.rank}-е`, note: `из ${context.benchmark.totalInGroup} объектов`, formula: 'Рейтинг по числу брендов текущего среза. Фокус отображается вместе с peer group.' },
-    { label: 'Эксклюзивы', value: formatNumber.format(exclusiveCount), note: context.uniqueness.scopeLabel, formula: 'Бренд есть в фокусном ТЦ и отсутствует у выбранных конкурентов.' },
-    { label: 'Доля эксклюзивов', value: formatPercent(focusCount ? exclusiveCount / focusCount : 0), note: `из ${focusCount} брендов`, formula: 'Эксклюзивы фокусного ТЦ / бренды фокусного ТЦ.' },
+    { label: 'Бренды фокусного объекта', value: formatNumber.format(focusCount), note: context.benchmark.peerMedian == null ? 'медиана н/д' : `медиана группы ${formatNumber.format(context.benchmark.peerMedian)}`, formula: 'Различные нормализованные бренды фокусного объекта в текущем срезе.' },
+    { label: 'Позиция в группе', value: context.benchmark.rank == null ? 'н/д' : `${context.benchmark.rank}-е`, note: `из ${context.benchmark.totalInGroup} объектов`, formula: 'Рейтинг по числу брендов текущего среза. Фокусный объект отображается отдельно от группы сравнения.' },
+    { label: 'Эксклюзивы', value: formatNumber.format(exclusiveCount), note: `${formatPercent(focusCount ? exclusiveCount / focusCount : 0)} от брендов · ${context.uniqueness.scopeLabel}`, formula: 'Бренд есть в фокусном объекте и отсутствует у всех объектов текущей группы сравнения.' },
     { label: 'Пересечение с группой', value: formatNumber.format(intersectionCount), note: formatPercent(focusCount ? intersectionCount / focusCount : 0), formula: 'Бренды фокусного ТЦ, представленные хотя бы у одного выбранного конкурента.' },
-    { label: 'Категории ниже медианы', value: formatNumber.format(context.benchmark.categoryGaps.length), note: context.benchmark.categoryGaps.slice(0, 2).join(', ') || 'нет отклонений', formula: 'Категории, где число брендов фокусного ТЦ ниже медианы текущей peer group.' },
+    { label: 'Категории ниже медианы', value: formatNumber.format(context.benchmark.categoryGaps.length), note: context.benchmark.categoryGaps.length ? 'Показать полный список' : 'нет отклонений', formula: 'Категории, где число брендов фокусного объекта ниже медианы текущей группы сравнения.' },
   ];
-  return <section className="kpi-grid kpi-grid-six" aria-label="Управленческие показатели">{items.map((item) => <article className="kpi" key={item.label}><span>{item.label}<Tooltip label={item.formula} /></span><strong>{item.value}</strong><small>{item.note}</small></article>)}</section>;
+  return <><section className="kpi-grid kpi-grid-five" aria-label="Управленческие показатели">{items.map((item, index) => <article className="kpi" key={item.label}><span>{item.label}<Tooltip label={item.formula} /></span><strong>{item.value}</strong>{index === items.length - 1 && context.benchmark.categoryGaps.length ? <button className="kpi-detail-button" onClick={() => setShowGaps(!showGaps)} aria-expanded={showGaps}>{item.note}{showGaps ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</button> : <small>{item.note}</small>}</article>)}</section>{showGaps ? <section className="panel kpi-gap-details"><div className="panel-title"><div><span className="eyebrow">Текущий срез</span><h2>Категории ниже медианы группы</h2></div><button className="button button-ghost" onClick={() => setShowGaps(false)}>Скрыть</button></div><div className="gap-chip-list">{context.benchmark.categoryGaps.map((category) => <span className="badge badge-warning" key={category}>{category}</span>)}</div></section> : null}</>;
 }

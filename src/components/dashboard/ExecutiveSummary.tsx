@@ -15,8 +15,8 @@ export function ExecutiveSummary({ context }: { context: AnalysisContext }) {
   const nearest = context.similarities[0];
   const items = [
     { icon: context.benchmark.rank === 1 ? CircleCheck : Minus, tone: 'neutral', text: `${context.focusMall.mall} занимает ${context.benchmark.rank ?? 'н/д'}-е место из ${context.benchmark.totalInGroup} объектов по числу брендов текущего среза.`, page: 'comparability' as const },
-    above ? { icon: TrendingUp, tone: 'positive', text: `Доля категории «${above.category}» на ${formatNumber.format(above.delta * 100)} п.п. выше медианы peer group.`, page: 'categories' as const } : null,
-    below ? { icon: TrendingDown, tone: 'warning', text: `Доля категории «${below.category}» на ${formatNumber.format(Math.abs(below.delta) * 100)} п.п. ниже медианы peer group; отклонение требует дополнительного анализа.`, page: 'categories' as const } : null,
+    above ? { icon: TrendingUp, tone: 'positive', text: `Доля категории «${above.category}» на ${formatNumber.format(above.delta * 100)} п.п. выше медианы группы сравнения.`, page: 'categories' as const } : null,
+    below ? { icon: TrendingDown, tone: 'warning', text: `Доля категории «${below.category}» на ${formatNumber.format(Math.abs(below.delta) * 100)} п.п. ниже медианы группы сравнения; отклонение требует дополнительного анализа.`, page: 'categories' as const } : null,
     { icon: Info, tone: 'neutral', text: `Эксклюзивы составляют ${formatPercent(context.benchmark.focusBrandCount ? context.uniqueness.focusExclusive.size / context.benchmark.focusBrandCount : 0)} состава фокусного объекта.`, page: 'categories' as const },
     nearest ? { icon: CircleCheck, tone: 'neutral', text: `Наибольшее сходство состава брендов — с ${nearest.mall.mall}: Жаккар ${formatPercent(nearest.jaccard)} (${nearest.common} общих брендов).`, page: 'comparability' as const } : null,
   ].filter((item): item is NonNullable<typeof item> => item != null).slice(0, 5);
