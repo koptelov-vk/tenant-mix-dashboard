@@ -10,6 +10,6 @@ export default function OverviewPage({ context }: { context: AnalysisContext }) 
   return <>
     {!context.focusMatchesPeerCriteria ? <div className="alert warning">Фокусный объект не соответствует текущим критериям группы и добавлен отдельно для сравнения.</div> : null}
     <KpiGrid context={context} />
-    <section className="overview-grid"><span className="pdf-page-break" data-pdf-page-break-before aria-hidden="true" /><ExecutiveSummary context={context} /><Card><CardHeader eyebrow="Структура" title="Профиль tenant mix" /><TenantMixStackedBar context={context} compact /></Card><span className="pdf-page-break" data-pdf-page-break-before aria-hidden="true" /><ComparableObjects context={context} /><PotentialBrands context={context} /></section>
+    <section className="overview-grid"><span className="pdf-page-break" data-pdf-page-break-before aria-hidden="true" /><ExecutiveSummary context={context} /><Card><CardHeader title="Профиль tenant mix" /><TenantMixStackedBar context={context} compact /></Card><span className="pdf-page-break" data-pdf-page-break-before aria-hidden="true" /><ComparableObjects context={context} /><PotentialBrands context={context} /></section>
   </>;
 }
