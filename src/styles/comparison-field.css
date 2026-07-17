@@ -1,0 +1,55 @@
+.comparison-field > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 400;
+  line-height: 1;
+  text-align: left;
+  box-shadow: none;
+  appearance: none;
+}
+
+.comparison-field > button:hover {
+  border-color: #94a3b8;
+  background: #fff;
+}
+
+.comparison-field > button:focus-visible {
+  border-color: #2563eb;
+  outline: 3px solid rgba(37, 99, 235, 0.22);
+  outline-offset: 1px;
+}
+
+.comparison-field > button > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comparison-field > button > svg {
+  flex: 0 0 auto;
+  margin-left: 8px;
+  color: #0f172a;
+  stroke-width: 2;
+}
+
+@media (max-width: 768px) {
+  .comparison-field > button {
+    height: 44px;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+}
