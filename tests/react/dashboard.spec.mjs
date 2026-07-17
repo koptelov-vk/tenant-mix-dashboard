@@ -68,6 +68,24 @@ test('page has no horizontal overflow on mobile', async ({ page }, testInfo) => 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
 
+test('mobile KPI cards use one column and tooltips remain inside viewport', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.startsWith('mobile'));
+  await page.goto('');
+  const columns = await page.locator('.kpi-grid').evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').length);
+  expect(columns).toBe(1);
+
+  const trigger = page.locator('.tooltip-trigger').first();
+  await trigger.click();
+  const tooltip = page.getByRole('tooltip');
+  await expect(tooltip).toBeVisible();
+  const box = await tooltip.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width);
+});
+
 test('mall details open from comparability and close with Escape', async ({ page }) => {
   await page.goto('?tab=comparability');
   await page.locator('.table-link').first().click();
