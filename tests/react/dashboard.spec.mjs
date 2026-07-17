@@ -107,7 +107,7 @@ test('legacy scenarios URL opens the overview', async ({ page }) => {
 
 test('manual comparison selection is stored in URL and excludes focus', async ({ page }) => {
   await page.goto('');
-  await page.getByRole('button', { name: /Объекты сравнения/ }).click();
+  await page.getByRole('button', { name: /Выбрать объекты/ }).click();
   const dialog = page.getByRole('dialog', { name: 'Выбор объектов' });
   await dialog.getByRole('button', { name: 'Снять все' }).click();
   await dialog.getByRole('checkbox', { name: /Небо/ }).check();
@@ -118,7 +118,7 @@ test('manual comparison selection is stored in URL and excludes focus', async ({
 
 test('primary filters use the revised comparison terminology', async ({ page }) => {
   await page.goto('');
-  await expect(page.getByLabel('Параметры анализа').getByText('Объекты сравнения', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Параметры анализа').getByText('Выбрать объекты', { exact: true })).toBeVisible();
   await expect(page.getByLabel('Параметры анализа').getByRole('option', { name: 'Сопоставимые' })).toBeAttached();
   await expect(page.getByRole('button', { name: 'Расширенные фильтры' })).toHaveCount(0);
   await expect(page.locator('.focus-hero')).toHaveCount(0);

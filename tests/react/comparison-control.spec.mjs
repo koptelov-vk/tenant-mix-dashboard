@@ -1,50 +1,64 @@
 import { test, expect } from '@playwright/test';
 
-test('mobile comparison control keeps a 44px hit area with select-like visual metrics', async ({ page }, testInfo) => {
+test('mobile global filters share one control system', async ({ page }, testInfo) => {
   test.skip(!testInfo.project.name.startsWith('mobile'));
   await page.goto('');
 
-  const field = page.locator('.comparison-field');
-  const comparison = page.locator('.comparison-trigger');
-  const surface = page.locator('.comparison-trigger-surface');
+  const fields = page.locator('.filter-bar .filter-field');
+  const controls = page.locator('.filter-bar .filter-control');
+  const comparisonLabel = page.locator('#comparison-field-label');
 
-  await expect(field).toBeVisible();
-  await expect(comparison).toBeVisible();
-  await expect(surface).toBeVisible();
-  await expect(field).toHaveJSProperty('tagName', 'DIV');
+  await expect(fields).toHaveCount(5);
+  await expect(controls).toHaveCount(5);
+  await expect(comparisonLabel).toHaveText('Выбрать объекты');
 
-  const geometry = await page.evaluate(() => {
-    const button = document.querySelector('.comparison-trigger');
-    const visual = document.querySelector('.comparison-trigger-surface');
-    if (!(button instanceof HTMLElement) || !(visual instanceof HTMLElement)) return null;
-    const buttonStyle = getComputedStyle(button);
-    const visualStyle = getComputedStyle(visual);
+  const metrics = await controls.evaluateAll((elements) => elements.map((element) => {
+    const style = getComputedStyle(element);
+    const box = element.getBoundingClientRect();
     return {
-      hitHeight: button.getBoundingClientRect().height,
-      visualHeight: visual.getBoundingClientRect().height,
-      hitBlockSize: buttonStyle.blockSize,
-      visualBlockSize: visualStyle.blockSize,
-      hitPaddingTop: Number.parseFloat(buttonStyle.paddingTop),
-      hitPaddingBottom: Number.parseFloat(buttonStyle.paddingBottom),
-      visualAlignItems: visualStyle.alignItems,
-      visualFontSize: visualStyle.fontSize,
-      visualBorderRadius: visualStyle.borderRadius,
-      appearance: buttonStyle.appearance,
+      tagName: element.tagName,
+      height: box.height,
+      fontSize: style.fontSize,
+      borderRadius: style.borderRadius,
+      borderWidth: style.borderTopWidth,
+      paddingTop: style.paddingTop,
+      paddingBottom: style.paddingBottom,
+      backgroundColor: style.backgroundColor,
+      appearance: style.appearance,
+    };
+  }));
+
+  expect(metrics).toHaveLength(5);
+  for (const metric of metrics) {
+    expect(metric.height).toBeGreaterThanOrEqual(44);
+    expect(metric.height).toBeLessThanOrEqual(48);
+    expect(metric.fontSize).toBe('14px');
+    expect(metric.borderRadius).toBe('10px');
+    expect(metric.borderWidth).toBe('1px');
+    expect(metric.paddingTop).toBe('0px');
+    expect(metric.paddingBottom).toBe('0px');
+    expect(metric.backgroundColor).toBe('rgb(255, 255, 255)');
+    expect(metric.appearance).toBe('none');
+  }
+
+  const heights = metrics.map((metric) => metric.height);
+  expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1);
+
+  const verticalAlignment = await page.evaluate(() => {
+    const categoryField = Array.from(document.querySelectorAll('.filter-field')).find((field) => field.querySelector('.filter-label')?.textContent === 'Категория');
+    const comparisonField = document.querySelector('.comparison-field');
+    if (!(categoryField instanceof HTMLElement) || !(comparisonField instanceof HTMLElement)) return null;
+    const categoryLabel = categoryField.querySelector('.filter-label');
+    const categoryControl = categoryField.querySelector('.filter-control');
+    const comparisonLabelElement = comparisonField.querySelector('.filter-label');
+    const comparisonControl = comparisonField.querySelector('.filter-control');
+    if (!(categoryLabel instanceof HTMLElement) || !(categoryControl instanceof HTMLElement) || !(comparisonLabelElement instanceof HTMLElement) || !(comparisonControl instanceof HTMLElement)) return null;
+    return {
+      categoryGap: categoryControl.getBoundingClientRect().top - categoryLabel.getBoundingClientRect().bottom,
+      comparisonGap: comparisonControl.getBoundingClientRect().top - comparisonLabelElement.getBoundingClientRect().bottom,
     };
   });
 
-  expect(geometry).not.toBeNull();
-  expect(geometry.hitHeight).toBeGreaterThanOrEqual(44);
-  expect(geometry.hitHeight).toBeLessThanOrEqual(48);
-  expect(geometry.visualHeight).toBeGreaterThanOrEqual(27);
-  expect(geometry.visualHeight).toBeLessThanOrEqual(29);
-  expect(geometry.visualHeight).toBeLessThan(geometry.hitHeight);
-  expect(geometry.hitBlockSize).toBe('44px');
-  expect(geometry.visualBlockSize).toBe('28px');
-  expect(geometry.hitPaddingTop).toBe(0);
-  expect(geometry.hitPaddingBottom).toBe(0);
-  expect(geometry.visualAlignItems).toBe('center');
-  expect(geometry.visualFontSize).toBe('14px');
-  expect(geometry.visualBorderRadius).toBe('8px');
-  expect(geometry.appearance).toBe('none');
+  expect(verticalAlignment).not.toBeNull();
+  expect(Math.abs(verticalAlignment.categoryGap - verticalAlignment.comparisonGap)).toBeLessThanOrEqual(1);
 });
