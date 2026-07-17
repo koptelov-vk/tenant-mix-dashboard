@@ -16,7 +16,7 @@ export function Navigation() {
   const setActivePage = useDashboardStore((state) => state.setActivePage);
   const [moreOpen, setMoreOpen] = useState(false);
   return <nav className="navigation" aria-label="Основные разделы">
-    {items.map(({ id, label, icon: Icon }) => <button key={id} className={activePage === id ? 'nav-active' : ''} onClick={() => setActivePage(id)} aria-current={activePage === id ? 'page' : undefined}><Icon size={16} aria-hidden="true" /><span>{label}</span></button>)}
-    <div className="nav-more"><button className={secondary.some((item) => item.id === activePage) ? 'nav-active' : ''} onClick={() => setMoreOpen((value) => !value)} aria-expanded={moreOpen} aria-haspopup="menu"><MoreHorizontal size={17} /><span>Ещё</span></button>{moreOpen ? <div role="menu">{secondary.map(({ id, label, icon: Icon }) => <button key={id} role="menuitem" onClick={() => { setActivePage(id); setMoreOpen(false); }}><Icon size={16} />{label}</button>)}</div> : null}</div>
+    {items.map(({ id, label, icon: Icon }) => <button key={id} aria-label={label} className={activePage === id ? 'nav-active' : ''} onClick={() => setActivePage(id)} aria-current={activePage === id ? 'page' : undefined}><Icon size={16} aria-hidden="true" /><span>{label}</span></button>)}
+    <div className="nav-more"><button aria-label="Ещё" className={secondary.some((item) => item.id === activePage) ? 'nav-active' : ''} onClick={() => setMoreOpen((value) => !value)} aria-expanded={moreOpen} aria-haspopup="menu"><MoreHorizontal size={17} /><span>Ещё</span></button>{moreOpen ? <div role="menu">{secondary.map(({ id, label, icon: Icon }) => <button key={id} aria-label={label} role="menuitem" onClick={() => { setActivePage(id); setMoreOpen(false); }}><Icon size={16} />{label}</button>)}</div> : null}</div>
   </nav>;
 }
