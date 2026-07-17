@@ -32,8 +32,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Install Node dependencies
         run: pnpm install --frozen-lockfile
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
       - name: Validate source data
         run: python scripts/validate_data.py
       - name: Build normalized aggregates
