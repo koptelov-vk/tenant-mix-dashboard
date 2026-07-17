@@ -17,13 +17,13 @@ Snapshot: 2026-07-16. Production data: 4,997 tenant rows, 30 malls, 2,578 normal
 | Executive summary | `ExecutiveSummary` | Unified analysis context | Complete | Every statement is reproducible |
 | Tenant mix profile | `TenantMixStackedBar` | Current slice | Complete | Shares total 100% per mall |
 | Category heatmap | `CategoryHeatmap` | Current slice | Complete | Absolute, share, and density modes |
-| Mall comparison | `MallComparisonTable`, `MallSheet` | Current slice and mall metadata | Partial: table/cards | Focus first; GLA and GBA distinct |
+| Mall comparison | `MallComparisonTable`, `MallSheet` | Current slice and mall metadata | Complete | Focus first; GLA and GBA distinct; sheet keyboard close |
 | Brand registry | `BrandRegistryTable`, `BrandSheet` | Tenant rows | Complete | Virtualization, filters, mobile cards |
 | CSV export | `export/csv.ts` | Current filtered rows | Complete | UTF-8 BOM and filtered rows only |
 | XLSX export | `export/xlsx.ts` | Current filtered rows | Complete | Lazy-loaded workbook |
 | Upcoming openings | `UpcomingPage`, `UpcomingTable` | Upcoming aggregate | Complete | Overdue does not imply opened |
 | Data quality | `DataQualityPage` | `dataQualitySummary` | Complete | Critical errors block deploy |
-| Scenarios | `ScenariosPage`, `scenarioStore` | Baseline plus local changes | Partial: add/remove/save | Baseline remains immutable |
+| Scenarios | `ScenariosPage`, `scenarioStore`, `calculations/scenarios` | Baseline plus local changes | Complete for available tenant-mix metrics | Baseline immutable; category, uniqueness, intersections and Jaccard recalculate |
 | History | `HistoryPage` | Snapshot collection | Complete empty state | One snapshot renders an empty state |
 | GitHub Pages deployment | quality-gated workflow | `dist` | Pending | No deploy after failed quality job |
 

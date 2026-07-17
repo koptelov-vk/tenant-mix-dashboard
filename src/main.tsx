@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './TenantMixApp';
 import './styles/globals.css';
 import './styles/accessibility.css';
+import './styles/mall-sheet.css';
+import './styles/scenarios.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
