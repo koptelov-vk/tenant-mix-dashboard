@@ -107,29 +107,52 @@ test('primary filters use the revised comparison terminology', async ({ page }) 
 
 test('comparison table supports explicit sorting', async ({ page }) => {
   await page.goto('?tab=comparability');
-  const header = page.locator('.data-table thead').getByRole('button', { name: 'Бренды', exact: true });
+  const header = page.locator('.comparison-table thead').getByRole('button', { name: 'Бренды', exact: true });
+  const column = header.locator('xpath=../..');
   await header.click();
-  await expect(header.locator('xpath=..')).toHaveAttribute('aria-sort', 'ascending');
+  await expect(column).toHaveAttribute('aria-sort', 'ascending');
   await header.click();
-  await expect(header.locator('xpath=..')).toHaveAttribute('aria-sort', 'descending');
+  await expect(column).toHaveAttribute('aria-sort', 'descending');
 });
 
-test('brand registry local filters do not change the global URL state', async ({ page }) => {
+test('comparison table provides a filter in every column header', async ({ page }) => {
+  await page.goto('?tab=comparability');
+  await expect(page.locator('.comparison-table thead .registry-filter-header')).toHaveCount(9);
+  const filter = page.getByLabel('Фильтр: Город');
+  await filter.click();
+  await page.getByRole('checkbox', { name: 'Казань' }).uncheck();
+  await expect(page.locator('.comparison-table tbody')).not.toContainText('KazanMall');
+});
+
+test('brand registry column filters and sorting do not change global URL state', async ({ page }) => {
   await page.goto('?tab=brands');
   await expect.poll(() => new URL(page.url()).searchParams.get('focus')).toBe('Фантастика');
   const before = new URL(page.url());
-  await page.locator('.registry-filter').filter({ hasText: 'Категория' }).locator('summary').click();
-  await page.locator('.registry-filter').filter({ hasText: 'Категория' }).getByText('Снять все').click();
+  await expect(page.locator('.registry-head .registry-filter-header')).toHaveCount(7);
+  const categoryFilter = page.getByLabel('Фильтр: Категория');
+  await categoryFilter.click();
+  await page.getByRole('button', { name: 'Снять все' }).click();
+  await expect(page.locator('.registry-filter-header[open]')).toHaveCount(1);
+  await expect(page.locator('.registry-row')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Выбрать все' }).click();
+  await page.getByRole('button', { name: 'Закрыть фильтр' }).click();
+  const brandHeader = page.locator('.registry-head').getByRole('button', { name: 'Бренд', exact: true });
+  await brandHeader.click();
+  await expect(brandHeader.locator('xpath=../..')).toHaveAttribute('aria-sort', 'descending');
   const after = new URL(page.url());
   expect(after.searchParams.toString()).toBe(before.searchParams.toString());
 });
 
-test('upcoming openings provide local column filters', async ({ page }) => {
+test('upcoming openings provide sortable filters in every column header', async ({ page }) => {
   await page.goto('?tab=upcoming');
-  const filters = page.getByLabel('Фильтры таблицы скоро открытие');
-  await expect(filters.locator('.registry-filter')).toHaveCount(8);
-  await filters.locator('.registry-filter').filter({ hasText: 'Категория' }).locator('summary').click();
-  await expect(filters.locator('.registry-filter').filter({ hasText: 'Категория' }).getByText('Выбрать все')).toBeVisible();
+  await expect(page.locator('.upcoming-table thead .registry-filter-header')).toHaveCount(8);
+  const sortHeader = page.locator('.upcoming-table thead').getByRole('button', { name: 'Бренд', exact: true });
+  await sortHeader.click();
+  await expect(sortHeader.locator('xpath=../..')).toHaveAttribute('aria-sort', 'ascending');
+  await page.getByLabel('Фильтр: Категория').click();
+  await page.getByRole('button', { name: 'Снять все' }).click();
+  await expect(page.locator('.upcoming-table tbody tr')).toHaveCount(0);
+  await expect(page.locator('.registry-filter-header[open]')).toHaveCount(1);
 });
 
 test('saved view restores filters, focus and active section', async ({ page }) => {
