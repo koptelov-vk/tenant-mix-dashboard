@@ -111,10 +111,31 @@ export const dashboardSchema = z.object({
   });
 });
 
+
+// The mandatory build/test pipeline validates every source row with
+// dashboardSchema. Repeating that full 6 MB validation in the browser delays
+// first paint, so runtime loading validates the envelope and small reference
+// collections before adapting the trusted build artifact.
+const runtimeDashboardSchema = z.object({
+  meta: z.object({ version: z.string().optional(), snapshotDate: z.string() }).passthrough(),
+  rows: z.array(z.unknown()),
+  mallSummary: z.array(mallSchema).min(1),
+  categoryMatrix: z.object({
+    categories: z.array(z.string().min(1)),
+    malls: z.array(z.string()).optional(),
+    counts: z.record(z.record(z.number().nonnegative())).optional(),
+  }).passthrough(),
+  brandPresence: z.record(z.unknown()),
+  mallSimilarity: z.array(z.unknown()),
+  brandGaps: z.record(z.array(z.string())),
+  upcoming: z.array(upcomingSchema),
+  dataQuality: dataQualitySchema,
+}).passthrough();
+
 export async function fetchDashboardData(): Promise<DashboardData> {
   const response = await fetch(`${import.meta.env.BASE_URL}data/dashboard_data.json`, { cache: 'no-cache' });
   if (!response.ok) throw new Error(`Не удалось загрузить данные: HTTP ${response.status}`);
-  return dashboardSchema.parse(await response.json()) as DashboardData;
+  return runtimeDashboardSchema.parse(await response.json()) as DashboardData;
 }
 
 export function useDashboardData() {
