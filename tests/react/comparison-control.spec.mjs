@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('mobile comparison control keeps a 44px hit area with compact native-like chrome', async ({ page }, testInfo) => {
+test('mobile comparison control keeps a 44px hit area with select-like visual metrics', async ({ page }, testInfo) => {
   test.skip(!testInfo.project.name.startsWith('mobile'));
   await page.goto('');
 
@@ -27,6 +27,8 @@ test('mobile comparison control keeps a 44px hit area with compact native-like c
       hitPaddingTop: Number.parseFloat(buttonStyle.paddingTop),
       hitPaddingBottom: Number.parseFloat(buttonStyle.paddingBottom),
       visualAlignItems: visualStyle.alignItems,
+      visualFontSize: visualStyle.fontSize,
+      visualBorderRadius: visualStyle.borderRadius,
       appearance: buttonStyle.appearance,
     };
   });
@@ -34,13 +36,15 @@ test('mobile comparison control keeps a 44px hit area with compact native-like c
   expect(geometry).not.toBeNull();
   expect(geometry.hitHeight).toBeGreaterThanOrEqual(44);
   expect(geometry.hitHeight).toBeLessThanOrEqual(48);
-  expect(geometry.visualHeight).toBeGreaterThanOrEqual(28);
-  expect(geometry.visualHeight).toBeLessThanOrEqual(32);
+  expect(geometry.visualHeight).toBeGreaterThanOrEqual(27);
+  expect(geometry.visualHeight).toBeLessThanOrEqual(29);
   expect(geometry.visualHeight).toBeLessThan(geometry.hitHeight);
   expect(geometry.hitBlockSize).toBe('44px');
-  expect(geometry.visualBlockSize).toBe('30px');
+  expect(geometry.visualBlockSize).toBe('28px');
   expect(geometry.hitPaddingTop).toBe(0);
   expect(geometry.hitPaddingBottom).toBe(0);
   expect(geometry.visualAlignItems).toBe('center');
+  expect(geometry.visualFontSize).toBe('14px');
+  expect(geometry.visualBorderRadius).toBe('8px');
   expect(geometry.appearance).toBe('none');
 });
