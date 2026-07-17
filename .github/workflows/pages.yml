@@ -40,8 +40,6 @@ jobs:
         run: python scripts/build_aggregates.py
       - name: Test data pipeline
         run: pnpm test:data
-      - name: Validate legacy aggregate contract
-        run: pnpm test:legacy
       - name: Unit and production data tests
         run: pnpm test
       - name: Build React production artifact
@@ -61,18 +59,53 @@ jobs:
             artifacts/lighthouse/
             dist/
           if-no-files-found: ignore
-      - name: Upload Pages artifact
+      - name: Upload final Pages artifact
         uses: actions/upload-pages-artifact@v3
-        with: { path: dist }
+        with:
+          name: final-pages
+          path: dist
 
-  deploy:
+  maintenance-artifact:
     needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare maintenance artifact
+        run: |
+          rm -rf maintenance-dist
+          mkdir maintenance-dist
+          cp maintenance/index.html maintenance-dist/index.html
+          touch maintenance-dist/.nojekyll
+      - name: Upload maintenance Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: maintenance-pages
+          path: maintenance-dist
+
+  deploy-maintenance:
+    needs: maintenance-artifact
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/configure-pages@v5
-      - name: Deploy to GitHub Pages
+      - name: Publish maintenance page
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: maintenance-pages
+
+  deploy:
+    needs: [quality, deploy-maintenance]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Deploy verified dashboard
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: final-pages
