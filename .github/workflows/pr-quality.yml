@@ -137,4 +137,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '22', cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test:lighthouse
+      - name: Build production artifact
+        run: pnpm build
+      - name: Run Lighthouse audit
+        run: pnpm test:lighthouse
