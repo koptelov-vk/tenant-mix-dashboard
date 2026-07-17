@@ -67,3 +67,21 @@ test('page has no horizontal overflow on mobile', async ({ page }, testInfo) => 
   await page.goto('');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });
+
+test('mall details open from comparability and close with Escape', async ({ page }) => {
+  await page.goto('?tab=comparability');
+  await page.locator('.table-link').first().click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByRole('dialog').getByRole('heading', { level: 2 })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+});
+
+test('scenario page recalculates without changing baseline', async ({ page }) => {
+  await page.goto('?tab=scenarios');
+  const baseline = await page.locator('.scenario-kpis-wide small').first().innerText();
+  await page.locator('.scenario-editors select').first().selectOption({ index: 1 });
+  await page.locator('.scenario-editors .button').first().click();
+  await expect(page.locator('.scenario-changes button')).toHaveCount(1);
+  await expect(page.locator('.scenario-kpis-wide small').first()).toHaveText(baseline);
+});

@@ -32,7 +32,7 @@ function Dashboard({ data, refreshing, refetch }: { data: NonNullable<ReturnType
   const refresh = async () => { await refetch(); setToast(`Данные обновлены: ${new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`); window.setTimeout(() => setToast(null), 2800); };
   return <div className="app-shell"><a className="skip-link" href="#main-content">Перейти к содержимому</a><AppHeader data={data} refreshing={refreshing} onRefresh={refresh} /><GlobalFilters data={data} context={context} /><main id="main-content" tabIndex={-1}><Breadcrumbs context={context} snapshot={data.meta.snapshotDate} /><Suspense fallback={<PageSkeleton />}>
     {activePage === 'overview' ? <OverviewPage context={context} /> : null}
-    {activePage === 'comparability' ? <ComparabilityPage context={context} /> : null}
+    {activePage === 'comparability' ? <ComparabilityPage context={context} data={data} /> : null}
     {activePage === 'categories' ? <CategoriesPage context={context} /> : null}
     {activePage === 'brands' ? <BrandsPage context={context} data={data} /> : null}
     {activePage === 'scenarios' ? <ScenariosPage context={context} data={data} /> : null}
