@@ -157,7 +157,7 @@ test('brand registry aggregates brands and opens the brand card', async ({ page 
   expect(new Set(names).size).toBe(names.length);
   await page.locator('.brand-registry-row .brand-button').first().click();
   await expect(page.locator('.sheet[role="dialog"]')).toBeVisible();
-  if (testInfo.project.name !== 'desktop') await expect(page.locator('.brand-table .registry-head')).toBeHidden();
+  if (testInfo.project.name.startsWith('mobile')) await expect(page.locator('.brand-table .registry-head')).toBeHidden();
 });
 
 test('upcoming openings expose desktop column controls and mobile card search', async ({ page }, testInfo) => {
