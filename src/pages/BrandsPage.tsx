@@ -6,7 +6,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import type { AnalysisContext, DashboardData } from '../types/dashboard';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import { downloadBrandCsv, downloadBrandXlsx } from '../lib/export/csv';
-import { buildBrandTableRows, CHARACTERISTIC_DEFINITIONS, CHARACTERISTIC_LABELS, CHARACTERISTIC_ORDER, type BrandCharacteristic, type BrandTableRow } from '../lib/brandTable';
+import { buildBrandTableRows, CHARACTERISTIC_DEFINITIONS, CHARACTERISTIC_LABELS, CHARACTERISTIC_ORDER, type BrandTableRow } from '../lib/brandTable';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { BrandSheet } from '../components/details/BrandSheet';
@@ -70,25 +70,39 @@ function BrandRow({ row, itemStart, itemSize, onOpen }: { row: BrandTableRow; it
 function MallList({ malls }: { malls: string[] }) {
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const visible = malls.slice(0, 3);
   const close = () => setAnchor(null);
   useEffect(() => {
     if (!anchor) return;
-    const dismiss = (event: Event) => { if (event.target instanceof Node && !buttonRef.current?.contains(event.target)) close(); };
-    window.addEventListener('resize', close);
-    window.addEventListener('scroll', close, true);
+    const reposition = () => {
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (rect) setAnchor(rect); else close();
+    };
+    const dismiss = (event: PointerEvent) => {
+      if (!(event.target instanceof Node)) return;
+      if (buttonRef.current?.contains(event.target) || popoverRef.current?.contains(event.target)) return;
+      close();
+    };
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
     document.addEventListener('pointerdown', dismiss);
-    return () => { window.removeEventListener('resize', close); window.removeEventListener('scroll', close, true); document.removeEventListener('pointerdown', dismiss); };
+    return () => { window.removeEventListener('resize', reposition); window.removeEventListener('scroll', reposition, true); document.removeEventListener('pointerdown', dismiss); };
   }, [anchor]);
-  return <span className="brand-mall-list"><span>{visible.join('; ')}</span>{malls.length > visible.length ? <button ref={buttonRef} type="button" className="brand-mall-more" aria-expanded={Boolean(anchor)} onClick={() => setAnchor((current) => current ? null : buttonRef.current?.getBoundingClientRect() ?? null)}>Ещё {malls.length - visible.length}</button> : null}{anchor ? createPortal(<div className="brand-mall-popover" role="dialog" aria-label="Все объекты бренда" style={popoverPosition(anchor)}><strong>Объекты присутствия</strong><ul>{malls.map((mall) => <li key={mall}>{mall}</li>)}</ul></div>, document.body) : null}</span>;
+  return <span className="brand-mall-list"><span>{visible.join('; ')}</span>{malls.length > visible.length ? <button ref={buttonRef} type="button" className="brand-mall-more" aria-expanded={Boolean(anchor)} onClick={() => setAnchor((current) => current ? null : buttonRef.current?.getBoundingClientRect() ?? null)}>Ещё {malls.length - visible.length}</button> : null}{anchor ? createPortal(<div ref={popoverRef} className="brand-mall-popover" role="dialog" aria-label="Все объекты бренда" style={popoverPosition(anchor)}><strong>Объекты присутствия</strong><ul>{malls.map((mall) => <li key={mall}>{mall}</li>)}</ul></div>, document.body) : null}</span>;
 }
 
 function popoverPosition(anchor: DOMRect) {
-  const width = Math.min(320, window.innerWidth - 24);
-  const left = Math.max(12, Math.min(anchor.left, window.innerWidth - width - 12));
-  const roomBelow = window.innerHeight - anchor.bottom;
-  const top = roomBelow >= 220 ? anchor.bottom + 8 : Math.max(12, anchor.top - 228);
-  return { left, top, width };
+  const viewportWidth = document.documentElement.clientWidth;
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+  const width = Math.min(320, viewportWidth - 24);
+  const maxHeight = Math.min(220, viewportHeight - 24);
+  const left = Math.max(12, Math.min(anchor.left, viewportWidth - width - 12));
+  const preferredTop = anchor.bottom + 8;
+  const top = preferredTop + maxHeight <= viewportHeight - 12
+    ? preferredTop
+    : Math.max(12, Math.min(anchor.top - maxHeight - 8, viewportHeight - maxHeight - 12));
+  return { left, top, width, maxHeight };
 }
 
 function createEmptyFilters() { return headers.reduce((result, [key]) => { result[key] = []; return result; }, {} as Record<SortKey, string[]>); }
