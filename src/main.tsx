@@ -11,6 +11,7 @@ import './styles/qa-fixes.css';
 import './styles/tooltip.css';
 import './styles/category-heatmap.css';
 import './styles/comparison-field.css';
+import './styles/package3-table-ux.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
