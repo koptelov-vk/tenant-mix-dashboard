@@ -1,15 +1,17 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
-const dialogs = (page: import('@playwright/test').Page) => page.locator('[role="dialog"].filter-popover, [role="dialog"].registry-filter-menu');
+const dialogs = (page: Page) => page.locator('[role="dialog"].filter-popover, [role="dialog"].registry-filter-menu');
+const globalFilter = (page: Page, label: string) => page.locator('.searchable-filter').filter({ has: page.locator('.filter-label', { hasText: label }) }).getByRole('button');
+const visibleTableFilter = (page: Page, label: string): Locator => page.locator(`summary[aria-label="Фильтр: ${label}"]:visible`).first();
 
 test.describe('QA-01 filter popovers', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('./');
-    await expect(page.getByRole('button', { name: 'Сравнение' })).toHaveAttribute('aria-current', 'page');
+    await expect(page.getByRole('button', { name: 'Сравнение', exact: true })).toHaveAttribute('aria-current', 'page');
   });
 
   test('outside click and Escape close a global popover and restore focus', async ({ page }) => {
-    const geography = page.getByRole('button', { name: /География/ });
+    const geography = globalFilter(page, 'География');
     await geography.click();
     await expect(page.getByRole('dialog', { name: 'Выбор: География' })).toBeVisible();
 
@@ -23,8 +25,8 @@ test.describe('QA-01 filter popovers', () => {
   });
 
   test('opening another global popover closes the previous and keeps selected values', async ({ page }) => {
-    const geography = page.getByRole('button', { name: /География/ });
-    const categories = page.getByRole('button', { name: /Категории/ });
+    const geography = globalFilter(page, 'География');
+    const categories = globalFilter(page, 'Категории');
 
     await geography.click();
     const geographyDialog = page.getByRole('dialog', { name: 'Выбор: География' });
@@ -41,31 +43,34 @@ test.describe('QA-01 filter popovers', () => {
   });
 
   test('global and table filters share one open-popover contract and navigation closes it', async ({ page }) => {
-    const globalFilter = page.getByRole('button', { name: /Категории/ });
-    await globalFilter.click();
+    const categories = globalFilter(page, 'Категории');
+    await categories.click();
     await expect(dialogs(page)).toHaveCount(1);
 
-    await page.getByRole('button', { name: 'Бренды' }).click();
+    await page.getByRole('button', { name: 'Бренды', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Бренды' })).toBeVisible();
     await expect(dialogs(page)).toHaveCount(0);
 
-    const tableFilter = page.getByLabel('Фильтр: Бренд').first();
+    const tableFilter = visibleTableFilter(page, 'Бренд');
     await tableFilter.click();
     await expect(page.getByRole('dialog', { name: 'Фильтр столбца: Бренд' })).toBeVisible();
 
-    await globalFilter.click();
+    await categories.click();
     await expect(page.getByRole('dialog', { name: 'Фильтр столбца: Бренд' })).toHaveCount(0);
     await expect(page.getByRole('dialog', { name: 'Выбор: Категории' })).toBeVisible();
     await expect(dialogs(page)).toHaveCount(1);
   });
 
   test('table filters are exclusive and Escape restores trigger focus', async ({ page }) => {
-    await page.getByRole('button', { name: 'Бренды' }).click();
-    const brandFilter = page.getByLabel('Фильтр: Бренд').first();
-    const categoryFilter = page.getByLabel('Фильтр: Категория').first();
+    await page.getByRole('button', { name: 'Бренды', exact: true }).click();
+    const brandFilter = visibleTableFilter(page, 'Бренд');
+    const categoryFilter = visibleTableFilter(page, 'Категория');
 
     await brandFilter.click();
-    await categoryFilter.click();
+    await expect(page.getByRole('dialog', { name: 'Фильтр столбца: Бренд' })).toBeVisible();
+
+    await categoryFilter.focus();
+    await categoryFilter.press('Enter');
     await expect(page.getByRole('dialog', { name: 'Фильтр столбца: Бренд' })).toHaveCount(0);
     await expect(page.getByRole('dialog', { name: 'Фильтр столбца: Категория' })).toBeVisible();
     await expect(dialogs(page)).toHaveCount(1);
