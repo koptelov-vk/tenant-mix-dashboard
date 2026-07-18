@@ -1,17 +1,21 @@
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import os
 import re
 import statistics
-import argparse
 from collections import defaultdict
 from pathlib import Path
 from urllib.parse import urlparse
 
 import pandas as pd
 
+try:
+    from .status_semantics import canonical_status
+except ImportError:
+    from status_semantics import canonical_status
 
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED = ROOT / "data" / "processed"
@@ -117,6 +121,7 @@ def prepare_rows(frame: pd.DataFrame) -> list[dict]:
         manual = text(item.get("Требует ручной проверки")).casefold() in {"true", "1", "да"}
         source = text(item.get("Источник"))
         confirmation = text(item.get("Статус подтверждения"))
+        row_status = text(item.get("Статус строки"))
         normalized = canonical_brand(item.get("brand_normalized"), item.get("Арендатор / бренд"))
         rows.append({
             "mall": text(item.get("ТЦ/ТРК")),
@@ -125,8 +130,9 @@ def prepare_rows(frame: pd.DataFrame) -> list[dict]:
             "category": text(item.get("Категория итоговая")),
             "sourceType": source,
             "sourceUrl": text(item.get("Источник URL")),
-            "rowStatus": text(item.get("Статус строки")),
+            "rowStatus": row_status,
             "confirmation": confirmation,
+            "statusNormalized": canonical_status(row_status, confirmation),
             "categoryBasis": text(item.get("Основание категории")),
             "manualReview": manual,
             "sourceQuality": source_quality(source, confirmation, manual),
@@ -148,6 +154,7 @@ def build(snapshot: str | None = None) -> dict:
     areas = pd.read_csv(AREA_CSV).fillna("")
     upcoming = pd.read_csv(UPCOMING_CSV).fillna("")
     rows = prepare_rows(base)
+    active_rows = [row for row in rows if row["statusNormalized"] == "active"]
 
     area_by_mall: dict[str, dict] = {}
     for item in areas.to_dict("records"):
@@ -173,7 +180,7 @@ def build(snapshot: str | None = None) -> dict:
     category_by_brand: dict[str, str] = {}
     sources_by_brand: dict[str, list[dict]] = defaultdict(list)
     presence: dict[str, set[str]] = defaultdict(set)
-    for row in rows:
+    for row in active_rows:
         mall, brand = row["mall"], row["brandNormalized"]
         brands_by_mall[mall].add(brand)
         category_brands_by_mall[mall][row["category"]].add(brand)
@@ -187,7 +194,7 @@ def build(snapshot: str | None = None) -> dict:
         if source_entry not in sources_by_brand[brand]:
             sources_by_brand[brand].append(source_entry)
 
-    malls = sorted(brands_by_mall)
+    malls = sorted(set(area_by_mall) | set(brands_by_mall))
     mall_summary: list[dict] = []
     for mall in malls:
         area = area_by_mall.get(mall, {"mall": mall, "city": "", "gba": None, "gla": None, "glaConfirmed": False, "mallClass": "Нет данных", "areaReliability": "Нет данных", "areaSource": "", "areaStatus": ""})
@@ -265,19 +272,23 @@ def build(snapshot: str | None = None) -> dict:
         })
 
     invalid_urls = [row["sourceUrl"] for row in rows if row["sourceUrl"] and urlparse(row["sourceUrl"]).scheme not in {"http", "https"}]
+    status_counts = {status: sum(row["statusNormalized"] == status for row in rows) for status in ("active", "upcoming", "closed", "unknown", "conflicting")}
     quality = {
         "snapshotDate": snapshot,
-        "rows": len(rows), "malls": len(malls), "brands": len(presence),
+        "rows": len(rows), "activeRows": len(active_rows), "malls": len(malls), "brands": len(presence),
         "emptyBrands": sum(not row["brand"] for row in rows),
         "emptyNormalizedBrands": sum(not row["brandNormalized"] for row in rows),
         "duplicateMallBrandPairs": 0,
         "invalidUrls": len(invalid_urls),
         "mallsWithoutGla": sum(not area_by_mall.get(mall, {}).get("glaConfirmed") for mall in malls),
         "manualReviewRows": sum(row["manualReview"] for row in rows),
+        "statusCounts": status_counts,
+        "missingBothStatusFields": sum(not row["rowStatus"] and not row["confirmation"] for row in rows),
+        "excludedFromActiveAggregates": len(rows) - len(active_rows),
     }
 
     return {
-        "meta": {"version": "2.1", "snapshotDate": snapshot, "methodology": {"density": "Количество брендов / подтвержденная GLA × 10 000", "similarity": "J(A,B) = |A ∩ B| / |A ∪ B|", "median": "Медиана по объектам группы сравнения без фокусного объекта"}},
+        "meta": {"version": "2.2", "snapshotDate": snapshot, "methodology": {"density": "Количество действующих брендов / подтвержденная GLA × 10 000", "similarity": "J(A,B) = |A ∩ B| / |A ∪ B| по действующим брендам", "median": "Медиана по объектам группы сравнения без фокусного объекта", "statuses": "Основные агрегаты включают только statusNormalized=active"}},
         "rows": rows,
         "mallSummary": mall_summary,
         "categoryMatrix": category_matrix,

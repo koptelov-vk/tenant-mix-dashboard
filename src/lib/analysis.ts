@@ -31,6 +31,8 @@ export interface AnalysisFilters {
   focusInSelectedGroup?: boolean;
 }
 
+export type TenantStatus = 'active' | 'upcoming' | 'closed' | 'unknown' | 'conflicting';
+
 const ALL_CATEGORIES = 'Все категории';
 const distinctBrands = (rows: TenantRow[]) => new Set(rows.map((row) => row.brandNormalized));
 
@@ -43,6 +45,27 @@ export function median(values: number[]): number | null {
   const right = sorted[middle];
   return left === undefined || right === undefined ? null : (left + right) / 2;
 }
+
+export function normalizedStatus(row: TenantRow): TenantStatus {
+  const explicit = row.statusNormalized?.trim().toLocaleLowerCase('ru');
+  if (explicit === 'active' || explicit === 'upcoming' || explicit === 'closed' || explicit === 'unknown' || explicit === 'conflicting') return explicit;
+
+  const rowStatus = (row.rowStatus ?? '').trim().toLocaleLowerCase('ru');
+  const confirmation = (row.confirmation ?? '').trim().toLocaleLowerCase('ru');
+  const value = `${rowStatus} ${confirmation}`.trim();
+  if (!value) return 'unknown';
+  if (value.includes('conflict') || value.includes('конфликт')) return 'conflicting';
+  if (value.includes('unknown') || value.includes('неизвест')) return 'unknown';
+  if (value.includes('upcoming') || value.includes('скоро') || value.includes('planned') || value.includes('заявлен') || value.includes('ожида')) return 'upcoming';
+  if (value.includes('closed') || value.includes('закры')) return 'closed';
+  if (
+    value.includes('active') || value.includes('действ') || value.includes('открыт') ||
+    value.includes('confirmed') || value.includes('подтвержд') || confirmation === 'ok'
+  ) return 'active';
+  return 'unknown';
+}
+
+const activeRows = (rows: TenantRow[]) => rows.filter((row) => normalizedStatus(row) === 'active');
 
 function hasFiniteArea(value: number | null): value is number {
   return Number.isFinite(value) && (value ?? 0) > 0;
@@ -70,17 +93,6 @@ function matchesRow(row: TenantRow, filters: AnalysisFilters): boolean {
     && (!filters.sourceQualities?.length || (row.sourceQuality != null && filters.sourceQualities.includes(row.sourceQuality)));
 }
 
-function normalizedStatus(row: TenantRow): 'active' | 'upcoming' | 'closed' | 'unknown' | 'conflicting' {
-  const value = `${row.rowStatus ?? ''} ${row.confirmation ?? ''}`.trim().toLocaleLowerCase('ru');
-  if (!value) return 'active';
-  if (value.includes('conflict') || value.includes('конфликт')) return 'conflicting';
-  if (value.includes('unknown') || value.includes('неизвест')) return 'unknown';
-  if (value.includes('upcoming') || value.includes('скоро') || value.includes('planned') || value.includes('заявлен')) return 'upcoming';
-  if (value.includes('closed') || value.includes('закры')) return 'closed';
-  if (value.includes('active') || value.includes('действ') || value.includes('открыт') || value.includes('confirmed')) return 'active';
-  return 'unknown';
-}
-
 function buildMallStats(malls: MallSummary[], rows: TenantRow[]): MallSliceStats[] {
   const rowsByMall = new Map<string, TenantRow[]>();
   rows.forEach((row) => {
@@ -88,7 +100,6 @@ function buildMallStats(malls: MallSummary[], rows: TenantRow[]): MallSliceStats
     values.push(row);
     rowsByMall.set(row.mall, values);
   });
-
   return malls.map((mall) => {
     const mallRows = rowsByMall.get(mall.mall) ?? [];
     const brands = distinctBrands(mallRows);
@@ -99,7 +110,6 @@ function buildMallStats(malls: MallSummary[], rows: TenantRow[]): MallSliceStats
       categorySets.set(row.category, set);
     });
     const categoryCounts = Object.fromEntries([...categorySets].map(([category, values]) => [category, values.size]));
-
     return {
       mall,
       brandCount: brands.size,
@@ -110,12 +120,7 @@ function buildMallStats(malls: MallSummary[], rows: TenantRow[]): MallSliceStats
   });
 }
 
-function buildCategoryStats(
-  categories: string[],
-  mallStats: MallSliceStats[],
-  focusMall: MallSummary,
-  peerMalls: MallSummary[],
-): CategorySliceStats[] {
+function buildCategoryStats(categories: string[], mallStats: MallSliceStats[], focusMall: MallSummary, peerMalls: MallSummary[]): CategorySliceStats[] {
   const peerNames = new Set(peerMalls.map((mall) => mall.mall));
   return categories.map((category) => {
     const values = mallStats.map((stats) => {
@@ -157,13 +162,14 @@ export function buildCategoryProfiles(
   const scopedRows = rows.filter((row) => allowedMalls.has(row.mall));
 
   return categories.map((category) => {
+    const categoryRows = scopedRows.filter((row) => row.category === category);
     const focusBrands = new Set<string>();
     const peerBrands = new Set<string>();
     let excludedUnknownCount = 0;
     let excludedConflictingCount = 0;
     let manualReviewCount = 0;
 
-    scopedRows.filter((row) => row.category === category).forEach((row) => {
+    categoryRows.forEach((row) => {
       const status = normalizedStatus(row);
       if (status === 'unknown') {
         excludedUnknownCount += 1;
@@ -204,6 +210,8 @@ export function buildCategoryProfiles(
       excludedConflictingCount,
       manualReviewCount,
       qualityIssues,
+      sourceRowCount: categoryRows.length,
+      allRowsExcludedByQuality: categoryRows.length > 0 && totalBrands === 0 && (excludedUnknownCount + excludedConflictingCount) === categoryRows.length,
     };
   }).sort((a, b) => b.totalBrands - a.totalBrands || a.category.localeCompare(b.category, 'ru'));
 }
@@ -223,10 +231,16 @@ function buildIntersections(rows: TenantRow[], focusMall: MallSummary): Intersec
   };
 }
 
-function buildUniqueness(data: DashboardData, intersections: IntersectionStats, displayMalls: MallSummary[]): UniquenessStats {
+function buildUniqueness(allActiveRows: TenantRow[], intersections: IntersectionStats, displayMalls: MallSummary[]): UniquenessStats {
+  const globalPresence = new Map<string, Set<string>>();
+  allActiveRows.forEach((row) => {
+    const malls = globalPresence.get(row.brandNormalized) ?? new Set<string>();
+    malls.add(row.mall);
+    globalPresence.set(row.brandNormalized, malls);
+  });
   const group = new Set([...intersections.presence].filter(([, malls]) => malls.size === 1).map(([brand]) => brand));
   const focusExclusive = new Set([...intersections.focusBrands].filter((brand) => intersections.presence.get(brand)?.size === 1));
-  const global = new Set([...intersections.focusBrands].filter((brand) => data.brandPresence[brand]?.mallCount === 1));
+  const global = new Set([...intersections.focusBrands].filter((brand) => globalPresence.get(brand)?.size === 1));
   return { global, group, focusExclusive, scopeLabel: `Уникальность рассчитана внутри группы из ${displayMalls.length} объектов` };
 }
 
@@ -249,10 +263,17 @@ function buildSimilarities(rows: TenantRow[], focusMall: MallSummary, peerMalls:
 function buildGaps(data: DashboardData, filters: AnalysisFilters, peerMalls: MallSummary[], intersections: IntersectionStats): BrandGap[] {
   const peerNames = new Set(peerMalls.map((mall) => mall.mall));
   const threshold = Math.max(1, filters.gapN ?? 3);
+  const activePresence = new Map<string, Set<string>>();
+  activeRows(data.rows).forEach((row) => {
+    const malls = activePresence.get(row.brandNormalized) ?? new Set<string>();
+    malls.add(row.mall);
+    activePresence.set(row.brandNormalized, malls);
+  });
+
   return Object.values(data.brandPresence).flatMap((brand) => {
     if (intersections.focusBrands.has(brand.brandNormalized)) return [];
     if (filters.category !== ALL_CATEGORIES && brand.category !== filters.category) return [];
-    const malls = brand.malls.filter((mall) => peerNames.has(mall));
+    const malls = [...(activePresence.get(brand.brandNormalized) ?? [])].filter((mall) => peerNames.has(mall));
     const sources = brand.sources.filter((source) => malls.includes(source.mall) && source.url);
     const source = sources.filter((item) => !filters.sourceQualities?.length || filters.sourceQualities.includes(item.quality)).sort((a, b) => qualityRank(b.quality) - qualityRank(a.quality))[0];
     if (malls.length < threshold || !source) return [];
@@ -281,13 +302,14 @@ export function createAnalysisContext(data: DashboardData, filters: AnalysisFilt
   const peerMalls = data.mallSummary.filter((mall) => mall.mall !== focusMall.mall && matchesPeerCriteria(mall, filters));
   const displayMalls = [focusMall, ...peerMalls];
   const allowedMalls = new Set(displayMalls.map((mall) => mall.mall));
-  const filteredRows = data.rows.filter((row) => allowedMalls.has(row.mall) && matchesRow(row, filters));
+  const scopedRows = data.rows.filter((row) => allowedMalls.has(row.mall) && matchesRow(row, filters));
+  const filteredRows = activeRows(scopedRows);
   const categories = filters.category === ALL_CATEGORIES ? data.categoryMatrix.categories : [filters.category];
   const mallStats = buildMallStats(displayMalls, filteredRows);
   const categoryStats = buildCategoryStats(categories, mallStats, focusMall, peerMalls);
-  const categoryProfiles = buildCategoryProfiles(data, filteredRows, focusMall, peerMalls, categories);
+  const categoryProfiles = buildCategoryProfiles(data, scopedRows, focusMall, peerMalls, categories);
   const intersections = buildIntersections(filteredRows, focusMall);
-  const uniqueness = buildUniqueness(data, intersections, displayMalls);
+  const uniqueness = buildUniqueness(activeRows(data.rows), intersections, displayMalls);
 
   return {
     focusMall,
