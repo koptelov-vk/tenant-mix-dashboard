@@ -18,6 +18,10 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
   if (!context.focusInSelectedGroup) return <div className="category-profile-state warning">Фокусный объект не входит в текущую группу.</div>;
   if (!context.peerMalls.length) return <div className="category-profile-state warning">Для расчёта эксклюзивности выберите минимум ещё один объект.</div>;
   if (!context.categoryProfiles.length) return <div className="category-profile-state">Нет данных, соответствующих выбранным объектам, категориям, статусам и дате.</div>;
+  if (context.categoryProfiles.every((profile) => profile.sourceRowCount === 0)) return <div className="category-profile-state">Нет данных, соответствующих выбранным объектам, категориям, статусам и дате.</div>;
+  if (context.categoryProfiles.every((profile) => profile.sourceRowCount === 0 || profile.allRowsExcludedByQuality)) {
+    return <div className="category-profile-state warning" role="alert">Невозможно рассчитать показатель: статусы или классификация брендов требуют проверки.</div>;
+  }
 
   const openCategory = (category: string) => {
     setCategories([category]);
@@ -30,9 +34,11 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
     {partial ? <div className="category-profile-partial" role="status"><AlertTriangle size={16} aria-hidden="true" />Расчёт выполнен по доступным данным. Часть записей исключена или требует проверки.</div> : null}
     {context.categoryProfiles.map((profile) => {
       const qualityLabel = profile.qualityIssues.length ? `Данные требуют проверки: ${profile.qualityIssues.join('; ')}` : '';
-      const mainValue = profile.displayPercent == null
-        ? `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · нет данных`
-        : `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · ${profile.displayPercent}% категории`;
+      const mainValue = profile.allRowsExcludedByQuality
+        ? 'Показатель не рассчитан · данные требуют проверки'
+        : profile.displayPercent == null
+          ? `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · нет данных`
+          : `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · ${profile.displayPercent}% категории`;
       const tooltipId = `category-profile-tooltip-${profile.category.replace(/[^a-zа-яё0-9]+/gi, '-').toLowerCase()}`;
       return <div className="category-profile-row" key={profile.category}>
         <button className="category-profile-open" type="button" onClick={() => openCategory(profile.category)} aria-label={`Открыть категорию ${profile.category}`} aria-describedby={tooltipId}>
