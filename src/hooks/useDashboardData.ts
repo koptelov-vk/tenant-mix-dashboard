@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { DashboardData } from '../types/dashboard';
 
 const sourceQualitySchema = z.enum(['Высокая', 'Средняя', 'Низкая']);
+const tenantStatusSchema = z.enum(['active', 'upcoming', 'closed', 'unknown', 'conflicting']);
 
 const tenantRowSchema = z.object({
   mall: z.string().min(1),
@@ -16,6 +17,7 @@ const tenantRowSchema = z.object({
   checkedAt: z.string().nullable().optional(),
   rowStatus: z.string().optional(),
   confirmation: z.string().optional(),
+  statusNormalized: tenantStatusSchema.optional(),
   originalCategory: z.string().optional(),
   manualReview: z.boolean().optional(),
 }).passthrough();
@@ -110,7 +112,6 @@ export const dashboardSchema = z.object({
     pairs.add(pair);
   });
 });
-
 
 // The mandatory build/test pipeline validates every source row with
 // dashboardSchema. Repeating that full 6 MB validation in the browser delays

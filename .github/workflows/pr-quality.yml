@@ -86,11 +86,18 @@ jobs:
         run: |
           pip install -r requirements.txt
           pnpm install --frozen-lockfile
-      - name: Validate and test canonical data pipeline
-        run: |
-          python scripts/validate_data.py
-          pnpm build:aggregates
-          pnpm test:data
+      - name: Validate canonical source data
+        run: python scripts/validate_data.py
+      - name: Build canonical aggregates
+        run: pnpm build:aggregates
+      - name: Run data pipeline tests and status audit
+        run: pnpm test:data
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: product-01-status-audit
+          path: test-results/product-01-status-audit.json
+          if-no-files-found: warn
 
   frontend-quality:
     needs: changes
@@ -103,11 +110,14 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '22', cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - name: TypeScript, unit tests and build
-        run: |
-          pnpm exec tsc --noEmit
-          pnpm test
-          pnpm build
+      - name: TypeScript noEmit
+        run: pnpm exec tsc --noEmit
+      - name: Unit tests
+        run: pnpm test
+      - name: TypeScript project build
+        run: pnpm exec tsc -b
+      - name: Vite production packaging
+        run: pnpm exec vite build
 
   browser-qa:
     needs: [changes, frontend-quality]

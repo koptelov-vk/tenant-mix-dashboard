@@ -1,5 +1,6 @@
 export type MetricMode = 'absolute' | 'share' | 'density';
 export type SourceQuality = 'Высокая' | 'Средняя' | 'Низкая';
+export type TenantStatus = 'active' | 'upcoming' | 'closed' | 'unknown' | 'conflicting';
 
 export interface TenantRow {
   mall: string;
@@ -13,6 +14,7 @@ export interface TenantRow {
   checkedAt?: string | null;
   rowStatus?: string;
   confirmation?: string;
+  statusNormalized?: TenantStatus;
   originalCategory?: string;
   manualReview?: boolean;
 }
@@ -68,6 +70,7 @@ export interface UpcomingOpening {
 export interface DataQualitySummary {
   snapshotDate: string;
   rows: number;
+  activeRows?: number;
   malls: number;
   brands: number;
   emptyBrands: number;
@@ -76,6 +79,9 @@ export interface DataQualitySummary {
   invalidUrls: number;
   mallsWithoutGla: number;
   manualReviewRows: number;
+  statusCounts?: Record<TenantStatus, number>;
+  missingBothStatusFields?: number;
+  excludedFromActiveAggregates?: number;
 }
 
 export interface DashboardData {
@@ -129,6 +135,8 @@ export interface CategoryProfileStats {
   excludedConflictingCount: number;
   manualReviewCount: number;
   qualityIssues: string[];
+  sourceRowCount: number;
+  allRowsExcludedByQuality: boolean;
 }
 
 export interface UniquenessStats {
