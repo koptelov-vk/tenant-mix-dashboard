@@ -93,12 +93,15 @@ test('similarity intersection, union and Jaccard use active brands only', () => 
 
   const focusBrands = brands(sample.focus);
   const peerBrands = brands(sample.mall);
-  const intersection = [...focusBrands].filter(value => peerBrands.has(value)).length;
-  const union = new Set([...focusBrands, ...peerBrands]).size;
-  const expectedJaccard = union ? intersection / union : 0;
+  const common = [...focusBrands].filter(value => peerBrands.has(value)).length;
+  const focusOnly = [...focusBrands].filter(value => !peerBrands.has(value)).length;
+  const competitorOnly = [...peerBrands].filter(value => !focusBrands.has(value)).length;
+  const union = common + focusOnly + competitorOnly;
+  const expectedJaccard = union ? common / union : 0;
 
-  assert.equal(sample.intersection, intersection);
-  assert.equal(sample.union, union);
+  assert.equal(sample.common, common);
+  assert.equal(sample.focusOnly, focusOnly);
+  assert.equal(sample.competitorOnly, competitorOnly);
   assert.ok(Math.abs(sample.jaccard - expectedJaccard) < 1e-12);
 
   for (const key of excludedOnlyPairs) {
