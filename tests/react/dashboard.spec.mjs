@@ -79,12 +79,12 @@ test('overview gap threshold recalculates immediately and uses concise headings'
 
 test('header navigation uses requested order and all sections open', async ({ page }) => {
   await page.goto('');
-  await expect(page.locator('.navigation > button, .navigation > .nav-more > button')).toHaveText(['Сравнение', 'Категории', 'Бренды', 'Сопоставимость', 'Ещё']);
-  for (const [button, heading] of [['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Сопоставимость', 'Сопоставимость объектов']]) {
+  await expect(page.locator('.navigation > button, .navigation > .nav-more > button')).toHaveText(['Сравнение', 'Категории', 'Бренды', 'Сопоставимость', 'Скоро открытие', 'Ещё']);
+  for (const [button, heading] of [['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Сопоставимость', 'Сопоставимость объектов'], ['Скоро открытие', 'Скоро открытие']]) {
     await navButton(page, button).click();
     await expect(page.getByRole('heading', { name: heading }).first()).toBeVisible();
   }
-  for (const [button, heading] of [['Скоро открытие', 'Скоро открытие'], ['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
+  for (const [button, heading] of [['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
     await page.getByRole('button', { name: 'Ещё', exact: true }).click();
     await page.getByRole('menuitem', { name: button }).click();
     await expect(page.getByRole('heading', { name: heading }).first()).toBeVisible();
