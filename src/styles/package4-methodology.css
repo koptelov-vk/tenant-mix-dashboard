@@ -1,0 +1,49 @@
+.method-disclosure {
+  margin-top: 16px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+  color: #475569;
+}
+
+.method-disclosure summary,
+.method-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: #0f5132;
+  font-weight: 750;
+}
+
+.method-disclosure p,
+.method-panel p {
+  margin: 10px 0 0;
+  line-height: 1.55;
+}
+
+.method-toggle {
+  margin: 10px 0 0;
+  border: 0;
+  background: transparent;
+  padding: 8px 0;
+}
+
+.method-panel {
+  margin-top: 10px;
+}
+
+.method-panel h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .method-disclosure,
+  .method-panel {
+    font-size: 14px;
+  }
+
+  .inline-control {
+    align-items: flex-start;
+  }
+}

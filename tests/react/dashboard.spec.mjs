@@ -62,8 +62,10 @@ test('category filter updates the same KPI slice', async ({ page }) => {
 
 test('overview gap threshold recalculates immediately and uses concise headings', async ({ page }) => {
   await page.goto('');
-  const threshold = page.getByLabel('Минимум объектов для списка брендов');
+  const threshold = page.getByLabel('Кол-во объектов присутствия бренда');
   const resultCount = page.locator('.gap-result-count');
+  await expect(threshold).toBeVisible();
+  await expect(page.getByText('Минимум объектов', { exact: true })).toHaveCount(0);
   const maximum = await threshold.evaluate((element) => element.options.item(element.options.length - 1)?.value);
   expect(maximum).toBeTruthy();
   await threshold.selectOption('1');
