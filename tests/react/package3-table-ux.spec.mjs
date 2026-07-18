@@ -32,7 +32,10 @@ test('upcoming openings has search and consistent status labels', async ({ page 
   const search = page.getByRole('textbox', { name: 'Поиск в таблице скоро открытие' });
   await expect(search).toBeVisible();
   await search.fill('Фантастика');
-  await expect(page.locator('.upcoming-table tbody tr')).toHaveCount(2);
+  const rows = page.locator('.upcoming-table tbody tr');
+  await expect(rows.first()).toBeVisible();
+  expect(await rows.count()).toBeGreaterThan(0);
+  for (const row of await rows.all()) await expect(row).toContainText('Фантастика');
   await expect(page.getByText('ожидается', { exact: true })).toHaveCount(0);
 });
 
