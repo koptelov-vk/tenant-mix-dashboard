@@ -4,7 +4,10 @@ import json
 import re
 from collections import defaultdict
 
-from build_aggregates import alias_key, build, canonical_brand, text, write_outputs
+try:
+    from .build_aggregates import alias_key, build, canonical_brand, text, write_outputs
+except ImportError:
+    from build_aggregates import alias_key, build, canonical_brand, text, write_outputs
 
 
 UPCOMING_STATUS_ALIASES = {
@@ -38,12 +41,13 @@ def clean_upcoming(payload: dict) -> dict:
         if mall and key and brand not in active_by_mall[mall][key]:
             active_by_mall[mall][key].append(brand)
 
+    source_rows = list(payload.get("upcoming", []))
     retained: list[dict] = []
     excluded: list[dict] = []
     ambiguous: list[dict] = []
     normalized_statuses = 0
 
-    for source in payload.get("upcoming", []):
+    for source in source_rows:
         item = dict(source)
         original_status = text(item.get("status"))
         normalized_status = normalize_upcoming_status(original_status)
@@ -70,7 +74,7 @@ def clean_upcoming(payload: dict) -> dict:
 
     payload["upcoming"] = retained
     audit = {
-        "sourceRows": len(payload.get("upcoming", [])) + len(excluded),
+        "sourceRows": len(source_rows),
         "retainedRows": len(retained),
         "excludedAlreadyOpen": excluded,
         "ambiguousMatches": ambiguous,
