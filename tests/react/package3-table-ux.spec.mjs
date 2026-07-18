@@ -17,6 +17,7 @@ test('brands registry is scrollable, omits source and shows collision-safe objec
   await more.click();
   const popover = page.getByRole('dialog', { name: 'Все объекты бренда' });
   await expect(popover).toBeVisible();
+  await expect(popover).toBeFocused();
   const box = await popover.boundingBox();
   expect(box).not.toBeNull();
   expect(box.x).toBeGreaterThanOrEqual(0);
@@ -24,6 +25,9 @@ test('brands registry is scrollable, omits source and shows collision-safe objec
   const viewport = await page.evaluate(() => ({ width: document.documentElement.clientWidth, height: window.visualViewport?.height ?? window.innerHeight }));
   expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
   expect(box.y + box.height).toBeLessThanOrEqual(viewport.height + 1);
+  await page.keyboard.press('Escape');
+  await expect(popover).toHaveCount(0);
+  await expect(more).toBeFocused();
 });
 
 test('upcoming openings has search and consistent status labels', async ({ page }) => {
@@ -50,11 +54,19 @@ test('heatmap share mode uses a single visible contrast scale', async ({ page })
   expect(colors.length).toBeGreaterThan(2);
 });
 
-test('mobile tables use card layout without horizontal page overflow', async ({ page }, testInfo) => {
+test('mobile tables expose controls and avoid horizontal page overflow', async ({ page }, testInfo) => {
   test.skip(!testInfo.project.name.startsWith('mobile'));
   await page.goto('');
   await page.getByRole('navigation', { name: 'Основные разделы' }).getByRole('button', { name: 'Бренды' }).click();
   await expect(page.locator('.brand-table .registry-row').first()).toBeVisible();
-  const width = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+  let width = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+  expect(width.scroll).toBeLessThanOrEqual(width.client);
+
+  await page.getByRole('navigation', { name: 'Основные разделы' }).getByRole('button', { name: 'Скоро открытие' }).click();
+  const controls = page.getByLabel('Фильтры и сортировка скоро открытие');
+  await expect(controls).toBeVisible();
+  await expect(controls.getByText('Сортировка')).toBeVisible();
+  await expect(controls.getByRole('button', { name: 'ТЦ' })).toBeVisible();
+  width = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
   expect(width.scroll).toBeLessThanOrEqual(width.client);
 });
