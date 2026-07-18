@@ -21,6 +21,56 @@ const queryClient = new QueryClient({
   },
 });
 
+function startBuildWatcher() {
+  if (!window.location.hostname.endsWith('github.io')) return;
+
+  const basePath = '/tenant-mix-dashboard/';
+  let activeBuild: string | null = null;
+  let navigating = false;
+
+  const navigateWithCacheBust = (build?: string) => {
+    if (navigating) return;
+    navigating = true;
+    const url = new URL(basePath, window.location.origin);
+    url.searchParams.set(build ? 'build' : 'deployment', build ?? Date.now().toString());
+    window.location.replace(url.toString());
+  };
+
+  const checkBuild = async () => {
+    try {
+      const response = await fetch(`${basePath}build-info.json?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'cache-control': 'no-cache' },
+      });
+
+      if (!response.ok) {
+        if (activeBuild) navigateWithCacheBust();
+        return;
+      }
+
+      const info = await response.json() as { status?: string; build?: string };
+      if (info.status !== 'production' || !info.build) {
+        if (activeBuild) navigateWithCacheBust();
+        return;
+      }
+
+      if (!activeBuild) {
+        activeBuild = info.build;
+        return;
+      }
+
+      if (info.build !== activeBuild) navigateWithCacheBust(info.build);
+    } catch {
+      if (activeBuild) navigateWithCacheBust();
+    }
+  };
+
+  void checkBuild();
+  window.setInterval(() => void checkBuild(), 8000);
+}
+
+startBuildWatcher();
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
