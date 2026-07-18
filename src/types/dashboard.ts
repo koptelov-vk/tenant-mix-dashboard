@@ -117,6 +117,20 @@ export interface CategorySliceStats {
   rank: number | null;
 }
 
+export interface CategoryProfileStats {
+  category: string;
+  totalBrands: number;
+  exclusiveBrands: Set<string>;
+  exclusiveCount: number;
+  exactPercent: number | null;
+  displayPercent: number | null;
+  upcomingCount: number;
+  excludedUnknownCount: number;
+  excludedConflictingCount: number;
+  manualReviewCount: number;
+  qualityIssues: string[];
+}
+
 export interface UniquenessStats {
   global: Set<string>;
   group: Set<string>;
@@ -161,9 +175,11 @@ export interface AnalysisContext {
   peerMalls: MallSummary[];
   displayMalls: MallSummary[];
   focusMatchesPeerCriteria: boolean;
+  focusInSelectedGroup: boolean;
   filteredRows: TenantRow[];
   mallStats: MallSliceStats[];
   categoryStats: CategorySliceStats[];
+  categoryProfiles: CategoryProfileStats[];
   categories: string[];
   uniqueness: UniquenessStats;
   intersections: IntersectionStats;
