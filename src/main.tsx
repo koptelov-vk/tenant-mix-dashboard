@@ -14,6 +14,7 @@ import './styles/comparison-field.css';
 import './styles/package3-table-ux.css';
 import './styles/package3-final.css';
 import './styles/package4-methodology.css';
+import './styles/category-profile.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
