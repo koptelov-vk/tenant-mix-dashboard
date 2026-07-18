@@ -41,12 +41,22 @@ describe('category profile exclusivity', () => {
     expect(result.excludedConflictingCount).toBe(1);
   });
 
+  it('returns a confirmed zero when peers cover all focus brands', () => {
+    const rows = [row('A', 'Alpha'), row('A', 'Beta'), row('B', 'Alpha'), row('B', 'Beta')];
+    const result = buildCategoryProfiles(data(rows), rows, malls[0]!, [malls[1]!], ['Одежда'])[0]!;
+    expect(result.totalBrands).toBe(2);
+    expect(result.exclusiveCount).toBe(0);
+    expect(result.exactPercent).toBe(0);
+    expect(result.displayPercent).toBe(0);
+  });
+
   it('rounds only the displayed percentage and returns null for zero denominator', () => {
     const rows = [row('A', 'A'), row('A', 'B'), row('A', 'C'), row('B', 'C')];
     const result = buildCategoryProfiles(data(rows), rows, malls[0]!, [malls[1]!], ['Одежда'])[0]!;
     expect(result.exactPercent).toBeCloseTo(66.666, 2);
     expect(result.displayPercent).toBe(67);
     const empty = buildCategoryProfiles(data([]), [], malls[0]!, [malls[1]!], ['Обувь'])[0]!;
+    expect(empty.exclusiveCount).toBe(0);
     expect(empty.exactPercent).toBeNull();
     expect(empty.displayPercent).toBeNull();
   });
