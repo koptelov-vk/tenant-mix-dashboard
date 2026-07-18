@@ -9,8 +9,16 @@ const malls: MallSummary[] = [
 ];
 
 const row = (mall: string, brand: string, category = 'Одежда', rowStatus?: string, normalized = brand.toLowerCase(), confirmation?: string): TenantRow => ({
-  mall, city: 'НН', brand, brandNormalized: normalized, category, rowStatus, confirmation,
-  sourceUrl: 'https://example.com', sourceType: 'официальный сайт', sourceQuality: 'Высокая',
+  mall,
+  city: 'НН',
+  brand,
+  brandNormalized: normalized,
+  category,
+  sourceUrl: 'https://example.com',
+  sourceType: 'официальный сайт',
+  sourceQuality: 'Высокая',
+  ...(rowStatus !== undefined ? { rowStatus } : {}),
+  ...(confirmation !== undefined ? { confirmation } : {}),
 });
 
 const active = (mall: string, brand: string, category = 'Одежда', normalized = brand.toLowerCase()) => row(mall, brand, category, 'active', normalized);
