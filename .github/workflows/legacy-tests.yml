@@ -24,4 +24,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run legacy tests
-        run: pnpm test:legacy
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm test:legacy 2>&1 | tail -n 180
