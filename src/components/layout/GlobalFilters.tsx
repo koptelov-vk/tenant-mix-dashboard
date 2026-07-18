@@ -1,7 +1,8 @@
 import { Check, ChevronDown, Search, X } from 'lucide-react';
-import { type ReactNode, useId, useMemo, useState } from 'react';
+import { type ReactNode, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useDashboardStore } from '../../stores/dashboardStore';
+import { useExclusivePopover } from '../../hooks/useExclusivePopover';
 import type { AnalysisContext, DashboardData } from '../../types/dashboard';
 import { Button } from '../ui/Button';
 
@@ -59,7 +60,11 @@ function FilterSelect({ label, value, onChange, children }: { label: string; val
 function SearchableFilter({ label, options, selected, onChange, allLabel = 'Все', single = false }: { label: string; options: FilterOption[]; selected: string[]; onChange: (values: string[]) => void; allLabel?: string; single?: boolean }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const activePage = useDashboardStore((state) => state.activePage);
   const id = useId();
+  const { close } = useExclusivePopover({ open, setOpen, triggerRef, contentRef: popoverRef, dismissKey: activePage, onClose: () => setQuery('') });
   const selectedSet = new Set(selected);
   const filtered = options.filter((option) => `${option.label} ${option.meta ?? ''}`.toLocaleLowerCase('ru').includes(query.trim().toLocaleLowerCase('ru')));
   const summary = single
@@ -68,18 +73,17 @@ function SearchableFilter({ label, options, selected, onChange, allLabel = 'Вс
   const choose = (value: string) => {
     if (single) {
       onChange([value]);
-      setOpen(false);
-      setQuery('');
+      close(true);
       return;
     }
     onChange(selectedSet.has(value) ? selected.filter((item) => item !== value) : [...selected, value]);
   };
   return <div className="filter-field searchable-filter">
     <span className="filter-label" id={`${id}-label`}>{label}</span>
-    <button className="filter-control" type="button" aria-haspopup="listbox" aria-expanded={open} aria-labelledby={`${id}-label ${id}-value`} onClick={() => setOpen((value) => !value)}>
+    <button ref={triggerRef} className="filter-control" type="button" aria-haspopup="listbox" aria-expanded={open} aria-labelledby={`${id}-label ${id}-value`} onClick={() => setOpen((value) => !value)}>
       <span id={`${id}-value`}>{summary}</span><ChevronDown className="filter-control-icon-static" size={16} aria-hidden="true" />
     </button>
-    {open ? <div className="filter-popover" role="dialog" aria-label={`Выбор: ${label}`}>
+    {open ? <div ref={popoverRef} className="filter-popover" role="dialog" aria-label={`Выбор: ${label}`}>
       <label className="filter-popover-search"><Search size={15} aria-hidden="true" /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Поиск: ${label.toLocaleLowerCase('ru')}`} /></label>
       {!single ? <div className="filter-popover-tools"><button type="button" onClick={() => onChange([])}>{allLabel}</button><span>{selected.length ? `Выбрано: ${selected.length}` : 'Без ограничений'}</span></div> : null}
       <div className="filter-options" role="listbox" aria-multiselectable={!single}>
@@ -88,7 +92,7 @@ function SearchableFilter({ label, options, selected, onChange, allLabel = 'Вс
         </button>)}
         {!filtered.length ? <p className="filter-empty">Ничего не найдено</p> : null}
       </div>
-      <button className="filter-popover-close" type="button" onClick={() => { setOpen(false); setQuery(''); }}>Готово</button>
+      <button className="filter-popover-close" type="button" onClick={() => close(true)}>Готово</button>
     </div> : null}
   </div>;
 }
@@ -98,5 +102,5 @@ function MallSelector({ data, focusMall, selected, onClose, onApply }: { data: D
   const [draft, setDraft] = useState(selected.filter((mall) => mall !== focusMall));
   const malls = useMemo(() => data.mallSummary.filter((mall) => mall.mall !== focusMall && `${mall.mall} ${mall.city}`.toLocaleLowerCase('ru').includes(query.toLocaleLowerCase('ru'))).sort((a, b) => Number(draft.includes(b.mall)) - Number(draft.includes(a.mall)) || a.city.localeCompare(b.city, 'ru') || a.mall.localeCompare(b.mall, 'ru')), [data, focusMall, query, draft]);
   const toggleMall = (mall: string) => setDraft((current) => current.includes(mall) ? current.filter((item) => item !== mall) : [...current, mall]);
-  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className="comparison-selector" role="dialog" aria-modal="true" aria-labelledby="comparison-selector-title"><div className="selector-head"><div><span className="eyebrow">Группа сравнения</span><h2 id="comparison-selector-title">Выбор объектов</h2><p>Фокусный объект добавляется отдельно и не входит в медиану.</p></div><Button variant="ghost" onClick={onClose} aria-label="Закрыть"><X /></Button></div><label className="selector-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Поиск по ТЦ или городу" /></label><div className="selector-tools"><Button variant="outline" onClick={() => setDraft(data.mallSummary.filter((mall) => mall.mall !== focusMall).map((mall) => mall.mall))}>Выбрать все</Button><Button variant="ghost" onClick={() => setDraft([])}>Снять все</Button><span>Выбрано: {draft.length}</span></div><div className="selector-list">{malls.map((mall) => <label key={mall.mall} className={draft.includes(mall.mall) ? 'selected' : ''}><input type="checkbox" checked={draft.includes(mall.mall)} onChange={() => toggleMall(mall.mall)} /><span><b>{mallLabel(mall)}</b><small>{mall.mallClass}</small></span></label>)}</div><div className="selector-footer"><Button variant="outline" onClick={onClose}>Отмена</Button><Button onClick={() => onApply(draft)} disabled={!draft.length}>Применить</Button></div></section></div>;
+  return <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}><section className="comparison-selector" role="dialog" aria-modal="true" aria-labelledby="comparison-selector-title"><div className="selector-head"><div><span className="eyebrow">Группа сравнения</span><h2 id="comparison-selector-title">Выбор объектов</h2><p>Фокусный объект добавляется отдельно и не входит в медиану.</p></div><Button variant="ghost" onClick={onClose} aria-label="Закрыть"><X /></Button></div><label className="selector-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Поиск по объекту или городу" /></label><div className="selector-tools"><Button variant="outline" onClick={() => setDraft(data.mallSummary.filter((mall) => mall.mall !== focusMall).map((mall) => mall.mall))}>Выбрать все</Button><Button variant="ghost" onClick={() => setDraft([])}>Снять все</Button><span>Выбрано: {draft.length}</span></div><div className="selector-list">{malls.map((mall) => <label key={mall.mall} className={draft.includes(mall.mall) ? 'selected' : ''}><input type="checkbox" checked={draft.includes(mall.mall)} onChange={() => toggleMall(mall.mall)} /><span><b>{mallLabel(mall)}</b><small>{mall.mallClass}</small></span></label>)}</div><div className="selector-footer"><Button variant="outline" onClick={onClose}>Отмена</Button><Button onClick={() => onApply(draft)} disabled={!draft.length}>Применить</Button></div></section></div>;
 }
