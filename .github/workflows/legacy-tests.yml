@@ -26,5 +26,8 @@ jobs:
       - name: Run legacy tests
         shell: bash
         run: |
-          set -o pipefail
-          pnpm test:legacy 2>&1 | tail -n 180
+          set +e
+          pnpm test:legacy > legacy-test.log 2>&1
+          status=$?
+          tac legacy-test.log | head -n 180
+          exit $status
