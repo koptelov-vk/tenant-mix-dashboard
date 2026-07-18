@@ -89,6 +89,11 @@ class DataPipelineTests(unittest.TestCase):
             "excludedByCategory": dict(excluded_by_category),
             "aggregateImpactByMall": impact,
         }
+        Path("test-results").mkdir(exist_ok=True)
+        Path("test-results/product-01-status-audit.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
         print("PRODUCT_01_STATUS_AUDIT=" + json.dumps(report, ensure_ascii=False, sort_keys=True))
         self.assertEqual(status_counts["unknown"], self.payload["dataQuality"]["statusCounts"]["unknown"])
         self.assertEqual(field_coverage["neither"], self.payload["dataQuality"]["missingBothStatusFields"])
