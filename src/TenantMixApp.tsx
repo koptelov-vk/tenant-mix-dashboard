@@ -30,7 +30,7 @@ function Dashboard({ data, refreshing, refetch }: { data: NonNullable<ReturnType
   const [toast, setToast] = useState<string | null>(null);
   const refresh = async () => { await refetch(); setToast(`Данные обновлены: ${new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`); window.setTimeout(() => setToast(null), 2800); };
   return <div className="app-shell"><a className="skip-link" href="#main-content">Перейти к содержимому</a><AppHeader data={data} refreshing={refreshing} onRefresh={refresh} /><GlobalFilters data={data} context={context} /><main id="main-content" tabIndex={-1}><div className="pdf-only-heading"><div><h1>Tenant Mix Analytics</h1><p>Фокусный объект: {context.focusMall.mall}</p></div><small>Срез данных: {data.meta.snapshotDate}<br />Объектов в группе сравнения: {context.peerMalls.length}</small></div><Breadcrumbs context={context} snapshot={data.meta.snapshotDate} /><Suspense fallback={<PageSkeleton />}>
-    {activePage === 'overview' ? <OverviewPage context={context} /> : null}
+    {activePage === 'overview' ? <OverviewPage context={context} loading={refreshing} /> : null}
     {activePage === 'comparability' ? <ComparabilityPage context={context} data={data} /> : null}
     {activePage === 'categories' ? <CategoriesPage context={context} /> : null}
     {activePage === 'brands' ? <BrandsPage context={context} data={data} /> : null}
