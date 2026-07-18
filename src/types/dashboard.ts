@@ -70,6 +70,7 @@ export interface UpcomingOpening {
 export interface DataQualitySummary {
   snapshotDate: string;
   rows: number;
+  activeRows?: number;
   malls: number;
   brands: number;
   emptyBrands: number;
@@ -78,6 +79,9 @@ export interface DataQualitySummary {
   invalidUrls: number;
   mallsWithoutGla: number;
   manualReviewRows: number;
+  statusCounts?: Record<TenantStatus, number>;
+  missingBothStatusFields?: number;
+  excludedFromActiveAggregates?: number;
 }
 
 export interface DashboardData {
