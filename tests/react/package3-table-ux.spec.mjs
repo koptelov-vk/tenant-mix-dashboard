@@ -66,7 +66,7 @@ test('mobile tables expose controls and avoid horizontal page overflow', async (
   const controls = page.getByLabel('Фильтры и сортировка скоро открытие');
   await expect(controls).toBeVisible();
   await expect(controls.getByText('Сортировка')).toBeVisible();
-  await expect(controls.getByRole('button', { name: 'ТЦ' })).toBeVisible();
+  await expect(controls.getByLabel('Фильтр: ТЦ')).toBeVisible();
   width = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
   expect(width.scroll).toBeLessThanOrEqual(width.client);
 });
