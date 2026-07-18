@@ -36,6 +36,7 @@ export function useAnalysisContext(data: DashboardData) {
       glaMax: state.glaMax,
       gbaMin: state.gbaMin,
       gbaMax: state.gbaMax,
+      focusInSelectedGroup: constrainedPeers.includes(state.focusMall),
     });
     const focusMatchesFilterCriteria = focus != null
       && (!state.cities.length || state.cities.includes(focus.city))
