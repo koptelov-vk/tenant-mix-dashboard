@@ -10,8 +10,12 @@ export function PdfExportButton({ snapshotDate, iconOnly = false }: { snapshotDa
     const root = document.getElementById('main-content');
     if (!root || exporting) return;
     setExporting(true);
-    try { const { exportDashboardPdf } = await import('../../lib/export/pdf'); await exportDashboardPdf(root, { focusMall, snapshotDate }); }
-    finally { setExporting(false); }
+    try {
+      const { exportDashboardPdf } = await import('../../lib/export/pdf');
+      await exportDashboardPdf(root, { focusMall, snapshotDate });
+    } finally {
+      setExporting(false);
+    }
   };
   return <Button variant="ghost" onClick={() => void exportPdf()} disabled={exporting} aria-label={exporting ? 'Формируется PDF' : 'Скачать текущий анализ в PDF'} title="PDF">{exporting ? <LoaderCircle className="spin" size={17} aria-hidden="true" /> : <Download size={17} aria-hidden="true" />}{iconOnly ? null : <span className="desktop-label">PDF</span>}</Button>;
 }
