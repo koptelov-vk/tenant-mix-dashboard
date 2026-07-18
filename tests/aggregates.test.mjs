@@ -4,12 +4,21 @@ import fs from 'node:fs';
 
 const data = JSON.parse(fs.readFileSync('data/aggregates/dashboard_data.json', 'utf8'));
 
+const activeRows = data.rows.filter(row => row.statusNormalized === 'active');
+const activeBrands = new Set(activeRows.map(row => row.brandNormalized));
+
 test('aggregate contract is complete', () => {
   assert.equal(data.dataQuality.rows, 4996);
-  assert.equal(data.dataQuality.brands, 2577);
+  assert.equal(data.dataQuality.activeRows, activeRows.length);
+  assert.equal(data.dataQuality.brands, activeBrands.size);
+  assert.equal(data.dataQuality.brands, Object.keys(data.brandPresence).length);
   assert.equal(data.dataQuality.malls, 30);
   assert.equal(data.dataQuality.emptyBrands, 0);
   assert.equal(data.dataQuality.duplicateMallBrandPairs, 0);
+  assert.equal(
+    data.dataQuality.excludedFromActiveAggregates,
+    data.dataQuality.rows - data.dataQuality.activeRows,
+  );
 });
 
 test('GLA and GBA remain distinct and density only uses confirmed GLA', () => {
@@ -20,12 +29,19 @@ test('GLA and GBA remain distinct and density only uses confirmed GLA', () => {
   }
 });
 
-test('similarity uses Jaccard formula', () => {
-  const brands = mall => new Set(data.rows.filter(row => row.mall === mall).map(row => row.brandNormalized));
+test('similarity uses Jaccard formula for active brands only', () => {
+  const brands = mall => new Set(
+    activeRows
+      .filter(row => row.mall === mall)
+      .map(row => row.brandNormalized),
+  );
   const sample = data.mallSimilarity.find(item => item.focus === 'Фантастика' && item.mall === 'Небо');
+  assert.ok(sample, 'Фантастика / Небо similarity sample is required');
   const a = brands(sample.focus), b = brands(sample.mall);
   const intersection = [...a].filter(value => b.has(value)).length;
   const union = new Set([...a, ...b]).size;
+  assert.equal(sample.intersection, intersection);
+  assert.equal(sample.union, union);
   assert.ok(Math.abs(sample.jaccard - intersection / union) < 1e-12);
 });
 
