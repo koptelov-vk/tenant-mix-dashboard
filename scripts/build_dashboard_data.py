@@ -9,7 +9,6 @@ try:
 except ImportError:
     from build_aggregates import alias_key, build, canonical_brand, text, write_outputs
 
-
 UPCOMING_STATUS_ALIASES = {
     "скоро открытие": "Скоро открытие",
     "скоро откроется": "Скоро открытие",
@@ -35,6 +34,8 @@ def normalize_upcoming_status(value: object) -> str:
 def clean_upcoming(payload: dict) -> dict:
     active_by_mall: dict[str, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
     for row in payload.get("rows", []):
+        if row.get("statusNormalized") != "active":
+            continue
         mall = text(row.get("mall"))
         brand = text(row.get("brandNormalized") or row.get("brand"))
         key = brand_match_key(brand)
