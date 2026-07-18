@@ -3,22 +3,79 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const data = JSON.parse(fs.readFileSync('data/aggregates/dashboard_data.json', 'utf8'));
+const STATUSES = ['active', 'upcoming', 'closed', 'unknown', 'conflicting'];
+const pairKey = (mall, brand) => `${mall}\u0000${brand}`;
+const uniqueBrands = rows => new Set(rows.map(row => row.brandNormalized).filter(Boolean));
+const rowsForMall = (rows, mall) => rows.filter(row => row.mall === mall);
 
 const activeRows = data.rows.filter(row => row.statusNormalized === 'active');
-const activeBrands = new Set(activeRows.map(row => row.brandNormalized));
+const excludedRows = data.rows.filter(row => row.statusNormalized !== 'active');
+const activeBrands = uniqueBrands(activeRows);
+const computedStatusCounts = Object.fromEntries(
+  STATUSES.map(status => [status, data.rows.filter(row => row.statusNormalized === status).length]),
+);
+const activePairs = new Set(activeRows.map(row => pairKey(row.mall, row.brandNormalized)));
+const excludedOnlyPairs = new Set(
+  excludedRows
+    .map(row => pairKey(row.mall, row.brandNormalized))
+    .filter(key => !activePairs.has(key)),
+);
 
-test('aggregate contract is complete', () => {
-  assert.equal(data.dataQuality.rows, 4996);
+test('aggregate contract is complete and derived from canonical statuses', () => {
+  assert.equal(data.dataQuality.rows, data.rows.length);
   assert.equal(data.dataQuality.activeRows, activeRows.length);
-  assert.equal(data.dataQuality.brands, activeBrands.size);
-  assert.equal(data.dataQuality.brands, Object.keys(data.brandPresence).length);
-  assert.equal(data.dataQuality.malls, 30);
-  assert.equal(data.dataQuality.emptyBrands, 0);
-  assert.equal(data.dataQuality.duplicateMallBrandPairs, 0);
+  assert.equal(data.dataQuality.excludedFromActiveAggregates, excludedRows.length);
+  assert.equal(data.dataQuality.rows, activeRows.length + excludedRows.length);
+
+  assert.deepEqual(data.dataQuality.statusCounts, computedStatusCounts);
+  assert.equal(
+    Object.values(data.dataQuality.statusCounts).reduce((sum, value) => sum + value, 0),
+    data.dataQuality.rows,
+  );
   assert.equal(
     data.dataQuality.excludedFromActiveAggregates,
-    data.dataQuality.rows - data.dataQuality.activeRows,
+    computedStatusCounts.upcoming + computedStatusCounts.closed + computedStatusCounts.unknown + computedStatusCounts.conflicting,
   );
+
+  assert.equal(data.dataQuality.brands, activeBrands.size);
+  assert.equal(data.dataQuality.brands, Object.keys(data.brandPresence).length);
+  assert.deepEqual(new Set(Object.keys(data.brandPresence)), activeBrands);
+  assert.equal(data.dataQuality.malls, data.mallSummary.length);
+  assert.equal(data.dataQuality.emptyBrands, 0);
+  assert.equal(data.dataQuality.emptyNormalizedBrands, 0);
+  assert.equal(data.dataQuality.duplicateMallBrandPairs, 0);
+});
+
+test('brandPresence and tenant counts contain active mall-brand pairs only', () => {
+  for (const [brand, presence] of Object.entries(data.brandPresence)) {
+    const expectedMalls = [...new Set(activeRows.filter(row => row.brandNormalized === brand).map(row => row.mall))].sort();
+    assert.deepEqual([...presence.malls].sort(), expectedMalls, brand);
+    assert.equal(presence.mallCount, expectedMalls.length, brand);
+  }
+
+  for (const mall of data.mallSummary) {
+    const expectedBrands = uniqueBrands(rowsForMall(activeRows, mall.mall));
+    assert.equal(mall.brandCount, expectedBrands.size, mall.mall);
+    for (const key of excludedOnlyPairs) {
+      const [excludedMall, excludedBrand] = key.split('\u0000');
+      if (excludedMall === mall.mall) assert.equal(expectedBrands.has(excludedBrand), false, `${mall.mall}: ${excludedBrand}`);
+    }
+  }
+});
+
+test('unknown and conflicting rows never enter active tenant sets', () => {
+  assert.ok(computedStatusCounts.unknown + computedStatusCounts.conflicting > 0, 'quality-excluded status rows are required');
+
+  for (const row of data.rows.filter(item => item.statusNormalized === 'unknown' || item.statusNormalized === 'conflicting')) {
+    const key = pairKey(row.mall, row.brandNormalized);
+    if (!activePairs.has(key)) {
+      assert.equal(
+        uniqueBrands(rowsForMall(activeRows, row.mall)).has(row.brandNormalized),
+        false,
+        `${row.statusNormalized} row leaked into active set: ${row.mall} / ${row.brandNormalized}`,
+      );
+    }
+  }
 });
 
 test('GLA and GBA remain distinct and density only uses confirmed GLA', () => {
@@ -29,20 +86,25 @@ test('GLA and GBA remain distinct and density only uses confirmed GLA', () => {
   }
 });
 
-test('similarity uses Jaccard formula for active brands only', () => {
-  const brands = mall => new Set(
-    activeRows
-      .filter(row => row.mall === mall)
-      .map(row => row.brandNormalized),
-  );
+test('similarity intersection, union and Jaccard use active brands only', () => {
+  const brands = mall => uniqueBrands(rowsForMall(activeRows, mall));
   const sample = data.mallSimilarity.find(item => item.focus === 'Фантастика' && item.mall === 'Небо');
   assert.ok(sample, 'Фантастика / Небо similarity sample is required');
-  const a = brands(sample.focus), b = brands(sample.mall);
-  const intersection = [...a].filter(value => b.has(value)).length;
-  const union = new Set([...a, ...b]).size;
+
+  const focusBrands = brands(sample.focus);
+  const peerBrands = brands(sample.mall);
+  const intersection = [...focusBrands].filter(value => peerBrands.has(value)).length;
+  const union = new Set([...focusBrands, ...peerBrands]).size;
+
   assert.equal(sample.intersection, intersection);
   assert.equal(sample.union, union);
-  assert.ok(Math.abs(sample.jaccard - intersection / union) < 1e-12);
+  assert.equal(sample.jaccard, union ? intersection / union : 0);
+
+  for (const key of excludedOnlyPairs) {
+    const [mall, brand] = key.split('\u0000');
+    if (mall === sample.focus) assert.equal(focusBrands.has(brand), false, `excluded focus brand leaked: ${brand}`);
+    if (mall === sample.mall) assert.equal(peerBrands.has(brand), false, `excluded peer brand leaked: ${brand}`);
+  }
 });
 
 test('three uniqueness scopes are distinguishable', () => {
