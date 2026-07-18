@@ -44,7 +44,7 @@ test('Back and Forward restore the shared analysis state', async ({ page }) => {
   await navButton(page, 'Категории').click();
   await page.goBack();
   await expect(page.locator('.searchable-filter').filter({ hasText: 'Фокусный объект' }).getByRole('button')).toContainText('Небо');
-  await expect(navButton(page, 'Обзор')).toHaveAttribute('aria-current', 'page');
+  await expect(navButton(page, 'Сравнение')).toHaveAttribute('aria-current', 'page');
   await page.goForward();
   await expect(navButton(page, 'Категории')).toHaveAttribute('aria-current', 'page');
 });
@@ -77,13 +77,14 @@ test('overview gap threshold recalculates immediately and uses concise headings'
   await expect(page.getByText('Сходство брендов', { exact: true })).toHaveCount(0);
 });
 
-test('all sections open', async ({ page }) => {
+test('header navigation uses requested order and all sections open', async ({ page }) => {
   await page.goto('');
-  for (const [button, heading] of [['Сопоставимость', 'Сопоставимость объектов'], ['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Скоро открытие', 'Скоро открытие']]) {
+  await expect(page.locator('.navigation > button, .navigation > .nav-more > button')).toHaveText(['Сравнение', 'Категории', 'Бренды', 'Сопоставимость', 'Ещё']);
+  for (const [button, heading] of [['Категории', 'Категории'], ['Бренды', 'Бренды'], ['Сопоставимость', 'Сопоставимость объектов']]) {
     await navButton(page, button).click();
     await expect(page.getByRole('heading', { name: heading }).first()).toBeVisible();
   }
-  for (const [button, heading] of [['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
+  for (const [button, heading] of [['Скоро открытие', 'Скоро открытие'], ['Качество данных', 'Качество данных'], ['Динамика', 'Историческая динамика пока недоступна']]) {
     await page.getByRole('button', { name: 'Ещё', exact: true }).click();
     await page.getByRole('menuitem', { name: button }).click();
     await expect(page.getByRole('heading', { name: heading }).first()).toBeVisible();
@@ -181,7 +182,7 @@ test('saved view restores filters, focus and active section', async ({ page }) =
   await dialog.getByRole('button', { name: 'Сохранить' }).click();
   await dialog.getByRole('button', { name: 'Закрыть' }).click();
   await chooseFocus(page, 'Фантастика');
-  await navButton(page, 'Обзор').click();
+  await navButton(page, 'Сравнение').click();
   await page.getByRole('button', { name: 'Сохранённые представления' }).click();
   await page.getByRole('dialog', { name: 'Сохранённые представления' }).getByRole('button', { name: 'Открыть' }).click();
   await expect(page.locator('.searchable-filter').filter({ hasText: 'Фокусный объект' }).getByRole('button')).toContainText('Небо');
