@@ -34,8 +34,10 @@ test('upcoming openings has search and consistent status labels', async ({ page 
   await search.fill('Фантастика');
   const rows = page.locator('.upcoming-table tbody tr');
   await expect(rows.first()).toBeVisible();
-  expect(await rows.count()).toBeGreaterThan(0);
-  for (const row of await rows.all()) await expect(row).toContainText('Фантастика');
+  await expect.poll(async () => rows.count()).toBeGreaterThan(0);
+  const rowTexts = await rows.allTextContents();
+  expect(rowTexts.length).toBeGreaterThan(0);
+  expect(rowTexts.every((text) => text.includes('Фантастика'))).toBe(true);
   await expect(page.getByText('ожидается', { exact: true })).toHaveCount(0);
 });
 
