@@ -164,3 +164,50 @@ jobs:
         run: pnpm build
       - name: Run Lighthouse audit
         run: pnpm test:lighthouse
+
+  pr-quality-gate:
+    name: pr-quality-gate
+    needs: [changes, docs-only, data-quality, frontend-quality, browser-qa, lighthouse]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify applicable quality jobs
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+          DOCS_RESULT: ${{ needs.docs-only.result }}
+          DATA_RESULT: ${{ needs.data-quality.result }}
+          FRONTEND_RESULT: ${{ needs.frontend-quality.result }}
+          BROWSER_RESULT: ${{ needs.browser-qa.result }}
+          LIGHTHOUSE_RESULT: ${{ needs.lighthouse.result }}
+        run: |
+          set -euo pipefail
+
+          require_success() {
+            local job="$1"
+            local result="$2"
+            if [[ "$result" != "success" ]]; then
+              echo "::error::$job must succeed, got: $result"
+              exit 1
+            fi
+          }
+
+          require_success_or_skipped() {
+            local job="$1"
+            local result="$2"
+            case "$result" in
+              success|skipped) ;;
+              *)
+                echo "::error::$job must be success or skipped, got: $result"
+                exit 1
+                ;;
+            esac
+          }
+
+          require_success "changes" "$CHANGES_RESULT"
+          require_success_or_skipped "docs-only" "$DOCS_RESULT"
+          require_success_or_skipped "data-quality" "$DATA_RESULT"
+          require_success_or_skipped "frontend-quality" "$FRONTEND_RESULT"
+          require_success_or_skipped "browser-qa" "$BROWSER_RESULT"
+          require_success_or_skipped "lighthouse" "$LIGHTHOUSE_RESULT"
+
+          echo "All applicable quality jobs passed."
