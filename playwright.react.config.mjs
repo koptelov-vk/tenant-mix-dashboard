@@ -19,7 +19,7 @@ export default defineConfig({
   },
   webServer: { command: 'pnpm build && pnpm preview --host 127.0.0.1 --port 4174', port: 4174, reuseExistingServer: !process.env.CI, timeout: 120_000 },
   projects: [
-    { name: 'desktop-chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 768 } } },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], viewport: { width: 1366, height: 768 } } },
     { name: 'desktop-webkit', use: { ...devices['Desktop Safari'], viewport: { width: 1366, height: 768 } } },
     ...mobileViewports.flatMap((viewport) => [
       { name: `mobile-chromium-${viewport.width}`, use: { browserName: 'chromium', viewport, isMobile: true, hasTouch: true } },
