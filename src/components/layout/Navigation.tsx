@@ -7,9 +7,9 @@ const items: Array<{ id: DashboardPage; label: string; icon: LucideIcon }> = [
   { id: 'categories', label: 'Категории', icon: Grid3X3 },
   { id: 'brands', label: 'Бренды', icon: Store },
   { id: 'comparability', label: 'Сопоставимость', icon: Building2 },
+  { id: 'upcoming', label: 'Скоро открытие', icon: BarChart3 },
 ];
 const secondary: Array<{ id: DashboardPage; label: string; icon: LucideIcon }> = [
-  { id: 'upcoming', label: 'Скоро открытие', icon: BarChart3 },
   { id: 'quality', label: 'Качество данных', icon: Database },
   { id: 'history', label: 'Динамика', icon: History },
 ];
