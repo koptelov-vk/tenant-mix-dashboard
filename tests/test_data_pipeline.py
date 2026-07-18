@@ -65,6 +65,7 @@ class DataPipelineTests(unittest.TestCase):
 
     def test_status_coverage_audit(self):
         rows = self.payload["rows"]
+        active_rows = [row for row in rows if row["statusNormalized"] == "active"]
         status_counts = Counter(row["statusNormalized"] for row in rows)
         field_coverage = Counter(
             "both" if row["rowStatus"] and row["confirmation"]
@@ -75,19 +76,52 @@ class DataPipelineTests(unittest.TestCase):
         )
         excluded_by_mall = Counter(row["mall"] for row in rows if row["statusNormalized"] != "active")
         excluded_by_category = Counter(row["category"] for row in rows if row["statusNormalized"] != "active")
-        active_by_mall = Counter(row["mall"] for row in rows if row["statusNormalized"] == "active")
-        before_by_mall = Counter(row["mall"] for row in rows)
-        impact = {
-            mall: {"before": before_by_mall[mall], "after": active_by_mall[mall], "delta": active_by_mall[mall] - before_by_mall[mall]}
-            for mall in sorted(before_by_mall)
-        }
+
+        def build_presence(source_rows):
+            presence = defaultdict(set)
+            brands_by_mall = defaultdict(set)
+            quality_brands = set()
+            for row in source_rows:
+                brand = row["brandNormalized"]
+                mall = row["mall"]
+                presence[brand].add(mall)
+                brands_by_mall[mall].add(brand)
+                if row.get("sourceQuality") in {"Высокая", "Средняя"} and row.get("sourceUrl"):
+                    quality_brands.add(brand)
+            return presence, brands_by_mall, quality_brands
+
+        before_presence, before_brands_by_mall, before_quality_brands = build_presence(rows)
+        after_presence, after_brands_by_mall, after_quality_brands = build_presence(active_rows)
+        malls = sorted({mall["mall"] for mall in self.payload["mallSummary"]})
+
+        aggregate_impact = {}
+        for mall in malls:
+            before_brands = before_brands_by_mall[mall]
+            after_brands = after_brands_by_mall[mall]
+            before_exclusive = sum(len(before_presence[brand]) == 1 for brand in before_brands)
+            after_exclusive = sum(len(after_presence[brand]) == 1 for brand in after_brands)
+            before_intersection = sum(len(before_presence[brand]) > 1 for brand in before_brands)
+            after_intersection = sum(len(after_presence[brand]) > 1 for brand in after_brands)
+            before_recommendations = sum(brand not in before_brands for brand in before_quality_brands)
+            after_recommendations = len(self.payload["brandGaps"].get(mall, []))
+            aggregate_impact[mall] = {
+                "tenantCount": {"before": len(before_brands), "after": len(after_brands), "delta": len(after_brands) - len(before_brands)},
+                "exclusiveCount": {"before": before_exclusive, "after": after_exclusive, "delta": after_exclusive - before_exclusive},
+                "intersectionCount": {"before": before_intersection, "after": after_intersection, "delta": after_intersection - before_intersection},
+                "recommendationCount": {"before": before_recommendations, "after": after_recommendations, "delta": after_recommendations - before_recommendations},
+            }
+            summary = next(item for item in self.payload["mallSummary"] if item["mall"] == mall)
+            self.assertEqual(summary["brandCount"], len(after_brands))
+            self.assertEqual(summary["uniqueGlobalCount"], after_exclusive)
+            self.assertEqual(after_recommendations, sum(brand not in after_brands for brand in after_quality_brands))
+
         report = {
             "rows": len(rows),
             "fieldCoverage": dict(field_coverage),
             "statusCounts": dict(status_counts),
             "excludedByMall": dict(excluded_by_mall),
             "excludedByCategory": dict(excluded_by_category),
-            "aggregateImpactByMall": impact,
+            "aggregateImpactByMall": aggregate_impact,
         }
         Path("test-results").mkdir(exist_ok=True)
         Path("test-results/product-01-status-audit.json").write_text(
