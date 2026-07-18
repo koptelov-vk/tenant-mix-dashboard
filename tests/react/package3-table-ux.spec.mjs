@@ -12,18 +12,18 @@ test('brands registry is scrollable, omits source and shows collision-safe objec
   expect(['auto', 'scroll']).toContain(geometry.overflowY);
   expect(geometry.clientHeight).toBeGreaterThan(300);
 
-  const more = page.locator('.brand-mall-more').first();
-  if (await more.count()) {
-    await more.click();
-    const popover = page.getByRole('dialog', { name: 'Все объекты бренда' });
-    await expect(popover).toBeVisible();
-    const box = await popover.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box.x).toBeGreaterThanOrEqual(0);
-    expect(box.y).toBeGreaterThanOrEqual(0);
-    expect(box.x + box.width).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth + 1));
-    expect(box.y + box.height).toBeLessThanOrEqual(await page.evaluate(() => window.innerHeight + 1));
-  }
+  const more = page.locator('.brand-mall-more:visible').first();
+  await expect(more).toBeVisible();
+  await more.click();
+  const popover = page.getByRole('dialog', { name: 'Все объекты бренда' });
+  await expect(popover).toBeVisible();
+  const box = await popover.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  const viewport = await page.evaluate(() => ({ width: document.documentElement.clientWidth, height: window.visualViewport?.height ?? window.innerHeight }));
+  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
+  expect(box.y + box.height).toBeLessThanOrEqual(viewport.height + 1);
 });
 
 test('upcoming openings has search and consistent status labels', async ({ page }) => {
