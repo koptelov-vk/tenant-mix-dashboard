@@ -3,13 +3,16 @@ import { useEffect, useRef, useState } from 'react';
 import { useDashboardStore, type DashboardPage } from '../../stores/dashboardStore';
 
 const items: Array<{ id: DashboardPage; label: string; icon: LucideIcon }> = [
-  { id: 'overview', label: 'Обзор', icon: Sparkles },
-  { id: 'comparability', label: 'Сопоставимость', icon: Building2 },
+  { id: 'overview', label: 'Сравнение', icon: Sparkles },
   { id: 'categories', label: 'Категории', icon: Grid3X3 },
   { id: 'brands', label: 'Бренды', icon: Store },
-  { id: 'upcoming', label: 'Скоро открытие', icon: BarChart3 },
+  { id: 'comparability', label: 'Сопоставимость', icon: Building2 },
 ];
-const secondary: Array<{ id: DashboardPage; label: string; icon: LucideIcon }> = [{ id: 'quality', label: 'Качество данных', icon: Database }, { id: 'history', label: 'Динамика', icon: History }];
+const secondary: Array<{ id: DashboardPage; label: string; icon: LucideIcon }> = [
+  { id: 'upcoming', label: 'Скоро открытие', icon: BarChart3 },
+  { id: 'quality', label: 'Качество данных', icon: Database },
+  { id: 'history', label: 'Динамика', icon: History },
+];
 
 export function Navigation() {
   const activePage = useDashboardStore((state) => state.activePage);
