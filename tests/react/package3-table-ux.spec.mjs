@@ -1,0 +1,55 @@
+import { expect, test } from '@playwright/test';
+
+test('brands registry is scrollable, omits source and shows collision-safe object popover', async ({ page }) => {
+  await page.goto('');
+  await page.getByRole('navigation', { name: 'Основные разделы' }).getByRole('button', { name: 'Бренды' }).click();
+  const table = page.getByRole('table', { name: 'Реестр нормализованных брендов' });
+  await expect(table).toBeVisible();
+  await expect(table.getByRole('columnheader', { name: /Источник/ })).toHaveCount(0);
+  const scroller = page.locator('.brand-table .virtual-list');
+  await expect(scroller).toBeVisible();
+  const geometry = await scroller.evaluate((element) => ({ clientHeight: element.clientHeight, scrollHeight: element.scrollHeight, overflowY: getComputedStyle(element).overflowY }));
+  expect(['auto', 'scroll']).toContain(geometry.overflowY);
+  expect(geometry.clientHeight).toBeGreaterThan(300);
+
+  const more = page.locator('.brand-mall-more').first();
+  if (await more.count()) {
+    await more.click();
+    const popover = page.getByRole('dialog', { name: 'Все объекты бренда' });
+    await expect(popover).toBeVisible();
+    const box = await popover.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth + 1));
+    expect(box.y + box.height).toBeLessThanOrEqual(await page.evaluate(() => window.innerHeight + 1));
+  }
+});
+
+test('upcoming openings has search and consistent status labels', async ({ page }) => {
+  await page.goto('');
+  await page.getByRole('navigation', { name: 'Основные разделы' }).getByRole('button', { name: 'Скоро открытие' }).click();
+  const search = page.getByRole('textbox', { name: 'Поиск в таблице скоро открытие' });
+  await expect(search).toBeVisible();
+  await search.fill('Фантастика');
+  await expect(page.locator('.upcoming-table tbody tr')).toHaveCount(2);
+  await expect(page.getByText('ожидается', { exact: true })).toHaveCount(0);
+});
+
+test('heatmap share mode uses a single visible contrast scale', async ({ page }) => {
+  await page.goto('');
+  await page.getByRole('navigation', { name: 'Основные разделы' }).getByRole('button', { name: 'Категории' }).click();
+  await page.getByRole('button', { name: 'Доля' }).click();
+  await expect(page.locator('.heatmap-legend')).toContainText('Единая шкала');
+  const colors = await page.locator('.category-heatmap-desktop .heatmap tbody td').evaluateAll((cells) => [...new Set(cells.map((cell) => getComputedStyle(cell).backgroundColor))]);
+  expect(colors.length).toBeGreaterThan(2);
+});
+
+test('mobile tables use card layout without horizontal page overflow', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.startsWith('mobile'));
+  await page.goto('');
+  await page.getByRole('navigation', { name: 'Основные разделы' }).getByRole('button', { name: 'Бренды' }).click();
+  await expect(page.locator('.brand-table .registry-row').first()).toBeVisible();
+  const width = await page.evaluate(() => ({ client: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+  expect(width.scroll).toBeLessThanOrEqual(width.client);
+});
