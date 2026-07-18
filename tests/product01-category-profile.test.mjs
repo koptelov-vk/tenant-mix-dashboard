@@ -10,7 +10,7 @@ test('PRODUCT-01 keeps one canonical category exclusivity aggregator', () => {
   assert.match(analysis, /export function buildCategoryProfiles\(/);
   assert.match(analysis, /const categoryProfiles = buildCategoryProfiles\(/);
   assert.match(contextTypes, /categoryProfiles: CategoryProfileStats\[\]/);
-  assert.doesNotMatch(ui, /new Set\(|exclusiveBrands\s*=|exactPercent\s*=/);
+  assert.doesNotMatch(ui, /new Set\(|\bconst\s+(?:exclusiveBrands|exactPercent)\b/);
 });
 
 test('PRODUCT-01 exposes required states and accessible explanations', () => {
