@@ -194,8 +194,9 @@ test('saved view restores filters, focus and active section', async ({ page }) =
 test('PDF export downloads a valid current-analysis document', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop');
   await page.goto('?focus=Фантастика&tab=overview');
+  await page.getByRole('button', { name: 'Экспорт текущего среза' }).click();
   const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Скачать текущий анализ в PDF' }).click();
+  await page.getByRole('dialog', { name: 'Экспорт текущего среза' }).getByRole('button', { name: 'Скачать текущий анализ в PDF' }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe('tenant-mix-фантастика-2026-07-16.pdf');
   const path = await download.path();
