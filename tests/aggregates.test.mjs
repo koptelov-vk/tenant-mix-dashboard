@@ -46,13 +46,19 @@ test('group uniqueness changes with the selected comparison set', () => {
   assert.notEqual(small, large);
 });
 
-test('publication workflow shows maintenance before quality and restores on failure', () => {
+test('publication workflow validates first and performs one atomic production deploy', () => {
   const workflow = fs.readFileSync('.github/workflows/pages.yml', 'utf8');
-  assert.match(workflow, /maintenance:\s+[\s\S]*Publish maintenance page/);
-  assert.match(workflow, /quality:\s+[\s\S]*needs: maintenance/);
-  assert.match(workflow, /deploy:\s+[\s\S]*needs: quality/);
-  assert.match(workflow, /restore-previous:\s+[\s\S]*needs: \[maintenance, quality\]/);
-  assert.match(workflow, /github\.event\.before/);
-  assert.match(workflow, /Validate source data/);
-  assert.match(workflow, /Desktop, mobile and accessibility tests/);
+  const qualityJob = workflow.indexOf('\n  quality:');
+  const deployJob = workflow.indexOf('\n  deploy:');
+
+  assert.ok(qualityJob >= 0, 'quality job is required');
+  assert.ok(deployJob > qualityJob, 'deploy must run after quality');
+  assert.equal(workflow.includes('\n  maintenance:'), false, 'maintenance deploy must not exist');
+  assert.equal(workflow.includes('\n  restore-previous:'), false, 'rollback rebuild must not exist');
+  assert.ok(workflow.includes('Validate production artifact'));
+  assert.ok(workflow.includes('Revalidate downloaded production artifact'));
+  assert.ok(workflow.includes('needs: quality'));
+  assert.ok(workflow.includes('Deploy verified dashboard once'));
+  assert.equal((workflow.match(/actions\/deploy-pages@v4/g) || []).length, 1);
+  assert.ok(workflow.includes('Desktop, mobile and accessibility tests'));
 });

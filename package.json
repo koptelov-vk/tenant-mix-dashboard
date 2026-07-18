@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "validate:data": "python scripts/validate_data.py",
+    "validate:artifact": "node scripts/validate_production_artifact.mjs",
     "build:aggregates": "python scripts/build_dashboard_data.py",
     "build:legacy": "python scripts/build_dashboard_v2.py",
     "test": "vitest run",

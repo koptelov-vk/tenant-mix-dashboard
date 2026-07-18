@@ -11,7 +11,6 @@ function copyDashboardData(): Plugin {
       const target = resolve('dist/data');
       mkdirSync(target, { recursive: true });
       cpSync(resolve('data/aggregates/dashboard_data.json'), resolve(target, 'dashboard_data.json'));
-      cpSync(resolve('dist/index-react.html'), resolve('dist/index.html'));
       writeFileSync(resolve('dist/build-info.json'), JSON.stringify({
         status: 'production',
         build: process.env.GITHUB_SHA ?? process.env.VITE_BUILD_SHA ?? `local-${Date.now()}`,
@@ -29,9 +28,6 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: true,
-    rollupOptions: {
-      input: { index: resolve('index-react.html') },
-    },
   },
   test: {
     include: ['src/**/*.test.{ts,tsx}'],
