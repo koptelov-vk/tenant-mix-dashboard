@@ -46,13 +46,14 @@ test('group uniqueness changes with the selected comparison set', () => {
   assert.notEqual(small, large);
 });
 
-test('publication workflow shows maintenance before quality and restores on failure', () => {
+test('publication workflow validates first and performs one atomic production deploy', () => {
   const workflow = fs.readFileSync('.github/workflows/pages.yml', 'utf8');
-  assert.match(workflow, /maintenance:\s+[\s\S]*Publish maintenance page/);
-  assert.match(workflow, /quality:\s+[\s\S]*needs: maintenance/);
+  assert.doesNotMatch(workflow, /^\s{2}maintenance:/m);
+  assert.doesNotMatch(workflow, /^\s{2}restore-previous:/m);
+  assert.match(workflow, /quality:\s+[\s\S]*Validate source data/);
+  assert.match(workflow, /quality:\s+[\s\S]*Verify production artifact contains only current app/);
   assert.match(workflow, /deploy:\s+[\s\S]*needs: quality/);
-  assert.match(workflow, /restore-previous:\s+[\s\S]*needs: \[maintenance, quality\]/);
-  assert.match(workflow, /github\.event\.before/);
-  assert.match(workflow, /Validate source data/);
+  assert.match(workflow, /deploy:\s+[\s\S]*Deploy verified dashboard/);
+  assert.equal((workflow.match(/uses: actions\/deploy-pages@v4/g) || []).length, 1);
   assert.match(workflow, /Desktop, mobile and accessibility tests/);
 });
