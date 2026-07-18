@@ -64,7 +64,7 @@ jobs:
       - name: Validate source data
         run: python scripts/validate_data.py
       - name: Build normalized aggregates
-        run: python scripts/build_aggregates.py
+        run: pnpm build:aggregates
       - name: Test data pipeline
         run: pnpm test:data
       - name: Validate legacy aggregate contract
@@ -148,7 +148,7 @@ jobs:
         run: |
           pip install -r requirements.txt
           pnpm install --frozen-lockfile
-          python scripts/build_aggregates.py
+          pnpm build:aggregates
           pnpm build
       - name: Upload rollback Pages artifact
         uses: actions/upload-pages-artifact@v3
