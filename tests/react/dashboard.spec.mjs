@@ -157,8 +157,14 @@ test('brand registry aggregates brands and opens the brand card', async ({ page 
   if (testInfo.project.name !== 'desktop') await expect(page.locator('.brand-table .registry-head')).toBeHidden();
 });
 
-test('upcoming openings provide sortable filters in every column header', async ({ page }) => {
+test('upcoming openings expose desktop column controls and mobile card search', async ({ page }, testInfo) => {
   await page.goto('?tab=upcoming');
+  if (testInfo.project.name.startsWith('mobile')) {
+    await expect(page.locator('.upcoming-table thead')).toBeHidden();
+    await expect(page.getByRole('textbox', { name: 'Поиск в таблице скоро открытие' })).toBeVisible();
+    await expect(page.locator('.upcoming-table tbody tr').first()).toBeVisible();
+    return;
+  }
   await expect(page.locator('.upcoming-table thead .registry-filter-header')).toHaveCount(8);
   const sortHeader = page.locator('.upcoming-table thead').getByRole('button', { name: 'Бренд', exact: true });
   await sortHeader.click();
