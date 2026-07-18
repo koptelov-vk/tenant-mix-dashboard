@@ -1,0 +1,48 @@
+.upcoming-mobile-controls {
+  display: none;
+}
+
+.brand-mall-popover:focus {
+  outline: 3px solid rgba(16, 185, 129, 0.35);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  .upcoming-mobile-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    padding: 0 10px 10px;
+  }
+
+  .upcoming-mobile-controls > label {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .upcoming-mobile-controls > label > span {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .upcoming-mobile-controls select,
+  .upcoming-mobile-controls button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+  }
+
+  .upcoming-mobile-controls .multi-filter {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .upcoming-mobile-controls {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,6 +1,6 @@
 import { Download, FileSpreadsheet, Search, X } from 'lucide-react';
 import fuzzysort from 'fuzzysort';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { AnalysisContext, DashboardData } from '../types/dashboard';
@@ -71,10 +71,15 @@ function MallList({ malls }: { malls: string[] }) {
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
+  const popoverId = useId();
   const visible = malls.slice(0, 3);
-  const close = () => setAnchor(null);
+  const close = (restoreFocus = false) => {
+    setAnchor(null);
+    if (restoreFocus) requestAnimationFrame(() => buttonRef.current?.focus());
+  };
   useEffect(() => {
     if (!anchor) return;
+    requestAnimationFrame(() => popoverRef.current?.focus());
     const reposition = () => {
       const rect = buttonRef.current?.getBoundingClientRect();
       if (rect) setAnchor(rect); else close();
@@ -84,12 +89,18 @@ function MallList({ malls }: { malls: string[] }) {
       if (buttonRef.current?.contains(event.target) || popoverRef.current?.contains(event.target)) return;
       close();
     };
+    const keyboard = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      close(true);
+    };
     window.addEventListener('resize', reposition);
     window.addEventListener('scroll', reposition, true);
     document.addEventListener('pointerdown', dismiss);
-    return () => { window.removeEventListener('resize', reposition); window.removeEventListener('scroll', reposition, true); document.removeEventListener('pointerdown', dismiss); };
+    document.addEventListener('keydown', keyboard);
+    return () => { window.removeEventListener('resize', reposition); window.removeEventListener('scroll', reposition, true); document.removeEventListener('pointerdown', dismiss); document.removeEventListener('keydown', keyboard); };
   }, [anchor]);
-  return <span className="brand-mall-list"><span>{visible.join('; ')}</span>{malls.length > visible.length ? <button ref={buttonRef} type="button" className="brand-mall-more" aria-expanded={Boolean(anchor)} onClick={() => setAnchor((current) => current ? null : buttonRef.current?.getBoundingClientRect() ?? null)}>Ещё {malls.length - visible.length}</button> : null}{anchor ? createPortal(<div ref={popoverRef} className="brand-mall-popover" role="dialog" aria-label="Все объекты бренда" style={popoverPosition(anchor)}><strong>Объекты присутствия</strong><ul>{malls.map((mall) => <li key={mall}>{mall}</li>)}</ul></div>, document.body) : null}</span>;
+  return <span className="brand-mall-list"><span>{visible.join('; ')}</span>{malls.length > visible.length ? <button ref={buttonRef} type="button" className="brand-mall-more" aria-expanded={Boolean(anchor)} aria-controls={anchor ? popoverId : undefined} onClick={() => setAnchor((current) => current ? null : buttonRef.current?.getBoundingClientRect() ?? null)}>Ещё {malls.length - visible.length}</button> : null}{anchor ? createPortal(<div id={popoverId} ref={popoverRef} className="brand-mall-popover" role="dialog" aria-modal="false" aria-label="Все объекты бренда" tabIndex={-1} style={popoverPosition(anchor)}><strong>Объекты присутствия</strong><ul>{malls.map((mall) => <li key={mall}>{mall}</li>)}</ul></div>, document.body) : null}</span>;
 }
 
 function popoverPosition(anchor: DOMRect) {

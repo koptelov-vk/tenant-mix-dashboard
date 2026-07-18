@@ -12,6 +12,7 @@ import './styles/tooltip.css';
 import './styles/category-heatmap.css';
 import './styles/comparison-field.css';
 import './styles/package3-table-ux.css';
+import './styles/package3-final.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
