@@ -3,7 +3,7 @@ import type { BrandTableRow } from '../brandTable';
 import { CHARACTERISTIC_LABELS } from '../brandTable';
 import { csvCell } from '../utils';
 
-const headers = ['ТЦ', 'Город', 'Бренд', 'Нормализованный бренд', 'Категория', 'Тип источника', 'Качество источника', 'Дата проверки', 'Источник'];
+const headers = ['Объект', 'Город', 'Бренд', 'Нормализованный бренд', 'Категория', 'Тип источника', 'Качество источника', 'Дата проверки', 'Источник'];
 const values = (row: TenantRow) => [row.mall, row.city, row.brand, row.brandNormalized, row.category, row.sourceType, row.sourceQuality ?? '', row.checkedAt ?? '', row.sourceUrl];
 
 export function rowsToCsv(rows: TenantRow[]) {
