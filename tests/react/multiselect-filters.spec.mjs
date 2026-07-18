@@ -26,6 +26,52 @@ test('geography and categories support searchable multiple selection', async ({ 
   await expect.poll(() => new URL(page.url()).searchParams.get('categories')).toContain('Одежда');
 });
 
+test('mobile filter sheet stays below the header and restores viewport width', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.startsWith('mobile'));
+  await page.goto('');
+  const initial = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    viewportWidth: window.visualViewport?.width ?? window.innerWidth,
+    scale: window.visualViewport?.scale ?? 1,
+  }));
+
+  await page.getByRole('button', { name: /География Все города/ }).click();
+  const sheet = page.getByRole('dialog', { name: 'Выбор: География' });
+  const search = sheet.getByPlaceholder('Поиск: география');
+  await expect(sheet).toBeVisible();
+  await expect(search).toHaveCSS('font-size', '16px');
+
+  const geometry = await page.evaluate(() => {
+    const header = document.querySelector('.app-header');
+    const dialog = document.querySelector('.filter-popover');
+    if (!(header instanceof HTMLElement) || !(dialog instanceof HTMLElement)) return null;
+    return {
+      headerBottom: header.getBoundingClientRect().bottom,
+      dialogTop: dialog.getBoundingClientRect().top,
+      firstOptionTop: dialog.querySelector('[role="option"]')?.getBoundingClientRect().top ?? 0,
+    };
+  });
+  expect(geometry).not.toBeNull();
+  expect(geometry.dialogTop).toBeGreaterThanOrEqual(geometry.headerBottom - 1);
+  expect(geometry.firstOptionTop).toBeGreaterThanOrEqual(geometry.dialogTop);
+
+  await search.fill('Москва');
+  await sheet.getByRole('button', { name: 'Готово' }).click();
+  await expect(sheet).toHaveCount(0);
+
+  const restored = await page.evaluate(() => ({
+    clientWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    viewportWidth: window.visualViewport?.width ?? window.innerWidth,
+    scale: window.visualViewport?.scale ?? 1,
+  }));
+  expect(restored.scrollWidth).toBeLessThanOrEqual(restored.clientWidth);
+  expect(Math.abs(restored.clientWidth - initial.clientWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(restored.viewportWidth - initial.viewportWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(restored.scale - initial.scale)).toBeLessThanOrEqual(0.01);
+});
+
 test('focus selector includes city and supports search', async ({ page }) => {
   await page.goto('');
   await page.getByRole('button', { name: /Фокусный объект/ }).click();
