@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { Button } from '../ui/Button';
 
-export function PdfExportButton({ snapshotDate }: { snapshotDate: string }) {
+export function PdfExportButton({ snapshotDate, iconOnly = false }: { snapshotDate: string; iconOnly?: boolean }) {
   const [exporting, setExporting] = useState(false);
   const focusMall = useDashboardStore((state) => state.focusMall);
   const exportPdf = async () => {
@@ -17,5 +17,5 @@ export function PdfExportButton({ snapshotDate }: { snapshotDate: string }) {
       setExporting(false);
     }
   };
-  return <Button variant="ghost" onClick={() => void exportPdf()} disabled={exporting} aria-label={exporting ? 'Формируется PDF' : 'Скачать текущий анализ в PDF'}>{exporting ? <LoaderCircle className="spin" size={17} /> : <Download size={17} />}<span className="desktop-label">PDF</span></Button>;
+  return <Button variant="ghost" onClick={() => void exportPdf()} disabled={exporting} aria-label={exporting ? 'Формируется PDF' : 'Скачать текущий анализ в PDF'} title="PDF">{exporting ? <LoaderCircle className="spin" size={17} aria-hidden="true" /> : <Download size={17} aria-hidden="true" />}{iconOnly ? null : <span className="desktop-label">PDF</span>}</Button>;
 }
