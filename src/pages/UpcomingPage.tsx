@@ -1,5 +1,5 @@
 import { differenceInCalendarDays, parseISO } from 'date-fns';
-import { ExternalLink, RotateCcw } from 'lucide-react';
+import { ExternalLink, RotateCcw, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { AnalysisContext, DashboardData, UpcomingOpening } from '../types/dashboard';
 import { Badge } from '../components/ui/Badge';
@@ -7,11 +7,12 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { TableColumnHeader } from '../components/ui/TableColumnHeader';
 import { matchesFilter, uniqueOptions } from '../components/ui/MultiFilter';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 
 const status = (plannedDate: string, explicit: string) => {
-  if (!plannedDate) return explicit || 'анонсировано';
+  if (!plannedDate) return explicit || 'Скоро открытие';
   const days = differenceInCalendarDays(parseISO(plannedDate), new Date());
-  return days < 0 ? 'срок прошёл — требуется проверка' : 'ожидается';
+  return days < 0 ? 'Срок прошёл — требуется проверка' : 'Скоро открытие';
 };
 
 type UpcomingRow = UpcomingOpening & { currentStatus: string };
@@ -21,19 +22,22 @@ const headers: Array<[SortKey, string]> = [['mall', 'ТЦ'], ['brand', 'Брен
 export default function UpcomingPage({ context, data }: { context: AnalysisContext; data: DashboardData }) {
   const malls = new Set(context.displayMalls.map((mall) => mall.mall));
   const baseRows = useMemo<UpcomingRow[]>(() => data.upcoming.filter((item) => malls.has(item.mall)).map((item) => ({ ...item, currentStatus: status(item.plannedDate, item.status) })), [data.upcoming, context.displayMalls]);
+  const [search, setSearch] = useState('');
+  const debounced = useDebouncedValue(search);
   const [filters, setFilters] = useState<Record<SortKey, string[]>>(createEmptyFilters);
   const [sort, setSort] = useState<{ key: SortKey; direction: 'asc' | 'desc' }>({ key: 'mall', direction: 'asc' });
   const options = useMemo(() => Object.fromEntries(headers.map(([key]) => [key, uniqueOptions(baseRows.map((item) => valueFor(item, key)))])) as Record<SortKey, string[]>, [baseRows]);
   const rows = useMemo(() => baseRows
+    .filter((item) => !debounced.trim() || [item.mall, item.brand, item.category, item.currentStatus, item.comment].join(' ').toLocaleLowerCase('ru').includes(debounced.trim().toLocaleLowerCase('ru')))
     .filter((item) => headers.every(([key]) => matchesFilter(filters[key], valueFor(item, key))))
-    .sort((left, right) => compareText(valueFor(left, sort.key), valueFor(right, sort.key), sort.direction)), [baseRows, filters, sort]);
+    .sort((left, right) => compareText(valueFor(left, sort.key), valueFor(right, sort.key), sort.direction)), [baseRows, debounced, filters, sort]);
   const activeFilters = Object.values(filters).filter((value) => value.length).length;
   const setColumnFilter = (key: SortKey, value: string[]) => setFilters((current) => ({ ...current, [key]: value }));
   const toggleSort = (key: SortKey) => setSort((current) => current.key === key ? { key, direction: current.direction === 'asc' ? 'desc' : 'asc' } : { key, direction: 'asc' });
-  const reset = () => { setFilters(createEmptyFilters()); setSort({ key: 'mall', direction: 'asc' }); };
+  const reset = () => { setSearch(''); setFilters(createEmptyFilters()); setSort({ key: 'mall', direction: 'asc' }); };
 
   return <><div className="page-heading"><div><h1>Скоро открытие</h1><p>{rows.length} из {baseRows.length} подтверждённых анонсов в текущем срезе. Просроченная плановая дата не означает автоматическое открытие.</p></div></div>
-    <Card className="upcoming-panel unified-table-panel"><div className="table-meta-bar"><span><strong>{rows.length}</strong> из {baseRows.length} анонсов</span>{activeFilters || sort.key !== 'mall' || sort.direction !== 'asc' ? <Button variant="ghost" onClick={reset}><RotateCcw size={16} />Сбросить</Button> : null}</div><div className="table-scroll"><table className="data-table upcoming-table unified-table"><caption className="sr-only">Анонсы будущих открытий по текущему срезу</caption><thead><tr>{headers.map(([key, label]) => <th key={key} aria-sort={sort.key === key ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}><TableColumnHeader label={label} direction={sort.key === key ? sort.direction : null} onSort={() => toggleSort(key)} options={options[key]} filterValue={filters[key]} onFilterChange={(value) => setColumnFilter(key, value)} /></th>)}</tr></thead><tbody>{rows.map((item) => <tr key={`${item.mall}-${item.brand}-${item.sourceUrl}`}><td>{item.mall}</td><th>{item.brand}</th><td>{item.category}</td><td>{item.announcementDate || 'н/д'}</td><td>{item.plannedDate || 'н/д'}</td><td>{item.checkedAt || 'н/д'}</td><td><Badge tone={item.currentStatus.includes('требуется') ? 'warning' : 'info'}>{item.currentStatus}</Badge></td><td>{item.sourceUrl ? <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer">Источник <ExternalLink size={14} /></a> : 'Без ссылки'}</td></tr>)}</tbody></table></div>{!rows.length ? <p className="empty-state">По выбранным фильтрам анонсы не найдены.</p> : null}</Card></>;
+    <Card className="upcoming-panel unified-table-panel"><div className="registry-toolbar upcoming-toolbar"><label className="search-field"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Поиск по ТЦ, бренду, категории или статусу" aria-label="Поиск в таблице скоро открытие" />{search ? <button onClick={() => setSearch('')} aria-label="Очистить поиск"><X size={16} /></button> : null}</label><span className="registry-result-count" role="status" aria-live="polite"><strong>{rows.length}</strong> анонсов</span></div><div className="table-meta-bar"><span><strong>{rows.length}</strong> из {baseRows.length} анонсов</span>{activeFilters || search || sort.key !== 'mall' || sort.direction !== 'asc' ? <Button variant="ghost" onClick={reset}><RotateCcw size={16} />Сбросить</Button> : null}</div><div className="table-scroll upcoming-table-scroll"><table className="data-table upcoming-table unified-table"><caption className="sr-only">Анонсы будущих открытий по текущему срезу</caption><thead><tr>{headers.map(([key, label]) => <th key={key} aria-sort={sort.key === key ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}><TableColumnHeader label={label} direction={sort.key === key ? sort.direction : null} onSort={() => toggleSort(key)} options={options[key]} filterValue={filters[key]} onFilterChange={(value) => setColumnFilter(key, value)} /></th>)}</tr></thead><tbody>{rows.map((item) => <tr key={`${item.mall}-${item.brand}-${item.sourceUrl}`}><td data-label="ТЦ">{item.mall}</td><th data-label="Бренд">{item.brand}</th><td data-label="Категория">{item.category}</td><td data-label="Публикация">{item.announcementDate || 'н/д'}</td><td data-label="Плановая дата">{item.plannedDate || 'н/д'}</td><td data-label="Проверено">{item.checkedAt || 'н/д'}</td><td data-label="Статус"><Badge tone={item.currentStatus.includes('требуется') || item.currentStatus.includes('Требуется') ? 'warning' : 'info'}>{item.currentStatus}</Badge></td><td data-label="Источник">{item.sourceUrl ? <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer">Источник <ExternalLink size={14} /></a> : 'Без ссылки'}</td></tr>)}</tbody></table></div>{!rows.length ? <p className="empty-state">По выбранным фильтрам анонсы не найдены.</p> : null}</Card></>;
 }
 
 function createEmptyFilters() { return headers.reduce((result, [key]) => { result[key] = []; return result; }, {} as Record<SortKey, string[]>); }
