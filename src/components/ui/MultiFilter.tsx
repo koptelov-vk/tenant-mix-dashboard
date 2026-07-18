@@ -1,6 +1,8 @@
 import { Filter, Search, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { useDashboardStore } from '../../stores/dashboardStore';
+import { useExclusivePopover } from '../../hooks/useExclusivePopover';
 
 export const EMPTY_FILTER = '__EMPTY_FILTER__';
 
@@ -15,10 +17,13 @@ interface MultiFilterProps {
 
 export function MultiFilter({ label, options, value, onChange, variant = 'toolbar', align = 'left' }: MultiFilterProps) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [menuStyle, setMenuStyle] = useState<CSSProperties>();
+  const activePage = useDashboardStore((state) => state.activePage);
+  const { close } = useExclusivePopover({ open, setOpen, triggerRef, contentRef: menuRef, dismissKey: activePage, onClose: () => setQuery('') });
   const filteredOptions = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase('ru');
     return normalized ? options.filter((option) => option.toLocaleLowerCase('ru').includes(normalized)) : options;
@@ -40,22 +45,10 @@ export function MultiFilter({ label, options, value, onChange, variant = 'toolba
   useEffect(() => {
     if (!open) return;
     positionMenu();
-    const close = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (!detailsRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setOpen(false);
-        detailsRef.current?.querySelector('summary')?.focus();
-      }
-    };
     const reposition = () => positionMenu();
-    document.addEventListener('mousedown', close);
-    document.addEventListener('keydown', escape);
     window.addEventListener('resize', reposition);
     window.addEventListener('scroll', reposition, true);
-    return () => { document.removeEventListener('mousedown', close); document.removeEventListener('keydown', escape); window.removeEventListener('resize', reposition); window.removeEventListener('scroll', reposition, true); };
+    return () => { window.removeEventListener('resize', reposition); window.removeEventListener('scroll', reposition, true); };
   }, [open, align]);
 
   const commit = (next: Set<string>) => {
@@ -79,14 +72,14 @@ export function MultiFilter({ label, options, value, onChange, variant = 'toolba
     commit(next);
   };
   const menu = <div ref={menuRef} className={`registry-filter-menu registry-filter-portal registry-filter-portal-${variant}`} style={menuStyle} role="dialog" aria-label={`Фильтр столбца: ${label}`}>
-    <header><div><strong>{label}</strong><span>{options.length} значений</span></div><button type="button" className="registry-filter-close" onClick={() => setOpen(false)} aria-label="Закрыть фильтр"><X size={17} /></button></header>
+    <header><div><strong>{label}</strong><span>{options.length} значений</span></div><button type="button" className="registry-filter-close" onClick={() => close(true)} aria-label="Закрыть фильтр"><X size={17} /></button></header>
     {options.length > 8 ? <label className="registry-filter-search"><Search size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Поиск в списке" aria-label={`Поиск: ${label}`} />{query ? <button type="button" onClick={() => setQuery('')} aria-label="Очистить поиск"><X size={14} /></button> : null}</label> : null}
     <div className="registry-filter-tools"><button type="button" onClick={selectVisible}>Выбрать все</button><button type="button" onClick={clearVisible}>Снять все</button></div>
     <div className="registry-filter-options">{filteredOptions.map((option) => <label key={option}><input type="checkbox" checked={selected.has(option)} onChange={() => toggle(option)} /><span>{option}</span></label>)}{!filteredOptions.length ? <p>Значения не найдены</p> : null}</div>
   </div>;
 
   return <><details ref={detailsRef} open={open} className={`registry-filter registry-filter-${variant} registry-filter-${align}`}>
-    <summary aria-label={`Фильтр: ${label}`} title={`Фильтр: ${label}`} onClick={(event) => { event.preventDefault(); setOpen((current) => { if (current) setQuery(''); return !current; }); }}>
+    <summary ref={triggerRef} aria-label={`Фильтр: ${label}`} title={`Фильтр: ${label}`} onClick={(event) => { event.preventDefault(); setOpen((current) => !current); }}>
       <Filter size={variant === 'header' ? 15 : 14} aria-hidden="true" />
       {variant === 'toolbar' ? <span>{label}</span> : <span className="sr-only">{label}</span>}
       {value.length ? <b aria-label={`Выбрано: ${activeCount}`}>{activeCount}</b> : null}
