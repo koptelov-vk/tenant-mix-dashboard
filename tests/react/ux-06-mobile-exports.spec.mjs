@@ -12,6 +12,27 @@ const normalizeDate = (value) => {
   return `${parsed.getUTCFullYear()}-${String(parsed.getUTCMonth() + 1).padStart(2, '0')}-${String(parsed.getUTCDate()).padStart(2, '0')}`;
 };
 const normalizeRows = (rows) => rows.slice(1).filter((row) => row.some((value) => String(value ?? '').length)).map((row) => expectedHeader.map((_, index) => index === 7 ? normalizeDate(row[index]) : String(row[index] ?? '')));
+const parseCsv = (text, delimiter = ';') => {
+  const rows = [];
+  let row = [];
+  let cell = '';
+  let quoted = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (quoted) {
+      if (character === '"' && text[index + 1] === '"') { cell += '"'; index += 1; continue; }
+      if (character === '"') { quoted = false; continue; }
+      cell += character;
+      continue;
+    }
+    if (character === '"') { quoted = true; continue; }
+    if (character === delimiter) { row.push(cell); cell = ''; continue; }
+    if (character === '\n') { row.push(cell.replace(/\r$/, '')); rows.push(row); row = []; cell = ''; continue; }
+    cell += character;
+  }
+  if (cell.length || row.length) { row.push(cell.replace(/\r$/, '')); rows.push(row); }
+  return rows;
+};
 
 test('mobile export actions are visible, accessible, touch-safe and do not overflow', async ({ page }, testInfo) => {
   test.skip(!testInfo.project.name.startsWith('mobile'));
@@ -50,8 +71,7 @@ test('tenant CSV and XLSX use current context, object terminology and unchanged 
   const csv = await csvDownload;
   expect(csv.suggestedFilename()).toBe('tenant-mix-slice.csv');
   const csvText = (await readFile(await csv.path(), 'utf8')).replace(/^\uFEFF/, '');
-  const csvBook = XLSX.read(csvText, { type: 'string', FS: ';' });
-  const csvRows = XLSX.utils.sheet_to_json(csvBook.Sheets[csvBook.SheetNames[0]], { header: 1, raw: false });
+  const csvRows = parseCsv(csvText);
   expect(csvRows[0]).toEqual(expectedHeader);
   expect(csvRows.some((row) => row[0] === 'Фантастика')).toBe(true);
   expect(csvRows[0]).not.toContain('ТЦ');
@@ -60,7 +80,9 @@ test('tenant CSV and XLSX use current context, object terminology and unchanged 
   await page.getByRole('button', { name: 'Скачать текущий срез в XLSX' }).click();
   const xlsx = await xlsxDownload;
   expect(xlsx.suggestedFilename()).toBe('tenant-mix-slice.xlsx');
-  const book = XLSX.read(await readFile(await xlsx.path()));
+  const xlsxBuffer = await readFile(await xlsx.path());
+  expect(xlsxBuffer.subarray(0, 2).toString()).toBe('PK');
+  const book = XLSX.read(xlsxBuffer);
   const xlsxRows = XLSX.utils.sheet_to_json(book.Sheets.Арендаторы, { header: 1, raw: false });
   expect(xlsxRows[0]).toEqual(expectedHeader);
   expect(xlsxRows.some((row) => row[0] === 'Фантастика')).toBe(true);
