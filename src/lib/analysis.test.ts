@@ -4,7 +4,7 @@ import type { DashboardData, TenantRow } from '../types/dashboard';
 
 const row = (mall: string, brand: string, category: string, quality: 'Высокая' | 'Средняя' = 'Высокая'): TenantRow => ({
   mall, city: 'НН', brand, brandNormalized: brand.toLocaleLowerCase('ru'), category,
-  sourceUrl: `https://example.com/${brand}`, sourceType: 'официальный сайт', sourceQuality: quality, checkedAt: '2026-07-16',
+  sourceUrl: `https://example.com/${brand}`, sourceType: 'официальный сайт', sourceQuality: quality, checkedAt: '2026-07-16', rowStatus: 'active',
 });
 
 const rows = [
