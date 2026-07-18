@@ -5,7 +5,7 @@ const dialogs = (page: import('@playwright/test').Page) => page.locator('[role="
 test.describe('QA-01 filter popovers', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('./');
-    await expect(page.getByRole('heading', { name: 'Сравнение' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Сравнение' })).toHaveAttribute('aria-current', 'page');
   });
 
   test('outside click and Escape close a global popover and restore focus', async ({ page }) => {
@@ -13,7 +13,7 @@ test.describe('QA-01 filter popovers', () => {
     await geography.click();
     await expect(page.getByRole('dialog', { name: 'Выбор: География' })).toBeVisible();
 
-    await page.getByRole('heading', { name: 'Сравнение' }).click();
+    await page.locator('main').click({ position: { x: 4, y: 4 } });
     await expect(page.getByRole('dialog', { name: 'Выбор: География' })).toHaveCount(0);
 
     await geography.click();
@@ -28,9 +28,7 @@ test.describe('QA-01 filter popovers', () => {
 
     await geography.click();
     const geographyDialog = page.getByRole('dialog', { name: 'Выбор: География' });
-    const firstOption = geographyDialog.getByRole('option').first();
-    const optionName = (await firstOption.textContent())?.trim();
-    await firstOption.click();
+    await geographyDialog.getByRole('option').first().click();
 
     await categories.click();
     await expect(geographyDialog).toHaveCount(0);
@@ -39,7 +37,7 @@ test.describe('QA-01 filter popovers', () => {
 
     await categories.click();
     await geography.click();
-    if (optionName) await expect(geographyDialog.getByRole('option', { name: new RegExp(optionName) })).toHaveAttribute('aria-selected', 'true');
+    await expect(geographyDialog.locator('[role="option"][aria-selected="true"]')).toHaveCount(1);
   });
 
   test('global and table filters share one open-popover contract and navigation closes it', async ({ page }) => {
