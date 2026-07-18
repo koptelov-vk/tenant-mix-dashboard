@@ -110,12 +110,14 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '22', cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - name: TypeScript
+      - name: TypeScript noEmit
         run: pnpm exec tsc --noEmit
       - name: Unit tests
         run: pnpm test
-      - name: Production build
-        run: pnpm build
+      - name: TypeScript project build
+        run: pnpm exec tsc -b
+      - name: Vite production packaging
+        run: pnpm exec vite build
 
   browser-qa:
     needs: [changes, frontend-quality]
