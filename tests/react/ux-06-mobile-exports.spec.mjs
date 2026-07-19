@@ -88,7 +88,7 @@ const contrastRatio = ({ foreground, background }) => {
   await expect(trigger).toBeFocused();
 });
 
-test('tenant CSV and XLSX use current context, object terminology and unchanged names', async ({ page }, testInfo) => {
+test('tenant CSV and XLSX use current context, canonical cities and unchanged names', async ({ page }, testInfo) => {
   test.skip(!exportProjects.has(testInfo.project.name));
   await page.goto('?focus=Фантастика&tab=overview');
   await page.getByRole('button', { name: 'Экспорт текущего среза' }).click();
@@ -100,6 +100,8 @@ test('tenant CSV and XLSX use current context, object terminology and unchanged 
   const csvRows = parseCsv(csvText);
   expect(csvRows[0]).toEqual(expectedHeader);
   expect(csvRows.some((row) => row[0] === 'Фантастика')).toBe(true);
+  expect(csvRows.filter((row) => row.length > 1).slice(1).every((row) => String(row[1] ?? '').trim().length > 0)).toBe(true);
+  expect(csvRows.filter((row) => row[0] === 'Фантастика').every((row) => row[1] === 'Нижний Новгород')).toBe(true);
   expect(csvRows[0]).not.toContain('ТЦ');
   await page.getByRole('button', { name: 'Экспорт текущего среза' }).click();
   const xlsxDownload = page.waitForEvent('download');
@@ -112,6 +114,8 @@ test('tenant CSV and XLSX use current context, object terminology and unchanged 
   const xlsxRows = XLSX.utils.sheet_to_json(book.Sheets.Арендаторы, { header: 1, raw: false });
   expect(xlsxRows[0]).toEqual(expectedHeader);
   expect(xlsxRows.some((row) => row[0] === 'Фантастика')).toBe(true);
+  expect(xlsxRows.filter((row) => row.length > 1).slice(1).every((row) => String(row[1] ?? '').trim().length > 0)).toBe(true);
+  expect(xlsxRows.filter((row) => row[0] === 'Фантастика').every((row) => row[1] === 'Нижний Новгород')).toBe(true);
   expect(xlsxRows[0]).not.toContain('ТЦ');
   expect(normalizeRows(xlsxRows)).toEqual(normalizeRows(csvRows));
 });
