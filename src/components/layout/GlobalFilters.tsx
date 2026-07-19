@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { useExclusivePopover } from '../../hooks/useExclusivePopover';
 import type { AnalysisContext, DashboardData } from '../../types/dashboard';
+import { formatCountRu } from '../../lib/utils';
 import { Button } from '../ui/Button';
 
 type FilterOption = { value: string; label: string; meta?: string };
@@ -19,6 +20,7 @@ export function GlobalFilters({ data, context }: { data: DashboardData; context:
     .sort((a, b) => a.city.localeCompare(b.city, 'ru') || a.mall.localeCompare(b.mall, 'ru'))
     .map((mall) => ({ value: mall.mall, label: mallLabel(mall), meta: mall.mallClass })), [data]);
   const applyPreset = (mode: 'same-class' | 'all') => state.hydrate({ peerGroup: mode, selectedMalls: [] });
+  const cityCount = new Set(context.displayMalls.map((mall) => mall.city)).size;
 
   return <section className="filter-shell" aria-label="Параметры анализа">
     <div className="filter-bar">
@@ -38,7 +40,7 @@ export function GlobalFilters({ data, context }: { data: DashboardData; context:
         </button>
       </div>
     </div>
-    <div className="context-strip"><span>{context.peerMalls.length} объектов в группе сравнения</span><span>{new Set(context.displayMalls.map((mall) => mall.city)).size} городов</span><span>{context.filteredRows.length.toLocaleString('ru-RU')} строк</span>{!context.focusMatchesPeerCriteria ? <strong>Фокусный объект не соответствует выбранной географии или диапазону площади и добавлен отдельно для сравнения.</strong> : null}</div>
+    <div className="context-strip"><span>{formatCountRu(context.peerMalls.length, ['объект', 'объекта', 'объектов'])} в группе сравнения</span><span>{formatCountRu(cityCount, ['город', 'города', 'городов'])}</span><span>{context.filteredRows.length.toLocaleString('ru-RU')} строк</span>{!context.focusMatchesPeerCriteria ? <strong>Фокусный объект не соответствует выбранной географии или диапазону площади и добавлен отдельно для сравнения.</strong> : null}</div>
     <div className="active-tags">
       {state.categories.map((category) => <button key={category} onClick={() => state.setCategories(state.categories.filter((item) => item !== category))}>{category}<X size={13} /></button>)}
       {state.cities.map((city) => <button key={city} onClick={() => state.setCities(state.cities.filter((item) => item !== city))}>{city}<X size={13} /></button>)}
