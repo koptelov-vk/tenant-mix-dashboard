@@ -27,7 +27,7 @@ export function App() {
 function Dashboard({ data, refreshing }: { data: NonNullable<ReturnType<typeof useDashboardData>['data']>; refreshing: boolean }) {
   const activePage = useDashboardStore((state) => state.activePage);
   const context = useAnalysisContext(data);
-  return <div className="app-shell"><a className="skip-link" href="#main-content">Перейти к содержимому</a><AppHeader data={data} /><GlobalFilters data={data} context={context} /><main id="main-content" tabIndex={-1}><div className="pdf-only-heading"><div><h1>Tenant Mix Analytics</h1><p>Фокусный объект: {context.focusMall.mall}</p></div><small>Срез данных: {data.meta.snapshotDate}<br />Объектов в группе сравнения: {context.peerMalls.length}</small></div><Breadcrumbs context={context} snapshot={data.meta.snapshotDate} /><Suspense fallback={<PageSkeleton />}>
+  return <div className="app-shell"><a className="skip-link" href="#main-content">Перейти к содержимому</a><AppHeader data={data} rows={context.filteredRows} /><GlobalFilters data={data} context={context} /><main id="main-content" tabIndex={-1}><div className="pdf-only-heading"><div><h1>Tenant Mix Analytics</h1><p>Фокусный объект: {context.focusMall.mall}</p></div><small>Срез данных: {data.meta.snapshotDate}<br />Объектов в группе сравнения: {context.peerMalls.length}</small></div><Breadcrumbs context={context} snapshot={data.meta.snapshotDate} /><Suspense fallback={<PageSkeleton />}>
     {activePage === 'overview' ? <OverviewPage context={context} loading={refreshing} /> : null}
     {activePage === 'comparability' ? <ComparabilityPage context={context} data={data} /> : null}
     {activePage === 'categories' ? <CategoriesPage context={context} /> : null}
