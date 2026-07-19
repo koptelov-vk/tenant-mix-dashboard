@@ -43,8 +43,9 @@ test('PRODUCT-01 quality disclosure is independent, keyboard accessible and pres
   await expect(dialog).toBeVisible();
 
   const calculationTrigger = page.getByRole('button', { name: /Пояснение расчёта для категории/ }).first();
-  await calculationTrigger.click();
+  await calculationTrigger.dispatchEvent('pointerdown', { pointerType: testInfo.project.name.startsWith('mobile') ? 'touch' : 'mouse', bubbles: true });
   await expect(dialog).toBeHidden();
+  await calculationTrigger.click();
   await expect(page.locator('.category-profile-tooltip[open] [role="tooltip"]').first()).toBeVisible();
 
   const navigation = page.locator('.category-profile-row').first().getByRole('button', { name: /Открыть категорию/ });
