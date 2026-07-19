@@ -74,7 +74,7 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
       className="category-profile-quality-trigger"
       aria-label={`Показать качество данных категории ${profile.category}`}
       aria-expanded={Boolean(anchor)}
-      aria-controls={anchor ? popoverId : undefined}
+      aria-controls={popoverId}
       onClick={() => setAnchor((current) => current ? null : triggerRef.current?.getBoundingClientRect() ?? null)}
     >
       <AlertTriangle size={15} aria-hidden="true" />
@@ -97,9 +97,9 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
         </div>
         <p><b>{excludedCount.toLocaleString('ru-RU')}</b> записей исключено из основного показателя.</p>
         <dl>
-          <div><dt>Неизвестный статус</dt><dd>{profile.excludedUnknownCount.toLocaleString('ru-RU')}</dd></div>
-          <div><dt>Конфликтующий статус</dt><dd>{profile.excludedConflictingCount.toLocaleString('ru-RU')}</dd></div>
-          <div><dt>Ручная проверка</dt><dd>{profile.manualReviewCount.toLocaleString('ru-RU')}</dd></div>
+          {profile.excludedUnknownCount > 0 ? <div><dt>Неизвестный статус</dt><dd>{profile.excludedUnknownCount.toLocaleString('ru-RU')}</dd></div> : null}
+          {profile.excludedConflictingCount > 0 ? <div><dt>Конфликтующий статус</dt><dd>{profile.excludedConflictingCount.toLocaleString('ru-RU')}</dd></div> : null}
+          {profile.manualReviewCount > 0 ? <div><dt>Ручная проверка</dt><dd>{profile.manualReviewCount.toLocaleString('ru-RU')}</dd></div> : null}
         </dl>
         <p className="category-profile-quality-note">Неизвестные и конфликтующие записи не входят в основной active-only показатель. Ручная проверка — отдельный сигнал качества и сама по себе не меняет статус записи.</p>
       </div>,
