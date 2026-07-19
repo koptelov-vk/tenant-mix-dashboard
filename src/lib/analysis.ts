@@ -134,8 +134,7 @@ function buildCategoryStats(categories: string[], mallStats: MallSliceStats[], f
     });
     const focus = values.find((value) => value.mall === focusMall.mall) ?? { mall: focusMall.mall, count: 0, share: 0, density: null };
     const peers = values.filter((value) => peerNames.has(value.mall));
-    const ranked = [...values].sort((a, b) => b.count - a.count || a.mall.localeCompare(b.mall, 'ru'));
-    const rankIndex = ranked.findIndex((value) => value.mall === focusMall.mall);
+    const rank = focus.count === 0 ? null : 1 + values.filter((value) => value.count > focus.count).length;
     return {
       category,
       values,
@@ -145,7 +144,7 @@ function buildCategoryStats(categories: string[], mallStats: MallSliceStats[], f
       densityMedian: median(peers.flatMap((value) => value.density == null ? [] : [value.density])),
       min: peers.length ? Math.min(...peers.map((value) => value.count)) : focus.count,
       max: peers.length ? Math.max(...peers.map((value) => value.count)) : focus.count,
-      rank: rankIndex < 0 ? null : rankIndex + 1,
+      rank,
     };
   });
 }
@@ -289,9 +288,10 @@ function buildBenchmark(focusMall: MallSummary, mallStats: MallSliceStats[], pee
   const focusStats = mallStats.find((stats) => stats.mall.mall === focusMall.mall);
   const peerNames = new Set(peerMalls.map((mall) => mall.mall));
   const peers = mallStats.filter((stats) => peerNames.has(stats.mall.mall));
-  const ranked = [focusStats, ...peers].filter((value): value is MallSliceStats => value != null).sort((a, b) => b.brandCount - a.brandCount || a.mall.mall.localeCompare(b.mall.mall, 'ru'));
-  const rankIndex = ranked.findIndex((value) => value.mall.mall === focusMall.mall);
-  return { focusBrandCount: focusStats?.brandCount ?? 0, peerMedian: median(peers.map((stats) => stats.brandCount)), rank: rankIndex < 0 ? null : rankIndex + 1, totalInGroup: ranked.length, categoryGaps: categoryStats.filter((stats) => stats.countMedian != null && stats.focus.count < stats.countMedian).map((stats) => stats.category) };
+  const ranked = [focusStats, ...peers].filter((value): value is MallSliceStats => value != null);
+  const focusBrandCount = focusStats?.brandCount ?? 0;
+  const rank = focusBrandCount === 0 ? null : 1 + ranked.filter((value) => value.brandCount > focusBrandCount).length;
+  return { focusBrandCount, peerMedian: median(peers.map((stats) => stats.brandCount)), rank, totalInGroup: ranked.length, categoryGaps: categoryStats.filter((stats) => stats.countMedian != null && stats.focus.count < stats.countMedian).map((stats) => stats.category) };
 }
 
 export function createAnalysisContext(data: DashboardData, filters: AnalysisFilters): AnalysisContext {
