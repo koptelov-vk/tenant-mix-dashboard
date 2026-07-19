@@ -13,8 +13,11 @@ export function ExecutiveSummary({ context }: { context: AnalysisContext }) {
   const above = categoryDeltas.find((item) => item.delta > 0.005);
   const below = categoryDeltas.find((item) => item.delta < -0.005);
   const nearest = context.similarities[0];
+  const positionText = context.benchmark.rank == null
+    ? `${context.focusMall.mall} не имеет позиции в группе: в текущем срезе нет учитываемых брендов.`
+    : `${context.focusMall.mall} занимает ${context.benchmark.rank}-е место из ${context.benchmark.totalInGroup} объектов по числу брендов текущего среза.`;
   const items = [
-    { icon: context.benchmark.rank === 1 ? CircleCheck : Minus, tone: 'neutral', text: `${context.focusMall.mall} занимает ${context.benchmark.rank ?? 'н/д'}-е место из ${context.benchmark.totalInGroup} объектов по числу брендов текущего среза.`, page: 'comparability' as const },
+    { icon: context.benchmark.rank === 1 ? CircleCheck : Minus, tone: 'neutral', text: positionText, page: 'comparability' as const },
     above ? { icon: TrendingUp, tone: 'positive', text: `Доля категории «${above.category}» на ${formatNumber.format(above.delta * 100)} п.п. выше медианы группы сравнения.`, page: 'categories' as const } : null,
     below ? { icon: TrendingDown, tone: 'warning', text: `Доля категории «${below.category}» на ${formatNumber.format(Math.abs(below.delta) * 100)} п.п. ниже медианы группы сравнения; отклонение требует дополнительного анализа.`, page: 'categories' as const } : null,
     { icon: Info, tone: 'neutral', text: `Эксклюзивы составляют ${formatPercent(context.benchmark.focusBrandCount ? context.uniqueness.focusExclusive.size / context.benchmark.focusBrandCount : 0)} состава фокусного объекта.`, page: 'categories' as const },
