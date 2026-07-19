@@ -3,11 +3,15 @@ from __future__ import annotations
 import json
 import re
 from collections import defaultdict
+from pathlib import Path
 
 try:
     from .build_aggregates import alias_key, build, canonical_brand, text, write_outputs
 except ImportError:
     from build_aggregates import alias_key, build, canonical_brand, text, write_outputs
+
+ROOT = Path(__file__).resolve().parents[1]
+METHODOLOGY_METADATA = ROOT / "config" / "methodology.json"
 
 UPCOMING_STATUS_ALIASES = {
     "скоро открытие": "Скоро открытие",
@@ -17,6 +21,16 @@ UPCOMING_STATUS_ALIASES = {
     "планируется": "Скоро открытие",
     "анонсировано": "Скоро открытие",
 }
+
+
+def methodology_version() -> str:
+    value = json.loads(METHODOLOGY_METADATA.read_text(encoding="utf-8")).get("methodologyVersion")
+    version = text(value)
+    if not version:
+        raise SystemExit("methodologyVersion is required in config/methodology.json")
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*-v[1-9][0-9]*", version):
+        raise SystemExit(f"Invalid methodologyVersion contract ID: {version}")
+    return version
 
 
 def brand_match_key(value: object) -> str:
@@ -92,8 +106,15 @@ def clean_upcoming(payload: dict) -> dict:
     return payload
 
 
+def apply_methodology_metadata(payload: dict) -> dict:
+    version = methodology_version()
+    payload.setdefault("meta", {})["methodologyVersion"] = version
+    payload.setdefault("dataQuality", {})["methodologyVersion"] = version
+    return payload
+
+
 def build_dashboard_data(snapshot: str | None = None) -> dict:
-    return clean_upcoming(build(snapshot))
+    return apply_methodology_metadata(clean_upcoming(build(snapshot)))
 
 
 if __name__ == "__main__":

@@ -105,11 +105,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12', cache: pip }
       - uses: pnpm/action-setup@v4
         with: { version: '11.9.0' }
       - uses: actions/setup-node@v4
         with: { node-version: '22', cache: pnpm }
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pnpm install --frozen-lockfile
+      - name: Build canonical aggregates for packaging
+        run: pnpm build:aggregates
       - name: TypeScript noEmit
         run: pnpm exec tsc --noEmit
       - name: Unit tests
@@ -155,11 +162,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12', cache: pip }
       - uses: pnpm/action-setup@v4
         with: { version: '11.9.0' }
       - uses: actions/setup-node@v4
         with: { node-version: '22', cache: pnpm }
-      - run: pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pnpm install --frozen-lockfile
+      - name: Build canonical aggregates for packaging
+        run: pnpm build:aggregates
       - name: Build production artifact
         run: pnpm build
       - name: Run Lighthouse audit

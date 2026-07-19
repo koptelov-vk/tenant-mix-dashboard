@@ -18,7 +18,7 @@
     "test:react:e2e": "playwright test --config=playwright.react.config.mjs",
     "test:lighthouse": "lhci autorun --config=lighthouserc.cjs",
     "test:legacy": "node --test tests/*.test.mjs",
-    "test:data": "python tests/test_data_pipeline.py"
+    "test:data": "python -m unittest discover -s tests -p 'test_*.py'"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
