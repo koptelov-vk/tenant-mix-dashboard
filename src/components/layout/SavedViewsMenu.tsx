@@ -12,7 +12,7 @@ function currentFilters(state: ReturnType<typeof useDashboardStore.getState>): D
   };
 }
 
-export function SavedViewsMenu({ snapshotDate }: { snapshotDate: string }) {
+export function SavedViewsMenu({ snapshotDate, triggerRole }: { snapshotDate: string; triggerRole?: 'menuitem' }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [message, setMessage] = useState('');
@@ -42,8 +42,8 @@ export function SavedViewsMenu({ snapshotDate }: { snapshotDate: string }) {
     setOpen(false);
   };
 
-  return <div className="saved-views-root" ref={root}>
-    <Button variant="ghost" onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="dialog" aria-label="Сохранённые представления"><Bookmark size={17} /><span className="desktop-label">Представления</span></Button>
+  return <div className="saved-views-root nav-utility-root" ref={root} role="none">
+    <Button variant="ghost" role={triggerRole} onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="dialog" aria-label="Сохранённые представления"><Bookmark size={17} /><span>Сохранённые представления</span></Button>
     {open ? <section className="saved-views-popover" role="dialog" aria-label="Сохранённые представления">
       <header><div><strong>Сохранённые представления</strong><small>Фильтры, фокус и активный раздел</small></div><button onClick={() => setOpen(false)} aria-label="Закрыть"><X size={18} /></button></header>
       <div className="saved-view-create"><input value={name} onChange={(event) => setName(event.target.value)} placeholder="Название представления" aria-label="Название нового представления" /><Button onClick={saveCurrent}><Plus size={16} />Сохранить</Button></div>
