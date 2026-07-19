@@ -32,19 +32,23 @@ test('PRODUCT-01 quality disclosure is independent, keyboard accessible and pres
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
   await expect(trigger).toBeFocused();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
 
   await trigger.press('Enter');
   await expect(dialog).toBeVisible();
   await page.dispatchEvent('body', 'pointerdown', { pointerType: 'mouse', bubbles: true });
   await expect(dialog).toBeHidden();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
 
   await trigger.focus();
   await trigger.press('Space');
   await expect(dialog).toBeVisible();
 
-  const calculationTrigger = page.getByRole('button', { name: /Пояснение расчёта для категории/ }).first();
+  const calculationTrigger = page.locator('summary[aria-label^="Пояснение расчёта для категории"]').first();
+  await expect(calculationTrigger).toBeVisible();
   await calculationTrigger.dispatchEvent('pointerdown', { pointerType: testInfo.project.name.startsWith('mobile') ? 'touch' : 'mouse', bubbles: true });
   await expect(dialog).toBeHidden();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
   await calculationTrigger.click();
   await expect(page.locator('.category-profile-tooltip[open] [role="tooltip"]').first()).toBeVisible();
 
