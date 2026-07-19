@@ -1,5 +1,5 @@
-import { lazy, Suspense, useState } from 'react';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
+import { lazy, Suspense } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { useDashboardData } from './hooks/useDashboardData';
 import { useAnalysisContext } from './hooks/useAnalysisContext';
 import { useUrlState } from './hooks/useUrlState';
@@ -21,15 +21,13 @@ export function App() {
   const query = useDashboardData();
   if (query.isLoading) return <StateCard title="Загружаем tenant mix" description="Проверяем структуру production-данных и готовим текущий срез." />;
   if (query.isError || !query.data) return <StateCard title="Не удалось открыть дашборд" description={query.error instanceof Error ? query.error.message : 'Ошибка загрузки данных'} error />;
-  return <Dashboard data={query.data} refreshing={query.isFetching} refetch={() => query.refetch()} />;
+  return <Dashboard data={query.data} refreshing={query.isFetching} />;
 }
 
-function Dashboard({ data, refreshing, refetch }: { data: NonNullable<ReturnType<typeof useDashboardData>['data']>; refreshing: boolean; refetch: () => Promise<unknown> }) {
+function Dashboard({ data, refreshing }: { data: NonNullable<ReturnType<typeof useDashboardData>['data']>; refreshing: boolean }) {
   const activePage = useDashboardStore((state) => state.activePage);
   const context = useAnalysisContext(data);
-  const [toast, setToast] = useState<string | null>(null);
-  const refresh = async () => { await refetch(); setToast(`Данные обновлены: ${new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`); window.setTimeout(() => setToast(null), 2800); };
-  return <div className="app-shell"><a className="skip-link" href="#main-content">Перейти к содержимому</a><AppHeader data={data} rows={context.filteredRows} refreshing={refreshing} onRefresh={refresh} /><GlobalFilters data={data} context={context} /><main id="main-content" tabIndex={-1}><div className="pdf-only-heading"><div><h1>Tenant Mix Analytics</h1><p>Фокусный объект: {context.focusMall.mall}</p></div><small>Срез данных: {data.meta.snapshotDate}<br />Объектов в группе сравнения: {context.peerMalls.length}</small></div><Breadcrumbs context={context} snapshot={data.meta.snapshotDate} /><Suspense fallback={<PageSkeleton />}>
+  return <div className="app-shell"><a className="skip-link" href="#main-content">Перейти к содержимому</a><AppHeader data={data} rows={context.filteredRows} /><GlobalFilters data={data} context={context} /><main id="main-content" tabIndex={-1}><div className="pdf-only-heading"><div><h1>Tenant Mix Analytics</h1><p>Фокусный объект: {context.focusMall.mall}</p></div><small>Срез данных: {data.meta.snapshotDate}<br />Объектов в группе сравнения: {context.peerMalls.length}</small></div><Breadcrumbs context={context} snapshot={data.meta.snapshotDate} /><Suspense fallback={<PageSkeleton />}>
     {activePage === 'overview' ? <OverviewPage context={context} loading={refreshing} /> : null}
     {activePage === 'comparability' ? <ComparabilityPage context={context} data={data} /> : null}
     {activePage === 'categories' ? <CategoriesPage context={context} /> : null}
@@ -37,7 +35,7 @@ function Dashboard({ data, refreshing, refetch }: { data: NonNullable<ReturnType
     {activePage === 'upcoming' ? <UpcomingPage context={context} data={data} /> : null}
     {activePage === 'quality' ? <DataQualityPage data={data} /> : null}
     {activePage === 'history' ? <HistoryPage /> : null}
-  </Suspense></main>{toast ? <div className="toast" role="status"><CheckCircle2 size={17} />{toast}</div> : null}</div>;
+  </Suspense></main></div>;
 }
 
 function PageSkeleton() { return <div className="page-skeleton" aria-label="Загрузка раздела"><i /><i /><i /></div>; }
