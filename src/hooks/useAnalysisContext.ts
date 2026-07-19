@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { createAnalysisContext } from '../lib/analysis';
+import { applyRankingContract } from '../lib/ranking';
 import type { DashboardData, MallSummary } from '../types/dashboard';
 import { useDashboardStore } from '../stores/dashboardStore';
 
@@ -25,7 +26,7 @@ export function useAnalysisContext(data: DashboardData) {
       categoryMatrix: { ...data.categoryMatrix, categories: data.categoryMatrix.categories.filter((category) => categorySet.has(category)) },
       brandPresence: Object.fromEntries(Object.entries(data.brandPresence).filter(([, brand]) => categorySet.has(brand.category))),
     } : data;
-    const context = createAnalysisContext(scopedData, {
+    const context = applyRankingContract(createAnalysisContext(scopedData, {
       focusMall: state.focusMall,
       category: 'Все категории',
       peerMalls: constrainedPeers,
@@ -37,7 +38,7 @@ export function useAnalysisContext(data: DashboardData) {
       gbaMin: state.gbaMin,
       gbaMax: state.gbaMax,
       focusInSelectedGroup: constrainedPeers.includes(state.focusMall),
-    });
+    }));
     const focusMatchesFilterCriteria = focus != null
       && (!state.cities.length || state.cities.includes(focus.city))
       && matchesArea(focus, state.glaMin, state.glaMax, 'gla')
