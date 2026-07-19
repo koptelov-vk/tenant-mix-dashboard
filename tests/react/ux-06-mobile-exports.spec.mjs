@@ -33,8 +33,21 @@ const parseCsv = (text, delimiter = ';') => {
   if (cell.length || row.length) { row.push(cell.replace(/\r$/, '')); rows.push(row); }
   return rows;
 };
+const contrastRatio = ({ foreground, background }) => {
+  const parse = (value) => value.match(/[\d.]+/g).slice(0, 3).map(Number);
+  const luminance = (rgb) => {
+    const channels = rgb.map((channel) => {
+      const value = channel / 255;
+      return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    });
+    return (0.2126 * channels[0]) + (0.7152 * channels[1]) + (0.0722 * channels[2]);
+  };
+  const first = luminance(parse(foreground));
+  const second = luminance(parse(background));
+  return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+};
 
-test('mobile export actions are visible, accessible, touch-safe and do not overflow', async ({ page }, testInfo) => {
+ test('mobile export actions are visible, accessible, touch-safe and do not overflow', async ({ page }, testInfo) => {
   test.skip(!testInfo.project.name.startsWith('mobile'));
   await page.goto('?focus=Фантастика&tab=overview');
   const trigger = page.getByRole('button', { name: 'Экспорт текущего среза' });
@@ -45,12 +58,25 @@ test('mobile export actions are visible, accessible, touch-safe and do not overf
   await trigger.click();
   const dialog = page.getByRole('dialog', { name: 'Экспорт текущего среза' });
   await expect(dialog).toBeVisible();
+  const heading = dialog.getByText('Экспорт текущего среза', { exact: true });
+  await expect(heading).toBeVisible();
+  const headingContrast = await heading.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const parentStyle = getComputedStyle(element.closest('.export-actions-popover'));
+    return { foreground: style.color, background: parentStyle.backgroundColor };
+  });
+  expect(contrastRatio(headingContrast)).toBeGreaterThanOrEqual(4.5);
   for (const name of ['Скачать текущий анализ в PDF', 'Скачать текущий срез в CSV', 'Скачать текущий срез в XLSX']) {
     const action = dialog.getByRole('button', { name });
     await expect(action).toBeVisible();
     const box = await action.boundingBox();
     expect(box.width).toBeGreaterThanOrEqual(44);
     expect(box.height).toBeGreaterThanOrEqual(44);
+    const actionContrast = await action.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { foreground: style.color, background: style.backgroundColor };
+    });
+    expect(contrastRatio(actionContrast)).toBeGreaterThanOrEqual(3);
   }
   const geometry = await dialog.boundingBox();
   const viewport = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
