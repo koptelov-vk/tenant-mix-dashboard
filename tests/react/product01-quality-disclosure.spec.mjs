@@ -34,7 +34,7 @@ test('PRODUCT-01 quality disclosure is independent, keyboard accessible and pres
 
   await trigger.press('Enter');
   await expect(dialog).toBeVisible();
-  await page.locator('.category-profile-note').click();
+  await page.mouse.click(4, 4);
   await expect(dialog).toBeHidden();
 
   await trigger.focus();
