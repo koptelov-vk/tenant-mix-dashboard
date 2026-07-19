@@ -7,6 +7,7 @@ test('PRODUCT-01 quality disclosure is independent, keyboard accessible and pres
   const trigger = page.getByRole('button', { name: /Показать качество данных категории/ }).first();
   await expect(trigger).toBeVisible();
   expect(await trigger.evaluate((element) => element.closest('.category-profile-open') === null)).toBe(true);
+  expect(await trigger.evaluate((element) => element.querySelector('button, a, input, select, textarea') === null)).toBe(true);
 
   const initialUrl = page.url();
   await trigger.click();
@@ -34,7 +35,7 @@ test('PRODUCT-01 quality disclosure is independent, keyboard accessible and pres
 
   await trigger.press('Enter');
   await expect(dialog).toBeVisible();
-  await page.mouse.click(4, 4);
+  await page.dispatchEvent('body', 'pointerdown', { pointerType: 'mouse', bubbles: true });
   await expect(dialog).toBeHidden();
 
   await trigger.focus();
@@ -56,15 +57,16 @@ test('PRODUCT-01 quality disclosure is independent, keyboard accessible and pres
     const box = await trigger.boundingBox();
     expect(box.width).toBeGreaterThanOrEqual(44);
     expect(box.height).toBeGreaterThanOrEqual(44);
-    await trigger.click();
+    await trigger.tap();
     const geometry = await dialog.boundingBox();
     const viewport = await page.evaluate(() => ({
       width: document.documentElement.clientWidth,
       height: window.visualViewport?.height ?? window.innerHeight,
       scrollWidth: document.documentElement.scrollWidth,
+      safeTop: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-top')) || 0,
     }));
     expect(geometry.x).toBeGreaterThanOrEqual(0);
-    expect(geometry.y).toBeGreaterThanOrEqual(0);
+    expect(geometry.y).toBeGreaterThanOrEqual(viewport.safeTop);
     expect(geometry.x + geometry.width).toBeLessThanOrEqual(viewport.width + 1);
     expect(geometry.y + geometry.height).toBeLessThanOrEqual(viewport.height + 1);
     expect(viewport.scrollWidth).toBeLessThanOrEqual(viewport.width);
