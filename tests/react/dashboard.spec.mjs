@@ -160,15 +160,13 @@ test('brand registry aggregates brands and opens the brand card', async ({ page 
   if (testInfo.project.name.startsWith('mobile')) await expect(page.locator('.brand-table .registry-head')).toBeHidden();
 });
 
-test('upcoming openings expose desktop column controls and mobile card search', async ({ page }, testInfo) => {
+test('upcoming openings expose one four-column table with search, filters and sorting', async ({ page }) => {
   await page.goto('?tab=upcoming');
-  if (testInfo.project.name.startsWith('mobile')) {
-    await expect(page.locator('.upcoming-table thead')).toBeHidden();
-    await expect(page.getByRole('textbox', { name: 'Поиск в таблице скоро открытие' })).toBeVisible();
-    await expect(page.locator('.upcoming-table tbody tr').first()).toBeVisible();
-    return;
-  }
-  await expect(page.locator('.upcoming-table thead .registry-filter-header')).toHaveCount(8);
+  const table = page.getByRole('table', { name: /Анонсы будущих открытий/ });
+  await expect(table).toBeVisible();
+  await expect(table.getByRole('columnheader')).toHaveCount(4);
+  await expect(page.getByRole('textbox', { name: 'Поиск в таблице скоро открытие' })).toBeVisible();
+  await expect(page.locator('.upcoming-table thead .registry-filter-header')).toHaveCount(4);
   const sortHeader = page.locator('.upcoming-table thead').getByRole('button', { name: 'Бренд', exact: true });
   await sortHeader.click();
   await expect(sortHeader.locator('xpath=../..')).toHaveAttribute('aria-sort', 'ascending');
