@@ -15,7 +15,9 @@ test('upcoming uses one four-column table with internal horizontal scroll', asyn
   const geometry = await page.evaluate(() => {
     const region = document.querySelector('.upcoming-table-scroll');
     const sticky = document.querySelector('.upcoming-table tbody th[scope="row"]');
-    if (!(region instanceof HTMLElement) || !(sticky instanceof HTMLElement)) throw new Error('Upcoming table geometry is unavailable');
+    const objectName = document.querySelector('.upcoming-object-name');
+    if (!(region instanceof HTMLElement) || !(sticky instanceof HTMLElement) || !(objectName instanceof HTMLElement)) throw new Error('Upcoming table geometry is unavailable');
+    const nameStyle = getComputedStyle(objectName);
     return {
       pageWidth: document.documentElement.clientWidth,
       pageScrollWidth: document.documentElement.scrollWidth,
@@ -24,6 +26,8 @@ test('upcoming uses one four-column table with internal horizontal scroll', asyn
       stickyPosition: getComputedStyle(sticky).position,
       stickyLeft: getComputedStyle(sticky).left,
       stickyBackground: getComputedStyle(sticky).backgroundColor,
+      objectNameHeight: objectName.getBoundingClientRect().height,
+      objectLineHeight: Number.parseFloat(nameStyle.lineHeight),
     };
   });
   expect(geometry.pageScrollWidth).toBeLessThanOrEqual(geometry.pageWidth + 1);
@@ -31,6 +35,7 @@ test('upcoming uses one four-column table with internal horizontal scroll', asyn
   expect(geometry.stickyPosition).toBe('sticky');
   expect(geometry.stickyLeft).toBe('0px');
   expect(geometry.stickyBackground).not.toBe('rgba(0, 0, 0, 0)');
+  expect(geometry.objectNameHeight).toBeLessThanOrEqual(geometry.objectLineHeight * 2 + 1);
 
   const source = table.getByRole('link', { name: /Открыть источник/ }).first();
   if (await source.count()) {
