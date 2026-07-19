@@ -27,7 +27,11 @@ const makeArtifact = (options = {}) => {
 
 const validate = (options) => {
   const cwd = makeArtifact(options);
-  const result = spawnSync(process.execPath, [validator], { cwd, encoding: 'utf8' });
+  const result = spawnSync(process.execPath, [validator], {
+    cwd,
+    encoding: 'utf8',
+    env: { ...process.env, GITHUB_SHA: '' },
+  });
   fs.rmSync(cwd, { recursive: true, force: true });
   return result;
 };
