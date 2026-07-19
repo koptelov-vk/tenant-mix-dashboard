@@ -24,7 +24,7 @@ const brandPresence = Object.fromEntries(['A', 'B', 'C', 'D', 'E'].map((brand) =
 
 const data: DashboardData = {
   meta: { snapshotDate: '2026-07-16' },
-  categoryMatrix: { categories: ['Одежда', 'Обувь'] },
+  categoryMatrix: { categories: ['Одежда', 'Обувь', 'Товары 18+'] },
   mallSummary: [
     { mall: 'Фантастика', city: 'НН', mallClass: 'Суперрегиональный', gla: 100_000, gba: 150_000, glaConfirmed: true, brandCount: 3, categoryCounts: {} },
     { mall: 'Конкурент', city: 'НН', mallClass: 'Суперрегиональный', gla: null, gba: 120_000, glaConfirmed: false, brandCount: 2, categoryCounts: {} },
@@ -70,6 +70,28 @@ describe('unified analysis context', () => {
     const context = createAnalysisContext(data, { focusMall: 'Фантастика', category: 'Все категории', peerMalls: ['Конкурент', 'Вне группы'], gapN: 2 });
     expect(context.similarities.find((item) => item.mall.mall === 'Конкурент')?.jaccard).toBeCloseTo(0.25);
     expect(context.gaps.map((item) => item.brandNormalized)).toEqual(['d']);
+  });
+});
+
+describe('PRODUCT-01 ranking contract', () => {
+  it('returns rank null for zero category count and never assigns ordinal places to zero ties', () => {
+    const context = createAnalysisContext(data, { focusMall: 'Фантастика', category: 'Товары 18+', peerMalls: ['Конкурент', 'Вне группы'] });
+    expect(context.benchmark.focusBrandCount).toBe(0);
+    expect(context.benchmark.rank).toBeNull();
+    expect(context.categoryStats[0]?.rank).toBeNull();
+  });
+
+  it('uses competition ranking for nonzero ties', () => {
+    const tiedRows = [
+      row('Фантастика', 'A1', 'Одежда'), row('Фантастика', 'A2', 'Одежда'),
+      row('Конкурент', 'B1', 'Одежда'), row('Конкурент', 'B2', 'Одежда'),
+      row('Вне группы', 'C1', 'Одежда'),
+    ];
+    const tiedData = { ...data, rows: tiedRows };
+    const first = createAnalysisContext(tiedData, { focusMall: 'Фантастика', category: 'Одежда', peerMalls: ['Конкурент', 'Вне группы'] });
+    expect(first.benchmark.rank).toBe(1);
+    const third = createAnalysisContext(tiedData, { focusMall: 'Вне группы', category: 'Одежда', peerMalls: ['Фантастика', 'Конкурент'] });
+    expect(third.benchmark.rank).toBe(3);
   });
 });
 
