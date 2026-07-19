@@ -3,11 +3,11 @@ import type { BrandTableRow } from '../brandTable';
 import { CHARACTERISTIC_LABELS } from '../brandTable';
 import { csvCell } from '../utils';
 
-const headers = ['Объект', 'Город', 'Бренд', 'Нормализованный бренд', 'Категория', 'Тип источника', 'Качество источника', 'Дата проверки', 'Источник'];
-const values = (row: TenantRow) => [row.mall, row.city, row.brand, row.brandNormalized, row.category, row.sourceType, row.sourceQuality ?? '', row.checkedAt ?? '', row.sourceUrl];
+export const tenantExportHeaders = ['Объект', 'Город', 'Бренд', 'Нормализованный бренд', 'Категория', 'Тип источника', 'Качество источника', 'Дата проверки', 'Источник'];
+export const tenantExportValues = (row: TenantRow) => [row.mall, row.city, row.brand, row.brandNormalized, row.category, row.sourceType, row.sourceQuality ?? '', row.checkedAt ?? '', row.sourceUrl];
 
 export function rowsToCsv(rows: TenantRow[]) {
-  return `\uFEFF${[headers, ...rows.map(values)].map((line) => line.map(csvCell).join(';')).join('\r\n')}`;
+  return `\uFEFF${[tenantExportHeaders, ...rows.map(tenantExportValues)].map((line) => line.map(csvCell).join(';')).join('\r\n')}`;
 }
 
 export function downloadCsv(rows: TenantRow[], filename = 'tenant-mix-slice.csv') {
@@ -17,7 +17,7 @@ export function downloadCsv(rows: TenantRow[], filename = 'tenant-mix-slice.csv'
 
 export async function downloadXlsx(rows: TenantRow[], filename = 'tenant-mix-slice.xlsx') {
   const XLSX = await import('xlsx');
-  const sheet = XLSX.utils.aoa_to_sheet([headers, ...rows.map(values)]);
+  const sheet = XLSX.utils.aoa_to_sheet([tenantExportHeaders, ...rows.map(tenantExportValues)]);
   const book = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(book, sheet, 'Арендаторы'); XLSX.writeFile(book, filename);
 }
 

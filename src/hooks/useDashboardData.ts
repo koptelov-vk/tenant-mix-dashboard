@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import type { DashboardData } from '../types/dashboard';
+import { adaptDashboardCities } from '../lib/cityMapping';
 
 const sourceQualitySchema = z.enum(['Высокая', 'Средняя', 'Низкая']);
 const tenantStatusSchema = z.enum(['active', 'upcoming', 'closed', 'unknown', 'conflicting']);
@@ -85,7 +86,7 @@ const dataQualitySchema = z.object({
   invalidUrls: z.number().nonnegative(),
   mallsWithoutGla: z.number().nonnegative(),
   manualReviewRows: z.number().nonnegative(),
-});
+}).passthrough();
 
 export const dashboardSchema = z.object({
   meta: z.object({ version: z.string().optional(), snapshotDate: z.string() }).passthrough(),
@@ -136,7 +137,8 @@ const runtimeDashboardSchema = z.object({
 export async function fetchDashboardData(): Promise<DashboardData> {
   const response = await fetch(`${import.meta.env.BASE_URL}data/dashboard_data.json`, { cache: 'no-cache' });
   if (!response.ok) throw new Error(`Не удалось загрузить данные: HTTP ${response.status}`);
-  return runtimeDashboardSchema.parse(await response.json()) as DashboardData;
+  const parsed = runtimeDashboardSchema.parse(await response.json()) as DashboardData;
+  return adaptDashboardCities(parsed);
 }
 
 export function useDashboardData() {
