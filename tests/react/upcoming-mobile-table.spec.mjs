@@ -6,7 +6,10 @@ test('upcoming uses one four-column table with internal horizontal scroll', asyn
   const region = page.getByRole('region', { name: /Таблица будущих открытий/ });
   const table = region.getByRole('table');
   await expect(table).toBeVisible();
-  await expect(table.getByRole('columnheader')).toHaveText(['Объект', 'Бренд', 'Категория', 'Источник']);
+  await expect(table.getByRole('columnheader')).toHaveCount(4);
+  for (const label of ['Объект', 'Бренд', 'Категория', 'Источник']) {
+    await expect(table.getByRole('button', { name: label, exact: true })).toBeVisible();
+  }
   await expect(page.locator('.upcoming-table tr').first()).not.toHaveCSS('display', 'grid');
 
   const geometry = await page.evaluate(() => {
@@ -20,12 +23,14 @@ test('upcoming uses one four-column table with internal horizontal scroll', asyn
       regionScrollWidth: region.scrollWidth,
       stickyPosition: getComputedStyle(sticky).position,
       stickyLeft: getComputedStyle(sticky).left,
+      stickyBackground: getComputedStyle(sticky).backgroundColor,
     };
   });
   expect(geometry.pageScrollWidth).toBeLessThanOrEqual(geometry.pageWidth + 1);
   expect(geometry.regionScrollWidth).toBeGreaterThanOrEqual(geometry.regionClientWidth);
   expect(geometry.stickyPosition).toBe('sticky');
   expect(geometry.stickyLeft).toBe('0px');
+  expect(geometry.stickyBackground).not.toBe('rgba(0, 0, 0, 0)');
 
   const source = table.getByRole('link', { name: /Открыть источник/ }).first();
   if (await source.count()) {
