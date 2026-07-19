@@ -5,11 +5,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
-const root = process.cwd();
 const source = JSON.parse(fs.readFileSync('config/methodology.json', 'utf8'));
 const validator = path.resolve('scripts/validate_production_artifact.mjs');
 
-const makeArtifact = ({ buildVersion = source.methodologyVersion, aggregateVersion = source.methodologyVersion } = {}) => {
+const makeArtifact = (options = {}) => {
+  const buildVersion = Object.hasOwn(options, 'buildVersion') ? options.buildVersion : source.methodologyVersion;
+  const aggregateVersion = Object.hasOwn(options, 'aggregateVersion') ? options.aggregateVersion : source.methodologyVersion;
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'tenant-mix-methodology-'));
   fs.mkdirSync(path.join(cwd, 'dist', 'assets'), { recursive: true });
   fs.mkdirSync(path.join(cwd, 'dist', 'data'), { recursive: true });
