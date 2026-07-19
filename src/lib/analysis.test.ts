@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createAnalysisContext, median } from './analysis';
+import { applyRankingContract, denseRanks } from './ranking';
 import type { DashboardData, TenantRow } from '../types/dashboard';
 
 const row = (mall: string, brand: string, category: string, quality: 'Высокая' | 'Средняя' = 'Высокая'): TenantRow => ({
@@ -34,9 +35,11 @@ const data: DashboardData = {
   dataQuality: { snapshotDate: '2026-07-16', rows: rows.length, malls: 3, brands: 5, emptyBrands: 0, emptyNormalizedBrands: 0, duplicateMallBrandPairs: 0, invalidUrls: 0, mallsWithoutGla: 1, manualReviewRows: 0 },
 };
 
+const rankedContext = (filters: Parameters<typeof createAnalysisContext>[1]) => applyRankingContract(createAnalysisContext(data, filters));
+
 describe('unified analysis context', () => {
   it('uses the same category-filtered rows for KPI, medians and category statistics', () => {
-    const context = createAnalysisContext(data, { focusMall: 'Фантастика', category: 'Одежда', peerMalls: ['Конкурент'] });
+    const context = rankedContext({ focusMall: 'Фантастика', category: 'Одежда', peerMalls: ['Конкурент'] });
     expect(context.filteredRows).toHaveLength(3);
     expect(context.benchmark.focusBrandCount).toBe(2);
     expect(context.benchmark.peerMedian).toBe(1);
@@ -44,7 +47,7 @@ describe('unified analysis context', () => {
   });
 
   it('keeps focus visible but excludes it from peer criteria and peer median', () => {
-    const context = createAnalysisContext(data, { focusMall: 'Фантастика', category: 'Все категории', cities: ['Москва'] });
+    const context = rankedContext({ focusMall: 'Фантастика', category: 'Все категории', cities: ['Москва'] });
     expect(context.focusMatchesPeerCriteria).toBe(false);
     expect(context.displayMalls.map((mall) => mall.mall)).toEqual(['Фантастика', 'Вне группы']);
     expect(context.peerMalls.map((mall) => mall.mall)).toEqual(['Вне группы']);
@@ -52,14 +55,14 @@ describe('unified analysis context', () => {
   });
 
   it('excludes missing GLA from a GLA filter and never substitutes GBA for density', () => {
-    const context = createAnalysisContext(data, { focusMall: 'Фантастика', category: 'Все категории', glaMin: 1 });
+    const context = rankedContext({ focusMall: 'Фантастика', category: 'Все категории', glaMin: 1 });
     expect(context.peerMalls.map((mall) => mall.mall)).toEqual(['Вне группы']);
-    const noGlaContext = createAnalysisContext(data, { focusMall: 'Конкурент', category: 'Все категории' });
+    const noGlaContext = rankedContext({ focusMall: 'Конкурент', category: 'Все категории' });
     expect(noGlaContext.mallStats[0]?.density10kGla).toBeNull();
   });
 
   it('calculates global, group and focus-exclusive uniqueness separately', () => {
-    const context = createAnalysisContext(data, { focusMall: 'Фантастика', category: 'Все категории', peerMalls: ['Конкурент'] });
+    const context = rankedContext({ focusMall: 'Фантастика', category: 'Все категории', peerMalls: ['Конкурент'] });
     expect([...context.uniqueness.global].sort()).toEqual(['b', 'c']);
     expect([...context.uniqueness.group].sort()).toEqual(['b', 'c', 'd']);
     expect([...context.uniqueness.focusExclusive].sort()).toEqual(['b', 'c']);
@@ -67,9 +70,34 @@ describe('unified analysis context', () => {
   });
 
   it('recalculates Jaccard and gap candidates from the current group', () => {
-    const context = createAnalysisContext(data, { focusMall: 'Фантастика', category: 'Все категории', peerMalls: ['Конкурент', 'Вне группы'], gapN: 2 });
+    const context = rankedContext({ focusMall: 'Фантастика', category: 'Все категории', peerMalls: ['Конкурент', 'Вне группы'], gapN: 2 });
     expect(context.similarities.find((item) => item.mall.mall === 'Конкурент')?.jaccard).toBeCloseTo(0.25);
     expect(context.gaps.map((item) => item.brandNormalized)).toEqual(['d']);
+  });
+});
+
+describe('PRODUCT-01 dense ranking', () => {
+  it('uses dense ranking for positive ties', () => {
+    expect(denseRanks([12, 12, 8, 8, 3])).toEqual([1, 1, 2, 2, 3]);
+  });
+
+  it('excludes zero values from ranking', () => {
+    expect(denseRanks([5, 0, 0])).toEqual([1, null, null]);
+    expect(denseRanks([0, 0, 0])).toEqual([null, null, null]);
+  });
+
+  it('recalculates after focus, group, geography and category changes', () => {
+    expect(rankedContext({ focusMall: 'Фантастика', category: 'Все категории', peerMalls: ['Конкурент'] }).benchmark.rank).toBe(1);
+    expect(rankedContext({ focusMall: 'Конкурент', category: 'Все категории', peerMalls: ['Фантастика', 'Вне группы'] }).benchmark.rank).toBe(2);
+    expect(rankedContext({ focusMall: 'Фантастика', category: 'Все категории', cities: ['Москва'] }).benchmark.rank).toBe(1);
+    expect(rankedContext({ focusMall: 'Конкурент', category: 'Одежда', peerMalls: ['Фантастика', 'Вне группы'] }).benchmark.rank).toBe(2);
+  });
+
+  it('returns null rank for a zero-count category without changing no-data semantics', () => {
+    const context = rankedContext({ focusMall: 'Фантастика', category: 'Категория без брендов', peerMalls: ['Конкурент', 'Вне группы'] });
+    expect(context.benchmark.focusBrandCount).toBe(0);
+    expect(context.benchmark.rank).toBeNull();
+    expect(context.categoryStats[0]?.rank).toBeNull();
   });
 });
 
