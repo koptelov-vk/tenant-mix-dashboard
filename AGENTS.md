@@ -3,7 +3,7 @@
 ## Project
 Tenant Mix Dashboard is a production analytics application for comparing shopping-centre tenant mix. Production: https://koptelov-vk.github.io/tenant-mix-dashboard/
 
-The canonical product, data, methodology, QA, deployment and security rules are defined in [`docs/PROJECT_INSTRUCTIONS.md`](docs/PROJECT_INSTRUCTIONS.md). Read and follow that document for every task. Root and local `AGENTS.md` files may add repository- or path-specific execution constraints, but they cannot weaken canonical quality or safety gates. If instructions genuinely conflict, stop until the owner resolves the conflict; do not choose a resolution independently.
+The canonical product, data, methodology, QA, deployment and security rules are defined in [`docs/PROJECT_INSTRUCTIONS.md`](docs/PROJECT_INSTRUCTIONS.md). The canonical multi-AI roles, task ownership and two-PC process are defined in [`docs/AI_OPERATING_MODEL.md`](docs/AI_OPERATING_MODEL.md), with handoff in [`docs/AI_TASK_HANDOFF.md`](docs/AI_TASK_HANDOFF.md) and QA applicability in [`docs/QA_RISK_TIERS.md`](docs/QA_RISK_TIERS.md). Read and follow these documents for every task. Root and local `AGENTS.md` files may add repository- or path-specific execution constraints, but they cannot weaken canonical quality or safety gates. If instructions genuinely conflict, stop until the owner resolves the conflict; do not choose a resolution independently.
 
 ## Approved stack
 React 18, TypeScript, Vite, Zustand, TanStack Query, TanStack Virtual, Recharts, Python data pipeline, GitHub Pages. Do not propose framework, state-manager or build-tool migrations unless explicitly requested.
@@ -22,6 +22,9 @@ React 18, TypeScript, Vite, Zustand, TanStack Query, TanStack Virtual, Recharts,
 Before work, read only:
 - this file;
 - `docs/PROJECT_INSTRUCTIONS.md`;
+- `docs/AI_OPERATING_MODEL.md`;
+- `docs/AI_TASK_HANDOFF.md` when changing executor or PC;
+- `docs/QA_RISK_TIERS.md` when selecting checks;
 - `docs/CURRENT_STATE.md`;
 - the referenced task file;
 - files explicitly listed in the task scope.
