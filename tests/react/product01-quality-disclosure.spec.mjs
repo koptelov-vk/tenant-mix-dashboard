@@ -19,7 +19,7 @@ test('PRODUCT-01 quality disclosure is independent, keyboard accessible and pres
   await expect(dialog).toHaveAttribute('id', controlledId);
   expect(new URL(page.url()).searchParams.get('tab') ?? 'overview').toBe('overview');
   expect(page.url()).toBe(initialUrl);
-  await expect(dialog).toContainText('записей исключено из основного показателя');
+  await expect(dialog).toContainText('Исключено из расчёта');
   await expect(dialog).toContainText('не входят в основной active-only показатель');
 
   const reasons = await dialog.locator('dl > div').evaluateAll((rows) => rows.map((row) => ({

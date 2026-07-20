@@ -15,8 +15,8 @@ function tooltip(profile: CategoryProfileStats, context: AnalysisContext) {
 function qualityPosition(anchor: DOMRect) {
   const viewportWidth = document.documentElement.clientWidth;
   const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-  const width = Math.min(380, viewportWidth - 24);
-  const maxHeight = Math.min(360, viewportHeight - 24);
+  const width = Math.min(400, viewportWidth - 24);
+  const maxHeight = Math.min(420, viewportHeight - 24);
   const left = Math.max(12, Math.min(anchor.left, viewportWidth - width - 12));
   const below = anchor.bottom + 8;
   const top = below + maxHeight <= viewportHeight - 12
@@ -25,12 +25,18 @@ function qualityPosition(anchor: DOMRect) {
   return { left, top, width, maxHeight };
 }
 
+function reviewSignalText(count: number) {
+  return `${count.toLocaleString('ru-RU')} действующих записей требуют дополнительной проверки, но включены в расчёт`;
+}
+
 function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const popoverId = useId();
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const excludedCount = profile.excludedUnknownCount + profile.excludedConflictingCount;
+  const hasExcluded = excludedCount > 0;
+  const hasIncludedReview = profile.manualReviewCount > 0;
 
   const close = (restoreFocus = false) => {
     setAnchor(null);
@@ -67,19 +73,20 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
     };
   }, [anchor]);
 
-  return <>
+  return <div className="category-profile-quality-signals">
     <button
       ref={triggerRef}
       type="button"
-      className="category-profile-quality-trigger"
+      className={`category-profile-quality-trigger ${hasExcluded ? 'is-limited' : 'is-review-only'}`}
       aria-label={`Показать качество данных категории ${profile.category}`}
       aria-expanded={Boolean(anchor)}
       aria-controls={popoverId}
       onClick={() => setAnchor((current) => current ? null : triggerRef.current?.getBoundingClientRect() ?? null)}
     >
-      <AlertTriangle size={15} aria-hidden="true" />
-      <span>Данные требуют проверки</span>
+      {hasExcluded ? <AlertTriangle size={15} aria-hidden="true" /> : <Info size={15} aria-hidden="true" />}
+      <span>{hasExcluded ? 'Расчёт ограничен' : reviewSignalText(profile.manualReviewCount)}</span>
     </button>
+    {hasExcluded && hasIncludedReview ? <span className="category-profile-review-signal" role="status">{reviewSignalText(profile.manualReviewCount)}</span> : null}
     {anchor ? createPortal(
       <div
         id={popoverId}
@@ -92,20 +99,27 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
         style={qualityPosition(anchor)}
       >
         <div className="category-profile-quality-heading">
-          <strong>Качество данных</strong>
+          <strong>Качество расчёта</strong>
           <button type="button" aria-label="Закрыть сведения о качестве данных" onClick={() => close(true)}><X size={18} aria-hidden="true" /></button>
         </div>
-        <p><b>{excludedCount.toLocaleString('ru-RU')}</b> записей исключено из основного показателя.</p>
-        <dl>
-          {profile.excludedUnknownCount > 0 ? <div><dt>Неизвестный статус</dt><dd>{profile.excludedUnknownCount.toLocaleString('ru-RU')}</dd></div> : null}
-          {profile.excludedConflictingCount > 0 ? <div><dt>Конфликтующий статус</dt><dd>{profile.excludedConflictingCount.toLocaleString('ru-RU')}</dd></div> : null}
-          {profile.manualReviewCount > 0 ? <div><dt>Ручная проверка</dt><dd>{profile.manualReviewCount.toLocaleString('ru-RU')}</dd></div> : null}
-        </dl>
-        <p className="category-profile-quality-note">Неизвестные и конфликтующие записи не входят в основной active-only показатель. Ручная проверка — отдельный сигнал качества и сама по себе не меняет статус записи.</p>
+        {hasExcluded ? <section className="category-profile-quality-section is-excluded">
+          <h3>Исключено из расчёта</h3>
+          <p><b>{excludedCount.toLocaleString('ru-RU')}</b> записей не входят в основной active-only показатель.</p>
+          <dl>
+            {profile.excludedUnknownCount > 0 ? <div><dt>Неизвестный статус</dt><dd>{profile.excludedUnknownCount.toLocaleString('ru-RU')}</dd></div> : null}
+            {profile.excludedConflictingCount > 0 ? <div><dt>Конфликтующий статус</dt><dd>{profile.excludedConflictingCount.toLocaleString('ru-RU')}</dd></div> : null}
+          </dl>
+          <p className="category-profile-quality-note">Эти записи исключены и ограничивают полноту рассчитанного показателя.</p>
+        </section> : null}
+        {hasIncludedReview ? <section className="category-profile-quality-section is-included-review">
+          <h3>Включено, но требует проверки</h3>
+          <p><b>{profile.manualReviewCount.toLocaleString('ru-RU')}</b> действующих записей требуют дополнительной проверки, но включены в расчёт.</p>
+          <p className="category-profile-quality-note">Ручная проверка не меняет active-статус и сама по себе не ограничивает расчёт.</p>
+        </section> : null}
       </div>,
       document.body,
     ) : null}
-  </>;
+  </div>;
 }
 
 export function CategoryProfile({ context, loading = false }: { context: AnalysisContext; loading?: boolean }) {
@@ -125,20 +139,22 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
     setCategories([category]);
     setActivePage('categories');
   };
-  const partial = context.categoryProfiles.some((profile) => profile.qualityIssues.length > 0);
+  const partial = context.categoryProfiles.some((profile) => profile.excludedUnknownCount + profile.excludedConflictingCount > 0);
 
   return <div className="category-profile-list">
     <p className="category-profile-note"><Info size={16} aria-hidden="true" />Количество брендов и эксклюзивность характеризуют структуру tenant-mix относительно выбранной группы и не подтверждают коммерческую эффективность категории.</p>
-    {partial ? <div className="category-profile-partial" role="status"><AlertTriangle size={16} aria-hidden="true" />Расчёт выполнен по доступным данным. Часть записей исключена или требует проверки.</div> : null}
+    {partial ? <div className="category-profile-partial" role="status"><AlertTriangle size={16} aria-hidden="true" />Расчёт выполнен по доступным данным. Часть записей исключена.</div> : null}
     {context.categoryProfiles.map((profile) => {
-      const hasQuality = profile.qualityIssues.length > 0;
+      const hasExcluded = profile.excludedUnknownCount + profile.excludedConflictingCount > 0;
+      const hasIncludedReview = profile.manualReviewCount > 0;
+      const hasQualitySignal = hasExcluded || hasIncludedReview;
       const mainValue = profile.allRowsExcludedByQuality
         ? 'Показатель не рассчитан · данные требуют проверки'
         : profile.displayPercent == null
           ? `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · нет данных`
           : `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · ${profile.displayPercent}% категории`;
       const tooltipId = `category-profile-tooltip-${profile.category.replace(/[^a-zа-яё0-9]+/gi, '-').toLowerCase()}`;
-      return <div className={`category-profile-row${hasQuality ? ' has-quality' : ''}`} key={profile.category}>
+      return <div className={`category-profile-row${hasQualitySignal ? ' has-quality-signal' : ''}${hasExcluded && hasIncludedReview ? ' has-mixed-quality' : ''}`} key={profile.category}>
         <button className="category-profile-open" type="button" onClick={() => openCategory(profile.category)} aria-label={`Открыть категорию ${profile.category}`} aria-describedby={tooltipId}>
           <span className="category-profile-copy">
             <strong>{profile.category}</strong>
@@ -150,7 +166,7 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
           </span>
           <ChevronRight aria-hidden="true" />
         </button>
-        {hasQuality ? <QualityDisclosure profile={profile} /> : null}
+        {hasQualitySignal ? <QualityDisclosure profile={profile} /> : null}
         <details className="category-profile-tooltip">
           <summary aria-label={`Пояснение расчёта для категории ${profile.category}`}><Info size={16} aria-hidden="true" /></summary>
           <div id={tooltipId} role="tooltip">{tooltip(profile, context)}</div>
