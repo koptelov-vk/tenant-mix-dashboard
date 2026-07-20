@@ -23,7 +23,7 @@ export function MultiFilter({ label, options, value, onChange, variant = 'toolba
   const [query, setQuery] = useState('');
   const [menuStyle, setMenuStyle] = useState<CSSProperties>();
   const activePage = useDashboardStore((state) => state.activePage);
-  const { close } = useExclusivePopover({ open, setOpen, triggerRef, contentRef: menuRef, dismissKey: activePage, onClose: () => setQuery('') });
+  const overlay = useExclusivePopover({ open, setOpen, triggerRef, contentRef: menuRef, dismissKey: activePage, onClose: () => setQuery('') });
   const filteredOptions = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase('ru');
     return normalized ? options.filter((option) => option.toLocaleLowerCase('ru').includes(normalized)) : options;
@@ -71,15 +71,15 @@ export function MultiFilter({ label, options, value, onChange, variant = 'toolba
     filteredOptions.forEach((option) => next.delete(option));
     commit(next);
   };
-  const menu = <div ref={menuRef} className={`registry-filter-menu registry-filter-portal registry-filter-portal-${variant}`} style={menuStyle} role="dialog" aria-label={`Фильтр столбца: ${label}`}>
-    <header><div><strong>{label}</strong><span>{options.length} значений</span></div><button type="button" className="registry-filter-close" onClick={() => close(true)} aria-label="Закрыть фильтр"><X size={17} /></button></header>
+  const menu = <div id={overlay.id} ref={menuRef} data-pdf-exclude className={`overlay-portal-layer registry-filter-menu registry-filter-portal registry-filter-portal-${variant}`} style={menuStyle} role="dialog" aria-label={`Фильтр столбца: ${label}`}>
+    <header><div><strong>{label}</strong><span>{options.length} значений</span></div><button type="button" className="registry-filter-close" onClick={() => overlay.close(true)} aria-label="Закрыть фильтр"><X size={17} /></button></header>
     {options.length > 8 ? <label className="registry-filter-search"><Search size={15} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Поиск в списке" aria-label={`Поиск: ${label}`} />{query ? <button type="button" onClick={() => setQuery('')} aria-label="Очистить поиск"><X size={14} /></button> : null}</label> : null}
     <div className="registry-filter-tools"><button type="button" onClick={selectVisible}>Выбрать все</button><button type="button" onClick={clearVisible}>Снять все</button></div>
     <div className="registry-filter-options">{filteredOptions.map((option) => <label key={option}><input type="checkbox" checked={selected.has(option)} onChange={() => toggle(option)} /><span>{option}</span></label>)}{!filteredOptions.length ? <p>Значения не найдены</p> : null}</div>
   </div>;
 
   return <><details ref={detailsRef} open={open} className={`registry-filter registry-filter-${variant} registry-filter-${align}`}>
-    <summary ref={triggerRef} aria-label={`Фильтр: ${label}`} title={`Фильтр: ${label}`} onClick={(event) => { event.preventDefault(); setOpen((current) => !current); }}>
+    <summary ref={triggerRef} aria-label={`Фильтр: ${label}`} aria-expanded={open} aria-controls={overlay.id} title={`Фильтр: ${label}`} onClick={(event) => { event.preventDefault(); overlay.toggle(); }}>
       <Filter size={variant === 'header' ? 15 : 14} aria-hidden="true" />
       {variant === 'toolbar' ? <span>{label}</span> : <span className="sr-only">{label}</span>}
       {value.length ? <b aria-label={`Выбрано: ${activeCount}`}>{activeCount}</b> : null}

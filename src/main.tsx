@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './TenantMixApp';
+import { OverlayControllerProvider } from './components/ui/OverlayController';
 import './styles/globals.css';
 import './styles/accessibility.css';
 import './styles/mall-sheet.css';
@@ -9,6 +10,7 @@ import './styles/saved-views.css';
 import './styles/pdf-export.css';
 import './styles/qa-fixes.css';
 import './styles/tooltip.css';
+import './styles/overlay-controller.css';
 import './styles/category-heatmap.css';
 import './styles/comparison-field.css';
 import './styles/package3-table-ux.css';
@@ -78,7 +80,7 @@ startBuildWatcher();
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <OverlayControllerProvider><App /></OverlayControllerProvider>
     </QueryClientProvider>
   </React.StrictMode>,
 );

@@ -7,9 +7,12 @@ const inventory = readFileSync(new URL('../docs/ux-tooltip-01-inventory.md', imp
 
 test('overlay controller exposes one active id and atomic open/toggle/close operations', () => {
   assert.match(controller, /activeId: string \| null/);
-  assert.match(controller, /setActiveId\(registration\.id\)/);
-  assert.match(controller, /current === registration\.id/);
+  assert.match(controller, /previous\.onDismiss\('handoff'\)/);
+  assert.match(controller, /active\.current\?\.id === registration\.id/);
   assert.match(controller, /restoreFocus/);
+  assert.match(controller, /document\.addEventListener\('pointerdown'/);
+  assert.match(controller, /document\.addEventListener\('keydown'/);
+  assert.match(controller, /OVERLAY_PDF_EXCLUSION_ATTRIBUTE/);
 });
 
 test('inventory covers required handoff and device contracts', () => {
