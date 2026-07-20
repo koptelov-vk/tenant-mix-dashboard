@@ -3,6 +3,8 @@
 ## Project
 Tenant Mix Dashboard is a production analytics application for comparing shopping-centre tenant mix. Production: https://koptelov-vk.github.io/tenant-mix-dashboard/
 
+The canonical product, data, methodology, QA, deployment and security rules are defined in [`docs/PROJECT_INSTRUCTIONS.md`](docs/PROJECT_INSTRUCTIONS.md). Read and follow that document for every task. Root and local `AGENTS.md` files may add repository- or path-specific execution constraints, but they cannot weaken canonical quality or safety gates. If instructions genuinely conflict, stop until the owner resolves the conflict; do not choose a resolution independently.
+
 ## Approved stack
 React 18, TypeScript, Vite, Zustand, TanStack Query, TanStack Virtual, Recharts, Python data pipeline, GitHub Pages. Do not propose framework, state-manager or build-tool migrations unless explicitly requested.
 
@@ -19,9 +21,12 @@ React 18, TypeScript, Vite, Zustand, TanStack Query, TanStack Virtual, Recharts,
 ## Context discipline
 Before work, read only:
 - this file;
+- `docs/PROJECT_INSTRUCTIONS.md`;
 - `docs/CURRENT_STATE.md`;
 - the referenced task file;
 - files explicitly listed in the task scope.
+
+This list limits repository file auditing. It does not prohibit reviewing task-related Issues, PRs, decisions, CI results or production evidence, and it does not authorize a repository-wide audit unless the task explicitly includes one.
 
 Do not re-audit the whole repository unless the task explicitly requests an audit.
 Do not inspect generated, archived or visual artefacts unless they are part of the task.
@@ -45,6 +50,8 @@ Normally ignore:
 
 ## Testing levels
 During implementation, run the narrowest relevant checks.
+
+Risk Tier determines the required depth of QA and acceptance; Testing Level describes when local checks run during implementation. Matching numbers do not imply a direct mapping. Select the concrete checks from the task's tier, scope and applicability.
 
 Level 1 — local change:
 - `pnpm exec tsc --noEmit`
