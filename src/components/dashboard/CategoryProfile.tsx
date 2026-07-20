@@ -48,7 +48,7 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
 
   useEffect(() => {
     if (!anchor) return;
-    requestAnimationFrame(() => popoverRef.current?.focus());
+    const focusFrame = requestAnimationFrame(() => popoverRef.current?.focus());
     const reposition = () => {
       const rect = triggerRef.current?.getBoundingClientRect();
       if (rect) setAnchor(rect);
@@ -59,6 +59,7 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
     window.visualViewport?.addEventListener('resize', reposition);
     window.visualViewport?.addEventListener('scroll', reposition);
     return () => {
+      cancelAnimationFrame(focusFrame);
       window.removeEventListener('resize', reposition);
       window.removeEventListener('scroll', reposition, true);
       window.visualViewport?.removeEventListener('resize', reposition);

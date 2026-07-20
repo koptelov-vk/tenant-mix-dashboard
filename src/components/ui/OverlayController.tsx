@@ -95,9 +95,15 @@ export function useControlledOverlay({ open: requestedOpen, setOpen, triggerRef,
   const reactId = useId();
   const id = `overlay-${reactId.replace(/:/g, '')}`;
   const controller = useOverlayController();
+  const dismissedWhileOpen = useRef(false);
   const registration = useMemo<OverlayRegistration>(() => ({
     id, triggerRef, contentRef,
-    onDismiss: (reason) => { onDismissReason?.(reason); setOpen(false); onClose?.(); },
+    onDismiss: (reason) => {
+      dismissedWhileOpen.current = true;
+      onDismissReason?.(reason);
+      setOpen(false);
+      onClose?.();
+    },
   }), [contentRef, id, onClose, onDismissReason, setOpen, triggerRef]);
   const previousDismissKey = useRef(dismissKey);
 
@@ -108,15 +114,19 @@ export function useControlledOverlay({ open: requestedOpen, setOpen, triggerRef,
   }, [controller, dismissKey, id]);
 
   useEffect(() => {
-    if (requestedOpen && !controller.isActive(id)) controller.open(registration);
+    if (!requestedOpen) {
+      dismissedWhileOpen.current = false;
+      return;
+    }
+    if (!dismissedWhileOpen.current && !controller.isActive(id)) controller.open(registration);
   }, [controller, id, registration, requestedOpen]);
 
   const active = controller.isActive(id) && requestedOpen;
   return {
     id,
     open: active,
-    openOverlay: () => { setOpen(true); controller.open(registration); },
-    toggle: () => { if (active) setOpen(false); else setOpen(true); controller.toggle(registration); },
+    openOverlay: () => { dismissedWhileOpen.current = false; setOpen(true); controller.open(registration); },
+    toggle: () => { dismissedWhileOpen.current = false; if (active) setOpen(false); else setOpen(true); controller.toggle(registration); },
     close: (restoreFocus = true, reason: CloseReason = 'ordinary') => controller.close({ restoreFocus, reason, onlyIfId: id }),
   };
 }
