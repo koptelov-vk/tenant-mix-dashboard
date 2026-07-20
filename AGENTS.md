@@ -3,6 +3,8 @@
 ## Project
 Tenant Mix Dashboard is a production analytics application for comparing shopping-centre tenant mix. Production: https://koptelov-vk.github.io/tenant-mix-dashboard/
 
+The canonical product, data, methodology, QA, deployment and security rules are defined in [`docs/PROJECT_INSTRUCTIONS.md`](docs/PROJECT_INSTRUCTIONS.md). Read and follow that document for every task; this file adds repository-specific execution constraints.
+
 ## Approved stack
 React 18, TypeScript, Vite, Zustand, TanStack Query, TanStack Virtual, Recharts, Python data pipeline, GitHub Pages. Do not propose framework, state-manager or build-tool migrations unless explicitly requested.
 
@@ -19,6 +21,7 @@ React 18, TypeScript, Vite, Zustand, TanStack Query, TanStack Virtual, Recharts,
 ## Context discipline
 Before work, read only:
 - this file;
+- `docs/PROJECT_INSTRUCTIONS.md`;
 - `docs/CURRENT_STATE.md`;
 - the referenced task file;
 - files explicitly listed in the task scope.
