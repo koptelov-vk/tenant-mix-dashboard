@@ -1,8 +1,10 @@
 import { AlertTriangle, ChevronRight, Info, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { AnalysisContext, CategoryProfileStats } from '../../types/dashboard';
 import { useDashboardStore } from '../../stores/dashboardStore';
+import { useControlledOverlay } from '../ui/OverlayController';
+import { Tooltip } from '../ui/Tooltip';
 
 const brandWord = (count: number) => count % 10 === 1 && count % 100 !== 11 ? 'бренд' : count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20) ? 'бренда' : 'брендов';
 const exclusiveWord = (count: number) => count % 10 === 1 && count % 100 !== 11 ? 'эксклюзивный' : 'эксклюзивных';
@@ -32,44 +34,36 @@ function reviewSignalText(count: number) {
 function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
-  const popoverId = useId();
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
   const excludedCount = profile.excludedUnknownCount + profile.excludedConflictingCount;
   const hasExcluded = excludedCount > 0;
   const hasIncludedReview = profile.manualReviewCount > 0;
 
-  const close = (restoreFocus = false) => {
-    setAnchor(null);
-    if (restoreFocus) requestAnimationFrame(() => triggerRef.current?.focus());
-  };
+  const overlay = useControlledOverlay({
+    open: Boolean(anchor),
+    setOpen: (next) => setAnchor(next ? triggerRef.current?.getBoundingClientRect() ?? null : null),
+    triggerRef,
+    contentRef: popoverRef,
+  });
 
   useEffect(() => {
     if (!anchor) return;
-    requestAnimationFrame(() => popoverRef.current?.focus());
+    const focusFrame = requestAnimationFrame(() => popoverRef.current?.focus());
     const reposition = () => {
       const rect = triggerRef.current?.getBoundingClientRect();
       if (rect) setAnchor(rect);
-      else close();
-    };
-    const dismiss = (event: PointerEvent) => {
-      if (!(event.target instanceof Node)) return;
-      if (triggerRef.current?.contains(event.target) || popoverRef.current?.contains(event.target)) return;
-      close();
-    };
-    const keyboard = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      event.preventDefault();
-      close(true);
+      else setAnchor(null);
     };
     window.addEventListener('resize', reposition);
     window.addEventListener('scroll', reposition, true);
-    document.addEventListener('pointerdown', dismiss);
-    document.addEventListener('keydown', keyboard);
+    window.visualViewport?.addEventListener('resize', reposition);
+    window.visualViewport?.addEventListener('scroll', reposition);
     return () => {
+      cancelAnimationFrame(focusFrame);
       window.removeEventListener('resize', reposition);
       window.removeEventListener('scroll', reposition, true);
-      document.removeEventListener('pointerdown', dismiss);
-      document.removeEventListener('keydown', keyboard);
+      window.visualViewport?.removeEventListener('resize', reposition);
+      window.visualViewport?.removeEventListener('scroll', reposition);
     };
   }, [anchor]);
 
@@ -77,11 +71,12 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
     <button
       ref={triggerRef}
       type="button"
+      data-overlay-trigger
       className={`category-profile-quality-trigger ${hasExcluded ? 'is-limited' : 'is-review-only'}`}
       aria-label={`Показать качество данных категории ${profile.category}`}
       aria-expanded={Boolean(anchor)}
-      aria-controls={popoverId}
-      onClick={() => setAnchor((current) => current ? null : triggerRef.current?.getBoundingClientRect() ?? null)}
+      aria-controls={overlay.id}
+      onClick={overlay.toggle}
     >
       {hasExcluded ? <AlertTriangle size={15} aria-hidden="true" /> : <Info size={15} aria-hidden="true" />}
       <span>{hasExcluded ? 'Расчёт ограничен' : reviewSignalText(profile.manualReviewCount)}</span>
@@ -89,9 +84,10 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
     {hasExcluded && hasIncludedReview ? <span className="category-profile-review-signal" role="status">{reviewSignalText(profile.manualReviewCount)}</span> : null}
     {anchor ? createPortal(
       <div
-        id={popoverId}
+        id={overlay.id}
         ref={popoverRef}
-        className="category-profile-quality-popover"
+        data-pdf-exclude
+        className="overlay-portal-layer category-profile-quality-popover"
         role="dialog"
         aria-modal="false"
         aria-label={`Качество данных категории ${profile.category}`}
@@ -100,7 +96,7 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
       >
         <div className="category-profile-quality-heading">
           <strong>Качество расчёта</strong>
-          <button type="button" aria-label="Закрыть сведения о качестве данных" onClick={() => close(true)}><X size={18} aria-hidden="true" /></button>
+          <button type="button" aria-label="Закрыть сведения о качестве данных" onClick={() => overlay.close(true)}><X size={18} aria-hidden="true" /></button>
         </div>
         {hasExcluded ? <section className="category-profile-quality-section is-excluded">
           <h3>Исключено из расчёта</h3>
@@ -153,9 +149,8 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
         : profile.displayPercent == null
           ? `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · нет данных`
           : `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · ${profile.displayPercent}% категории`;
-      const tooltipId = `category-profile-tooltip-${profile.category.replace(/[^a-zа-яё0-9]+/gi, '-').toLowerCase()}`;
       return <div className={`category-profile-row${hasQualitySignal ? ' has-quality-signal' : ''}${hasExcluded && hasIncludedReview ? ' has-mixed-quality' : ''}`} key={profile.category}>
-        <button className="category-profile-open" type="button" onClick={() => openCategory(profile.category)} aria-label={`Открыть категорию ${profile.category}`} aria-describedby={tooltipId}>
+        <button className="category-profile-open" type="button" onClick={() => openCategory(profile.category)} aria-label={`Открыть категорию ${profile.category}`}>
           <span className="category-profile-copy">
             <strong>{profile.category}</strong>
             <span>{profile.totalBrands} {brandWord(profile.totalBrands)}</span>
@@ -167,10 +162,7 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
           <ChevronRight aria-hidden="true" />
         </button>
         {hasQualitySignal ? <QualityDisclosure profile={profile} /> : null}
-        <details className="category-profile-tooltip">
-          <summary aria-label={`Пояснение расчёта для категории ${profile.category}`}><Info size={16} aria-hidden="true" /></summary>
-          <div id={tooltipId} role="tooltip">{tooltip(profile, context)}</div>
-        </details>
+        <Tooltip className="category-profile-tooltip" accessibleLabel={`Пояснение расчёта для категории ${profile.category}`} label={tooltip(profile, context)} />
       </div>;
     })}
   </div>;

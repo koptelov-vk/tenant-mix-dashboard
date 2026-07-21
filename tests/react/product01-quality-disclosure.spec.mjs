@@ -45,18 +45,17 @@ test('PRODUCT-01 quality disclosure is independent, keyboard accessible and pres
   await expect(dialog).toBeVisible();
 
   const calculationDetails = page.locator('.category-profile-tooltip').first();
-  const calculationTrigger = calculationDetails.locator('summary[aria-label^="Пояснение расчёта для категории"]');
+  const calculationTrigger = calculationDetails.getByRole('button', { name: /^Пояснение расчёта для категории/ });
   await expect(calculationTrigger).toBeVisible();
-  await calculationTrigger.dispatchEvent('pointerdown', { pointerType: testInfo.project.name.startsWith('mobile') ? 'touch' : 'mouse', bubbles: true });
+  await calculationTrigger.click();
   await expect(dialog).toBeHidden();
   await expect(trigger).toHaveAttribute('aria-expanded', 'false');
-  await calculationTrigger.click();
-  await expect(calculationDetails).toHaveAttribute('open', '');
-  await expect(calculationDetails.getByRole('tooltip')).toBeVisible();
+  await expect(calculationTrigger).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByRole('tooltip')).toBeVisible();
 
-  await calculationTrigger.click();
-  await expect(calculationDetails).not.toHaveAttribute('open', '');
-  await expect(calculationDetails.getByRole('tooltip')).toBeHidden();
+  await page.keyboard.press('Escape');
+  await expect(calculationTrigger).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('tooltip')).toBeHidden();
 
   const navigation = page.locator('.category-profile-row').first().getByRole('button', { name: /Открыть категорию/ });
   await navigation.click();

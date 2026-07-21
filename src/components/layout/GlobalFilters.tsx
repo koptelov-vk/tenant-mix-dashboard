@@ -66,7 +66,7 @@ function SearchableFilter({ label, options, selected, onChange, allLabel = 'Вс
   const popoverRef = useRef<HTMLDivElement>(null);
   const activePage = useDashboardStore((state) => state.activePage);
   const id = useId();
-  const { close } = useExclusivePopover({ open, setOpen, triggerRef, contentRef: popoverRef, dismissKey: activePage, onClose: () => setQuery('') });
+  const overlay = useExclusivePopover({ open, setOpen, triggerRef, contentRef: popoverRef, dismissKey: activePage, onClose: () => setQuery('') });
   const selectedSet = new Set(selected);
   const filtered = options.filter((option) => `${option.label} ${option.meta ?? ''}`.toLocaleLowerCase('ru').includes(query.trim().toLocaleLowerCase('ru')));
   const summary = single
@@ -75,17 +75,17 @@ function SearchableFilter({ label, options, selected, onChange, allLabel = 'Вс
   const choose = (value: string) => {
     if (single) {
       onChange([value]);
-      close(true);
+      overlay.close(true);
       return;
     }
     onChange(selectedSet.has(value) ? selected.filter((item) => item !== value) : [...selected, value]);
   };
   return <div className="filter-field searchable-filter">
     <span className="filter-label" id={`${id}-label`}>{label}</span>
-    <button ref={triggerRef} className="filter-control" type="button" aria-haspopup="listbox" aria-expanded={open} aria-labelledby={`${id}-label ${id}-value`} onClick={() => setOpen((value) => !value)}>
+    <button ref={triggerRef} className="filter-control" type="button" aria-haspopup="listbox" aria-expanded={open} aria-controls={overlay.id} aria-labelledby={`${id}-label ${id}-value`} onClick={overlay.toggle}>
       <span id={`${id}-value`}>{summary}</span><ChevronDown className="filter-control-icon-static" size={16} aria-hidden="true" />
     </button>
-    {open ? <div ref={popoverRef} className="filter-popover" role="dialog" aria-label={`Выбор: ${label}`}>
+    {open ? <div id={overlay.id} ref={popoverRef} data-pdf-exclude className="overlay-portal-layer filter-popover" role="dialog" aria-label={`Выбор: ${label}`}>
       <label className="filter-popover-search"><Search size={15} aria-hidden="true" /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Поиск: ${label.toLocaleLowerCase('ru')}`} /></label>
       {!single ? <div className="filter-popover-tools"><button type="button" onClick={() => onChange([])}>{allLabel}</button><span>{selected.length ? `Выбрано: ${selected.length}` : 'Без ограничений'}</span></div> : null}
       <div className="filter-options" role="listbox" aria-multiselectable={!single}>
@@ -94,7 +94,7 @@ function SearchableFilter({ label, options, selected, onChange, allLabel = 'Вс
         </button>)}
         {!filtered.length ? <p className="filter-empty">Ничего не найдено</p> : null}
       </div>
-      <button className="filter-popover-close" type="button" onClick={() => close(true)}>Готово</button>
+      <button className="filter-popover-close" type="button" onClick={() => overlay.close(true)}>Готово</button>
     </div> : null}
   </div>;
 }
