@@ -1,13 +1,8 @@
 # CLAUDE.md
 
-Claude Code and Claude Chat must follow, in order:
+Claude Code and Claude Chat must start with [`docs/AI_OPERATING_MODEL.md`](docs/AI_OPERATING_MODEL.md) and follow the authoritative multi-AI hierarchy defined there. This file is only a tool-specific entry point; it does not reproduce, replace or override that hierarchy.
 
-1. [`docs/PROJECT_INSTRUCTIONS.md`](docs/PROJECT_INSTRUCTIONS.md)
-2. [`docs/AI_OPERATING_MODEL.md`](docs/AI_OPERATING_MODEL.md)
-3. [`docs/AI_TASK_HANDOFF.md`](docs/AI_TASK_HANDOFF.md)
-4. [`docs/QA_RISK_TIERS.md`](docs/QA_RISK_TIERS.md)
-5. Root and applicable local `AGENTS.md`
-6. The referenced GitHub Issue and PR
+Supporting references are linked by the authoritative hierarchy and by the active GitHub Issue/PR. Applicable local `AGENTS.md` files may add path-specific constraints but cannot weaken canonical gates.
 
 ## Claude role
 
