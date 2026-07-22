@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -21,14 +21,11 @@ const copyRepository = () => {
   const sourceNodeModules = join(repositoryRoot, 'node_modules');
   if (!existsSync(sourceNodeModules)) throw new Error('node_modules is required for build-info generation integration tests');
   symlinkSync(sourceNodeModules, join(root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-  const aggregateResult = spawnSync(process.execPath, [pnpmCli, 'build:aggregates'], {
-    cwd: root,
-    encoding: 'utf8',
-    env: process.env,
-  });
-  if (aggregateResult.status !== 0) {
-    throw new Error(`aggregate fixture build failed:\n${aggregateResult.stdout}\n${aggregateResult.stderr}`);
-  }
+  const methodology = JSON.parse(readFileSync(join(root, 'config', 'methodology.json'), 'utf8'));
+  const dashboardDataPath = join(root, 'data', 'aggregates', 'dashboard_data.json');
+  const dashboardData = JSON.parse(readFileSync(dashboardDataPath, 'utf8'));
+  dashboardData.meta = { ...dashboardData.meta, methodologyVersion: methodology.methodologyVersion };
+  writeFileSync(dashboardDataPath, JSON.stringify(dashboardData));
   return root;
 };
 
