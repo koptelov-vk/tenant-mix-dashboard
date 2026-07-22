@@ -21,6 +21,14 @@ const copyRepository = () => {
   const sourceNodeModules = join(repositoryRoot, 'node_modules');
   if (!existsSync(sourceNodeModules)) throw new Error('node_modules is required for build-info generation integration tests');
   symlinkSync(sourceNodeModules, join(root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+  const aggregateResult = spawnSync(process.execPath, [pnpmCli, 'build:aggregates'], {
+    cwd: root,
+    encoding: 'utf8',
+    env: process.env,
+  });
+  if (aggregateResult.status !== 0) {
+    throw new Error(`aggregate fixture build failed:\n${aggregateResult.stdout}\n${aggregateResult.stderr}`);
+  }
   return root;
 };
 
