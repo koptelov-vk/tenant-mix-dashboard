@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://koptelov-vk.github.io/tenant-mix-dashboard/build-info.schema.json",
+  "title": "Tenant Mix production build metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "build",
+    "generatedAt",
+    "app",
+    "methodologyVersion",
+    "classifierVersion",
+    "deploymentId"
+  ],
+  "properties": {
+    "status": { "const": "production" },
+    "build": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "app": { "const": "tenant-mix-react" },
+    "methodologyVersion": { "type": "string", "minLength": 1 },
+    "classifierVersion": { "type": "string", "minLength": 1 },
+    "deploymentId": { "type": "string", "minLength": 1 }
+  }
+}
