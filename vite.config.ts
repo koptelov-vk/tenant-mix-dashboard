@@ -27,7 +27,10 @@ function copyDashboardData(): Plugin {
         classifierMetadata?.classifierVersion,
         'config/classifier.json classifierVersion',
       );
-      const deploymentId = requiredMetadata(process.env.DEPLOYMENT_ID, 'DEPLOYMENT_ID');
+      const deploymentId = requiredMetadata(
+        process.env.GITHUB_RUN_ID ?? process.env.VITE_DEPLOYMENT_ID ?? 'local',
+        'deploymentId',
+      );
 
       const target = resolve('dist/data');
       mkdirSync(target, { recursive: true });
