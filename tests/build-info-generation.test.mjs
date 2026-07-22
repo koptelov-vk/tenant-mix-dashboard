@@ -23,17 +23,18 @@ const copyRepository = () => {
   return root;
 };
 
-const buildArtifact = (root, envOverrides = {}) => spawnSync(pnpm, ['build'], {
-  cwd: root,
-  encoding: 'utf8',
-  env: {
-    ...process.env,
-    GITHUB_SHA: '',
-    GITHUB_RUN_ID: '',
-    VITE_DEPLOYMENT_ID: '',
-    ...envOverrides,
-  },
-});
+const buildArtifact = (root, envOverrides = {}) => {
+  const env = { ...process.env };
+  delete env.GITHUB_SHA;
+  delete env.GITHUB_RUN_ID;
+  delete env.VITE_DEPLOYMENT_ID;
+  Object.assign(env, envOverrides);
+  return spawnSync(pnpm, ['build'], {
+    cwd: root,
+    encoding: 'utf8',
+    env,
+  });
+};
 
 const readBuildInfo = (root) => JSON.parse(readFileSync(join(root, 'dist', 'build-info.json'), 'utf8'));
 
