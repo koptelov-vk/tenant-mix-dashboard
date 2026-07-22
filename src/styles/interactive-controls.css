@@ -1,0 +1,23 @@
+/* CP-1 shared interactive geometry. This file is loaded after consumer styles
+   so breakpoint-specific rules cannot shrink the usable target below 44px. */
+.header-actions .button,
+.header-actions > .saved-views-root > .button,
+.header-actions > .export-actions-root > .button {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 2px;
+}
+
+.navigation .nav-more > button {
+  width: 100%;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.tooltip > button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  margin: 0;
+}
