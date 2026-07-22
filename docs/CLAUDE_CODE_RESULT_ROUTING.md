@@ -19,9 +19,13 @@ workstreams.
    assumption; limitation.
 4. State exact repository path, branch, base SHA, head SHA, main SHA, PR,
    workflow run, deployment ID, production SHA — whenever relevant.
-5. Physical-device testing is currently `PHYSICAL_DEVICE_TESTING_OUT_OF_CURRENT_SCOPE`.
-   Never demand a physical iPhone/Android, and never treat its absence as a
-   blocker.
+5. Use `PHYSICAL_DEVICE_TESTING_OUT_OF_CURRENT_SCOPE` only as a declaration
+   about the current task scope, not as a waiver of a risk-triggered mandatory
+   physical QA gate. Determine applicability from the risk-based
+   physical-device policies in [`docs/QA_RISK_TIERS.md`](QA_RISK_TIERS.md) and
+   [`docs/PROJECT_INSTRUCTIONS.md`](PROJECT_INSTRUCTIONS.md). If those policies
+   make physical QA mandatory for the task, report that gate as required or
+   pending; do not label it out of scope.
 6. Never post GitHub comments, merge, deploy, or close Issues without an
    explicit separate command.
 7. Never use the word "done"/«готово» unless merge, deployment, or production
@@ -59,7 +63,8 @@ Separately: confirmed defects; hypotheses; test gaps; unrelated findings.
 
 ## Ограничения
 What was not verified; why; whether it affects the verdict;
-physical devices = OUT_OF_CURRENT_SCOPE.
+physical-device applicability under rule 5 = OUT_OF_CURRENT_SCOPE or
+required/pending under the referenced risk-based policies.
 
 ## Verdict
 Exact machine-readable statuses.
@@ -169,6 +174,7 @@ context from earlier messages.
 - CI is never called PASS before all required jobs finish
 - merge is never called deployment
 - deployment is never called production acceptance
-- physical devices are never used as a mandatory gate
+- physical-device applicability follows rule 5 and its referenced risk-based
+  policies; a triggered mandatory gate is never labeled out of scope
 - exactly one next step is stated
 - every code block can be copied with no further editing
