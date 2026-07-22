@@ -27,7 +27,11 @@ function copyDashboardData(): Plugin {
         classifierMetadata?.classifierVersion,
         'config/classifier.json classifierVersion',
       );
-      const deploymentId = requiredMetadata(process.env.GITHUB_RUN_ID ?? 'local', 'deploymentId');
+      const githubRunId = process.env.GITHUB_RUN_ID?.trim();
+      const deploymentId = requiredMetadata(
+        githubRunId || (process.env.GITHUB_SHA ? '' : 'local'),
+        'deploymentId',
+      );
       if (process.env.GITHUB_SHA && deploymentId === 'local') {
         throw new Error('deploymentId "local" is forbidden when GITHUB_SHA is present');
       }

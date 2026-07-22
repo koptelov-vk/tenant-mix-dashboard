@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+const pnpmCli = process.env.npm_execpath;
+if (!pnpmCli) throw new Error('npm_execpath is required for build-info generation integration tests');
 const ciSha = '0123456789abcdef0123456789abcdef01234567';
 const ciRunId = '29871238075';
 
@@ -29,7 +30,7 @@ const buildArtifact = (root, envOverrides = {}) => {
   delete env.GITHUB_RUN_ID;
   delete env.VITE_DEPLOYMENT_ID;
   Object.assign(env, envOverrides);
-  return spawnSync(pnpm, ['build'], {
+  return spawnSync(process.execPath, [pnpmCli, 'build'], {
     cwd: root,
     encoding: 'utf8',
     env,
@@ -66,6 +67,17 @@ test('canonical CI build emits GITHUB_SHA and GITHUB_RUN_ID', { timeout: 120_000
     assert.equal(buildInfo.classifierVersion, 'tenant-mix-classifier-v1');
     assert.equal(buildInfo.deploymentId, ciRunId);
     assert.notEqual(buildInfo.deploymentId, 'local');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('canonical CI build rejects an empty GITHUB_RUN_ID', { timeout: 120_000 }, () => {
+  const root = copyRepository();
+  try {
+    const result = buildArtifact(root, { GITHUB_SHA: ciSha, GITHUB_RUN_ID: '' });
+    assert.notEqual(result.status, 0);
+    assert.match(`${result.stdout}\n${result.stderr}`, /deploymentId is missing or empty/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
