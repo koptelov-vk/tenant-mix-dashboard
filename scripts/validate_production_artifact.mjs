@@ -45,16 +45,31 @@ const parseJson = (path, label) => {
 };
 const buildInfo = parseJson(join(root, 'build-info.json'), 'build-info.json');
 const dashboardData = parseJson(join(root, 'data/dashboard_data.json'), 'dashboard_data.json');
+const buildInfoSchema = parseJson(join('config', 'build-info.schema.json'), 'build-info schema');
+const classifierMetadata = parseJson(join('config', 'classifier.json'), 'classifier metadata');
 
-if (buildInfo) {
+if (buildInfo && buildInfoSchema) {
+  for (const field of buildInfoSchema.required ?? []) {
+    const value = buildInfo[field];
+    if (typeof value !== 'string' || !value.trim()) fail(`build-info ${field} is missing or empty`);
+  }
   if (buildInfo.status !== 'production') fail(`build-info status must be production, got ${buildInfo.status}`);
   if (buildInfo.app !== 'tenant-mix-react') fail(`unexpected app id in build-info: ${buildInfo.app}`);
-  if (!buildInfo.build) fail('build-info build SHA is missing');
   if (!buildInfo.generatedAt || Number.isNaN(Date.parse(buildInfo.generatedAt))) fail('build-info generatedAt is missing or invalid');
-  if (typeof buildInfo.methodologyVersion !== 'string' || !buildInfo.methodologyVersion.trim()) fail('build-info methodologyVersion is missing or empty');
   if (process.env.GITHUB_SHA && buildInfo.build !== process.env.GITHUB_SHA) {
     fail(`build-info SHA ${buildInfo.build} does not match GITHUB_SHA ${process.env.GITHUB_SHA}`);
   }
+  if (process.env.DEPLOYMENT_ID && buildInfo.deploymentId !== process.env.DEPLOYMENT_ID) {
+    fail(`build-info deploymentId ${buildInfo.deploymentId} does not match DEPLOYMENT_ID ${process.env.DEPLOYMENT_ID}`);
+  }
+}
+
+const canonicalClassifierVersion = classifierMetadata?.classifierVersion;
+if (typeof canonicalClassifierVersion !== 'string' || !canonicalClassifierVersion.trim()) {
+  fail('config/classifier.json classifierVersion is missing or empty');
+}
+if (buildInfo?.classifierVersion && canonicalClassifierVersion && buildInfo.classifierVersion !== canonicalClassifierVersion) {
+  fail(`classifierVersion mismatch: build-info=${buildInfo.classifierVersion}, canonical=${canonicalClassifierVersion}`);
 }
 
 const aggregateVersion = dashboardData?.meta?.methodologyVersion;
@@ -64,4 +79,4 @@ if (buildInfo?.methodologyVersion && aggregateVersion && buildInfo.methodologyVe
 }
 
 if (process.exitCode) process.exit(process.exitCode);
-console.log(`Production artifact validated: ${files.length} files, one canonical index, build ${buildInfo.build}, methodology ${buildInfo.methodologyVersion}`);
+console.log(`Production artifact validated: ${files.length} files, one canonical index, build ${buildInfo.build}, methodology ${buildInfo.methodologyVersion}, classifier ${buildInfo.classifierVersion}, deployment ${buildInfo.deploymentId}`);
