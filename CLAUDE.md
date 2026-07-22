@@ -4,6 +4,8 @@ Claude Code and Claude Chat must start with [`docs/AI_OPERATING_MODEL.md`](docs/
 
 Supporting references are linked by the authoritative hierarchy and by the active GitHub Issue/PR. Applicable local `AGENTS.md` files may add path-specific constraints but cannot weaken canonical gates.
 
+When returning results, Claude Code additionally follows the tool-specific output format in [`docs/CLAUDE_CODE_RESULT_ROUTING.md`](docs/CLAUDE_CODE_RESULT_ROUTING.md); that format does not reproduce, replace or override the authoritative hierarchy above.
+
 ## Claude role
 
 - Claude Code may be the single implementation executor or an independent reviewer, never both for the same acceptance decision.
