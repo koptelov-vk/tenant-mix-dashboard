@@ -6,6 +6,8 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const source = JSON.parse(fs.readFileSync('config/methodology.json', 'utf8'));
+const classifier = JSON.parse(fs.readFileSync('config/classifier.json', 'utf8'));
+const buildInfoSchema = fs.readFileSync('config/build-info.schema.json', 'utf8');
 const validator = path.resolve('scripts/validate_production_artifact.mjs');
 
 const makeArtifact = (options = {}) => {
@@ -14,9 +16,13 @@ const makeArtifact = (options = {}) => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'tenant-mix-methodology-'));
   fs.mkdirSync(path.join(cwd, 'dist', 'assets'), { recursive: true });
   fs.mkdirSync(path.join(cwd, 'dist', 'data'), { recursive: true });
+  fs.mkdirSync(path.join(cwd, 'config'), { recursive: true });
+  fs.writeFileSync(path.join(cwd, 'config', 'build-info.schema.json'), buildInfoSchema);
+  fs.writeFileSync(path.join(cwd, 'config', 'classifier.json'), JSON.stringify(classifier));
   fs.writeFileSync(path.join(cwd, 'dist', 'index.html'), '<script src="/tenant-mix-dashboard/assets/app.js"></script>');
   fs.writeFileSync(path.join(cwd, 'dist', 'build-info.json'), JSON.stringify({
     status: 'production', build: 'test-sha', generatedAt: '2026-07-19T00:00:00.000Z', app: 'tenant-mix-react',
+    classifierVersion: classifier.classifierVersion, deploymentId: 'local',
     ...(buildVersion === undefined ? {} : { methodologyVersion: buildVersion }),
   }));
   fs.writeFileSync(path.join(cwd, 'dist', 'data', 'dashboard_data.json'), JSON.stringify({
@@ -30,7 +36,7 @@ const validate = (options) => {
   const result = spawnSync(process.execPath, [validator], {
     cwd,
     encoding: 'utf8',
-    env: { ...process.env, GITHUB_SHA: '' },
+    env: { ...process.env, GITHUB_SHA: '', GITHUB_RUN_ID: '' },
   });
   fs.rmSync(cwd, { recursive: true, force: true });
   return result;
