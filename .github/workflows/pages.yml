@@ -16,7 +16,6 @@ concurrency:
 
 env:
   SNAPSHOT_DATE: '2026-07-16'
-  DEPLOYMENT_ID: ${{ github.run_id }}
 
 jobs:
   quality:
