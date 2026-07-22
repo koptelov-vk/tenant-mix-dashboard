@@ -20,6 +20,7 @@ import './styles/category-profile.css';
 import './styles/category-profile-quality.css';
 import './styles/export-actions.css';
 import './styles/upcoming-table-responsive.css';
+import './styles/interactive-controls.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
