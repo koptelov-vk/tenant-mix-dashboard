@@ -59,8 +59,11 @@ if (buildInfo && buildInfoSchema) {
   if (process.env.GITHUB_SHA && buildInfo.build !== process.env.GITHUB_SHA) {
     fail(`build-info SHA ${buildInfo.build} does not match GITHUB_SHA ${process.env.GITHUB_SHA}`);
   }
-  if (process.env.DEPLOYMENT_ID && buildInfo.deploymentId !== process.env.DEPLOYMENT_ID) {
-    fail(`build-info deploymentId ${buildInfo.deploymentId} does not match DEPLOYMENT_ID ${process.env.DEPLOYMENT_ID}`);
+  if (process.env.GITHUB_SHA && buildInfo.deploymentId === 'local') {
+    fail('build-info deploymentId must not be local when GITHUB_SHA is set');
+  }
+  if (process.env.GITHUB_RUN_ID && buildInfo.deploymentId !== process.env.GITHUB_RUN_ID) {
+    fail(`build-info deploymentId ${buildInfo.deploymentId} does not match GITHUB_RUN_ID ${process.env.GITHUB_RUN_ID}`);
   }
 }
 
