@@ -15,8 +15,10 @@ test('maintenance shell polls an uncached production marker and uses visual view
 
 test('React production build publishes a build marker and clears dist', async () => {
   const config = await read('vite.config.ts');
+  const contract = await read('scripts/build-info-contract.mjs');
   assert.match(config, /build-info\.json/);
-  assert.match(config, /status:\s*'production'/);
+  assert.match(config, /createBuildInfo/);
+  assert.match(contract, /status:\s*'production'/);
   assert.match(config, /emptyOutDir:\s*true/);
 });
 
