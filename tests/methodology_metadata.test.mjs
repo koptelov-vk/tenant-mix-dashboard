@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { dataVersionFor } from '../scripts/build-info-contract.mjs';
 
 const source = JSON.parse(fs.readFileSync('config/methodology.json', 'utf8'));
 const classifier = JSON.parse(fs.readFileSync('config/classifier.json', 'utf8'));
@@ -19,15 +20,24 @@ const makeArtifact = (options = {}) => {
   fs.mkdirSync(path.join(cwd, 'config'), { recursive: true });
   fs.writeFileSync(path.join(cwd, 'config', 'build-info.schema.json'), buildInfoSchema);
   fs.writeFileSync(path.join(cwd, 'config', 'classifier.json'), JSON.stringify(classifier));
+  fs.writeFileSync(path.join(cwd, 'package.json'), JSON.stringify({ version: '3.0.0-alpha.1' }));
   fs.writeFileSync(path.join(cwd, 'dist', 'index.html'), '<script src="/tenant-mix-dashboard/assets/app.js"></script>');
+  const dashboardData = {
+    meta: {
+      ...(aggregateVersion === undefined ? {} : { methodologyVersion: aggregateVersion }),
+      snapshotDate: '2026-07-16',
+    },
+  };
+  const dashboardDataJson = JSON.stringify(dashboardData);
   fs.writeFileSync(path.join(cwd, 'dist', 'build-info.json'), JSON.stringify({
     status: 'production', build: 'test-sha', generatedAt: '2026-07-19T00:00:00.000Z', app: 'tenant-mix-react',
+    appVersion: '3.0.0-alpha.1',
+    dataVersion: dataVersionFor(Buffer.from(dashboardDataJson)),
+    dataSnapshotAt: '2026-07-16',
     classifierVersion: classifier.classifierVersion, deploymentId: 'local',
     ...(buildVersion === undefined ? {} : { methodologyVersion: buildVersion }),
   }));
-  fs.writeFileSync(path.join(cwd, 'dist', 'data', 'dashboard_data.json'), JSON.stringify({
-    meta: aggregateVersion === undefined ? {} : { methodologyVersion: aggregateVersion },
-  }));
+  fs.writeFileSync(path.join(cwd, 'dist', 'data', 'dashboard_data.json'), dashboardDataJson);
   return cwd;
 };
 
@@ -45,11 +55,11 @@ const validate = (options) => {
 test('methodology version source uses a stable contract id', () => {
   assert.match(source.methodologyVersion, /^[a-z0-9]+(?:-[a-z0-9]+)*-v[1-9][0-9]*$/);
   const builder = fs.readFileSync('scripts/build_dashboard_data.py', 'utf8');
-  const vite = fs.readFileSync('vite.config.ts', 'utf8');
+  const buildInfoContract = fs.readFileSync('scripts/build-info-contract.mjs', 'utf8');
   assert.ok(builder.includes('config" / "methodology.json'));
-  assert.ok(vite.includes('dashboardData?.meta?.methodologyVersion'));
+  assert.ok(buildInfoContract.includes('dashboardData?.meta?.methodologyVersion'));
   assert.equal((builder.match(/tenant-mix-active-only-v1/g) || []).length, 0);
-  assert.equal((vite.match(/tenant-mix-active-only-v1/g) || []).length, 0);
+  assert.equal((buildInfoContract.match(/tenant-mix-active-only-v1/g) || []).length, 0);
 });
 
 test('artifact validator accepts matching methodology metadata', () => {
