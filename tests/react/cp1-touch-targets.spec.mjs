@@ -5,7 +5,10 @@ const configurations = [
   { name: 'portrait-375', width: 375, height: 812 },
   { name: 'portrait-390', width: 390, height: 844 },
   { name: 'portrait-430', width: 430, height: 932 },
+  { name: 'landscape-568', width: 568, height: 320 },
+  { name: 'landscape-667', width: 667, height: 375 },
   { name: 'landscape-844', width: 844, height: 390 },
+  { name: 'landscape-932', width: 932, height: 430 },
   { name: 'desktop-1366', width: 1366, height: 900 },
 ];
 
