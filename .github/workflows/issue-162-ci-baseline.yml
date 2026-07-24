@@ -1,13 +1,19 @@
 name: Issue 162 diagnostic CI baseline (temporary)
 
 # Diagnostic-only workflow for Issue #162 investigation.
-# Manual dispatch only. No push/schedule trigger. No deploy job. No Pages/production permissions.
+# Triggered on this diagnostic PR only (pull_request, scoped to this branch) plus manual
+# dispatch for reruns once GitHub registers it. No push-trigger for main, no schedule,
+# no deploy job, no Pages/production permissions.
 # Runs the exact regression test 10x on desktop and 10x on mobile-webkit-320, alternating,
 # workers=1, retries=0, to establish a CI-native baseline failure rate. Does not modify
 # application code, tests, or the ordinary CI/CD workflows.
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/issue-162-ci-baseline.yml'
 
 permissions:
   contents: read
