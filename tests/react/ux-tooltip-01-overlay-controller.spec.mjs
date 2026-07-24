@@ -37,6 +37,93 @@ test('quality↔calculation handoff has no focus bounce and close restores focus
   await expect(qualityTrigger).toBeFocused();
 });
 
+test('quality disclosure close-button restores focus to exact trigger (regression #156)', async ({ page }, testInfo) => {
+  const activate = (locator) => testInfo.project.name.startsWith('mobile') ? locator.tap() : locator.click();
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+
+  const qualityTrigger = quality(page);
+  await expect(qualityTrigger).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 200));
+  const scrollBefore = await page.evaluate(() => window.scrollY);
+
+  await activate(qualityTrigger);
+  const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+  await expect(dialog).toBeVisible();
+  const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
+
+  await activate(closeButton);
+  await expect(dialog).toBeHidden();
+  await expect(activeOverlay(page)).toHaveCount(0);
+  await expect(qualityTrigger).toBeFocused();
+  expect(await page.evaluate(() => document.activeElement?.tagName)).not.toBe('BODY');
+  expect(await page.evaluate(() => window.scrollY)).toBe(scrollBefore);
+  expect(errors).toEqual([]);
+});
+
+test('quality disclosure close-button keyboard activation restores focus to trigger', async ({ page }) => {
+  const qualityTrigger = quality(page);
+  await qualityTrigger.click();
+  const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+  await expect(dialog).toBeVisible();
+  const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
+  await closeButton.focus();
+  await page.keyboard.press('Enter');
+  await expect(dialog).toBeHidden();
+  await expect(qualityTrigger).toBeFocused();
+});
+
+test('repeated open/close via close-button keeps returning focus to the same exact trigger', async ({ page }) => {
+  const qualityTrigger = quality(page);
+  const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+  for (let cycle = 0; cycle < 3; cycle += 1) {
+    await qualityTrigger.click();
+    await expect(dialog).toBeVisible();
+    const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
+    await closeButton.click();
+    await expect(dialog).toBeHidden();
+    await expect(activeOverlay(page)).toHaveCount(0);
+    await expect(qualityTrigger).toBeFocused();
+  }
+});
+
+test('quality A→quality B forward handoff via own close buttons returns focus to each own trigger, never bounces to A', async ({ page }) => {
+  const qualityTriggers = page.locator('.category-profile-quality-trigger');
+  const triggerA = qualityTriggers.nth(0);
+  const triggerB = qualityTriggers.nth(1);
+  const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+
+  await triggerA.click();
+  await expect(dialog).toBeVisible();
+
+  await triggerB.click();
+  await expect(activeOverlay(page)).toHaveCount(1);
+  await expect(triggerA).not.toBeFocused();
+
+  const closeB = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
+  await closeB.click();
+  await expect(activeOverlay(page)).toHaveCount(0);
+  await expect(triggerB).toBeFocused();
+  await expect(triggerA).not.toBeFocused();
+});
+
+test('closing quality disclosure via close-button then changing section leaves no orphan overlay', async ({ page }) => {
+  const qualityTrigger = quality(page);
+  const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+  await qualityTrigger.click();
+  await expect(dialog).toBeVisible();
+  const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
+  await closeButton.click();
+  await expect(dialog).toBeHidden();
+
+  const navigation = page.locator('.category-profile-row').first().getByRole('button', { name: /Открыть категорию/ });
+  await navigation.click();
+  await expect.poll(() => new URL(page.url()).searchParams.get('tab')).toBe('categories');
+  await expect(activeOverlay(page)).toHaveCount(0);
+  await expect(page.getByRole('dialog', { name: /Качество данных категории/ })).toHaveCount(0);
+});
+
 test('tooltip↔filter↔export↔Saved Views share atomic integration contract', async ({ page }) => {
   await calculation(page).click();
   await page.getByRole('button', { name: 'Бренды' }).first().click();

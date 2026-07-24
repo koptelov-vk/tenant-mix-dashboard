@@ -22,6 +22,16 @@ type OverlayControllerValue = {
 
 const OverlayControllerContext = createContext<OverlayControllerValue | null>(null);
 
+// Documented opener-restore contract: an opener only receives focus back if it is
+// still connected, visible and enabled. A removed/hidden/disabled opener is left
+// alone (the browser's own default — typically <body> — stands as the fallback).
+function isRestorableOpener(element: HTMLElement | null): element is HTMLElement {
+  if (!element || !element.isConnected) return false;
+  if (element.hidden || element.closest('[hidden]')) return false;
+  if ('disabled' in element && (element as HTMLButtonElement).disabled) return false;
+  return true;
+}
+
 export function OverlayControllerProvider({ children }: { children: ReactNode }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = useRef<OverlayRegistration | null>(null);
@@ -32,10 +42,17 @@ export function OverlayControllerProvider({ children }: { children: ReactNode })
     if (options?.onlyIfId && current.id !== options.onlyIfId) return;
     active.current = null;
     setActiveId(null);
-    current.onDismiss(options?.reason ?? 'ordinary');
     if (options?.restoreFocus !== false && options?.reason !== 'handoff' && options?.reason !== 'hover-leave') {
-      requestAnimationFrame(() => { if (!active.current) current.triggerRef.current?.focus(); });
+      // Move focus to the opener BEFORE onDismiss unmounts the overlay content.
+      // Restoring focus after unmount (e.g. via requestAnimationFrame) races the
+      // browser's own synchronous reassignment of a removed focused node to
+      // <body> — that race is what left focus stranded on <body> after the
+      // close-button click (issue #156). Moving focus first means the node the
+      // browser is about to detach is never the focused one.
+      const opener = current.triggerRef.current;
+      if (isRestorableOpener(opener)) opener.focus({ preventScroll: true });
     }
+    current.onDismiss(options?.reason ?? 'ordinary');
   }, []);
 
   const open = useCallback((registration: OverlayRegistration) => {
