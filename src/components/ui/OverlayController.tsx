@@ -35,6 +35,15 @@ function isRestorableOpener(element: HTMLElement | null): element is HTMLElement
 export function OverlayControllerProvider({ children }: { children: ReactNode }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = useRef<OverlayRegistration | null>(null);
+  // Set for the duration of close()'s own synchronous work on a given overlay id.
+  // Some triggers open on focus (e.g. Tooltip's onFocus -> openOverlay, for
+  // keyboard users), and close() focuses the opener synchronously as part of
+  // the #156 fix — which fires that same onFocus handler re-entrantly, from
+  // inside close() itself, before onDismiss has run. Without this guard,
+  // open()'s re-registration would overwrite the active/activeId this close()
+  // is in the middle of clearing, leaving a stale active registration behind
+  // even though the overlay is visually closed.
+  const closingId = useRef<string | null>(null);
 
   const close = useCallback((options?: { restoreFocus?: boolean; reason?: CloseReason; onlyIfId?: string }) => {
     const current = active.current;
@@ -42,20 +51,31 @@ export function OverlayControllerProvider({ children }: { children: ReactNode })
     if (options?.onlyIfId && current.id !== options.onlyIfId) return;
     active.current = null;
     setActiveId(null);
-    if (options?.restoreFocus !== false && options?.reason !== 'handoff' && options?.reason !== 'hover-leave') {
-      // Move focus to the opener BEFORE onDismiss unmounts the overlay content.
-      // Restoring focus after unmount (e.g. via requestAnimationFrame) races the
-      // browser's own synchronous reassignment of a removed focused node to
-      // <body> — that race is what left focus stranded on <body> after the
-      // close-button click (issue #156). Moving focus first means the node the
-      // browser is about to detach is never the focused one.
-      const opener = current.triggerRef.current;
-      if (isRestorableOpener(opener)) opener.focus({ preventScroll: true });
+    closingId.current = current.id;
+    try {
+      if (options?.restoreFocus !== false && options?.reason !== 'handoff' && options?.reason !== 'hover-leave') {
+        // Move focus to the opener BEFORE onDismiss unmounts the overlay content.
+        // Restoring focus after unmount (e.g. via requestAnimationFrame) races the
+        // browser's own synchronous reassignment of a removed focused node to
+        // <body> — that race is what left focus stranded on <body> after the
+        // close-button click (issue #156). Moving focus first means the node the
+        // browser is about to detach is never the focused one.
+        const opener = current.triggerRef.current;
+        if (isRestorableOpener(opener)) opener.focus({ preventScroll: true });
+      }
+      current.onDismiss(options?.reason ?? 'ordinary');
+    } finally {
+      closingId.current = null;
     }
-    current.onDismiss(options?.reason ?? 'ordinary');
   }, []);
 
   const open = useCallback((registration: OverlayRegistration) => {
+    // Reject a re-entrant open of the same overlay triggered by the focus
+    // restore inside this very close() call (see closingId comment above).
+    // Opening a *different* overlay is never blocked: handoff dismisses the
+    // previous one directly (not through close()), so restoreFocus/closingId
+    // never come into play for A->B.
+    if (closingId.current === registration.id) return;
     const previous = active.current;
     if (previous?.id === registration.id) return;
     if (previous) previous.onDismiss('handoff');

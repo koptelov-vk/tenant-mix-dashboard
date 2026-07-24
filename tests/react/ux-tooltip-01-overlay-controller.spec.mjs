@@ -37,6 +37,100 @@ test('quality↔calculation handoff has no focus bounce and close restores focus
   await expect(qualityTrigger).toBeFocused();
 });
 
+test('calculation tooltip hover-open then Escape restores focus, closes cleanly and allows reopen (reentrancy corrective, Scenario A)', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.startsWith('mobile'), 'hover-open is a desktop pointer interaction; not simulated on touch/mobile');
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+
+  const trigger = calculation(page);
+  await trigger.hover();
+  await expect(page.getByRole('tooltip')).toBeVisible();
+  await expect(trigger).not.toBeFocused();
+
+  // Escape triggers close(), which synchronously focuses the opener. That
+  // focus event fires the trigger's own onFocus -> openOverlay() reentrantly
+  // on the unfixed controller, leaving a stale active registration even
+  // though the tooltip visually closes.
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('tooltip')).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(activeOverlay(page)).toHaveCount(0);
+
+  // Next legitimate open of the same trigger must still work — proves no
+  // stale active registration is left behind blocking it. The mouse must
+  // genuinely leave and re-enter (real hover requires a fresh transition;
+  // hovering the same already-hovered point again is a no-op in real browsers).
+  await page.mouse.move(0, 0);
+  await trigger.hover();
+  await expect(page.getByRole('tooltip')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('tooltip')).toBeHidden();
+
+  // A different, unrelated overlay must open cleanly right after.
+  const qualityTrigger = quality(page);
+  await qualityTrigger.click();
+  await expect(activeOverlay(page)).toHaveCount(1);
+  await expect(page.getByRole('tooltip')).toHaveCount(0);
+
+  expect(errors).toEqual([]);
+});
+
+test('calculation tooltip hover-open then outside-pointerdown closes cleanly with no orphan overlay and no stale active state (reentrancy corrective, Scenario B)', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.startsWith('mobile'), 'hover-open is a desktop pointer interaction; not simulated on touch/mobile');
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+
+  const trigger = calculation(page);
+  await trigger.hover();
+  await expect(page.getByRole('tooltip')).toBeVisible();
+
+  // Moving the mouse to click elsewhere necessarily leaves the hover zone
+  // first (real browser hover semantics), so this exercises the tooltip's
+  // own hover-leave close before the outside-pointerdown handler would even
+  // see an active overlay. That is correct, pre-existing, unmodified
+  // behavior (hover-leave never restores focus) — the decisive check here is
+  // that closing this way leaves no orphan overlay and no stale active
+  // registration blocking what comes next, not a focus assertion.
+  await page.locator('main').click({ position: { x: 2, y: 2 } });
+  await expect(page.getByRole('tooltip')).toBeHidden();
+  await expect(activeOverlay(page)).toHaveCount(0);
+
+  const qualityTrigger = quality(page);
+  await qualityTrigger.click();
+  await expect(activeOverlay(page)).toHaveCount(1);
+  await expect(page.getByRole('tooltip')).toHaveCount(0);
+  await qualityTrigger.click();
+  await expect(activeOverlay(page)).toHaveCount(0);
+
+  expect(errors).toEqual([]);
+});
+
+test('calculation tooltip focus-open (keyboard) then outside-pointerdown restores focus and clears active state (reentrancy corrective, Scenario B without hover-leave interference)', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.startsWith('mobile'), 'keyboard-focus-open is a desktop interaction pattern; touch/mobile uses tap-open, covered separately');
+  const trigger = calculation(page);
+  await trigger.focus();
+  await expect(page.getByRole('tooltip')).toBeVisible();
+
+  // A synthetic pointerdown dispatch (not a real .click()) matches the
+  // existing PRODUCT-01 pattern for this exact scenario: clicking a
+  // non-focusable area for real triggers the browser's own native default
+  // blur-to-nothing action *after* listeners run, which would independently
+  // clobber any programmatic focus() made during the same event — a browser
+  // quirk unrelated to this fix. Dispatching the event directly isolates the
+  // app's own close()/restoreFocus contract from that native side effect.
+  await page.dispatchEvent('body', 'pointerdown', { pointerType: 'mouse', bubbles: true });
+  await expect(page.getByRole('tooltip')).toBeHidden();
+  await expect(trigger).toBeFocused();
+  await expect(activeOverlay(page)).toHaveCount(0);
+
+  const qualityTrigger = quality(page);
+  await qualityTrigger.click();
+  await expect(activeOverlay(page)).toHaveCount(1);
+  await expect(page.getByRole('tooltip')).toHaveCount(0);
+});
+
 test('quality disclosure close-button restores focus to exact trigger (regression #156)', async ({ page }, testInfo) => {
   const activate = (locator) => testInfo.project.name.startsWith('mobile') ? locator.tap() : locator.click();
   const errors = [];
