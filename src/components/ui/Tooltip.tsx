@@ -14,8 +14,7 @@ export function Tooltip({ label, accessibleLabel = 'Показать метод�
   const trigger = useRef<HTMLButtonElement>(null);
   const floating = useRef<HTMLDivElement>(null);
   const openedByClick = useRef(false);
-  const suppressFocusOpen = useRef(false);
-  const overlay = useControlledOverlay({ open: requestedOpen, setOpen: (next) => { if (!next) openedByClick.current = false; setRequestedOpen(next); }, triggerRef: trigger, contentRef: floating, onDismissReason: (reason) => { suppressFocusOpen.current = reason === 'ordinary'; } });
+  const overlay = useControlledOverlay({ open: requestedOpen, setOpen: (next) => { if (!next) openedByClick.current = false; setRequestedOpen(next); }, triggerRef: trigger, contentRef: floating });
 
   const updatePosition = useCallback(() => {
     if (!root.current || !floating.current) return;
@@ -58,7 +57,7 @@ export function Tooltip({ label, accessibleLabel = 'Показать метод�
 
   const style = position ? { left: position.left, top: position.top, '--tooltip-arrow-left': `${position.arrowLeft}px` } as CSSProperties : undefined;
   return <span className={`${overlay.open ? 'tooltip tooltip-open' : 'tooltip'} ${className}`.trim()} ref={root} onPointerEnter={(event) => { if (event.pointerType !== 'touch') overlay.openOverlay(); }} onPointerLeave={(event) => { if (event.pointerType !== 'touch' && !floating.current?.contains(event.relatedTarget as Node)) overlay.close(false, 'hover-leave'); }}>
-    <button ref={trigger} type="button" data-overlay-trigger aria-label={accessibleLabel} aria-expanded={overlay.open} aria-controls={overlay.id} onClick={(event) => { event.preventDefault(); if (overlay.open && openedByClick.current) overlay.close(true); else { openedByClick.current = true; overlay.openOverlay(); } }} onFocus={() => { if (suppressFocusOpen.current) { suppressFocusOpen.current = false; return; } overlay.openOverlay(); }} onBlur={(event) => { if (!floating.current?.contains(event.relatedTarget as Node)) overlay.close(false, 'hover-leave'); }}><Info size={15} aria-hidden="true" /></button>
+    <button ref={trigger} type="button" data-overlay-trigger aria-label={accessibleLabel} aria-expanded={overlay.open} aria-controls={overlay.id} onClick={(event) => { event.preventDefault(); if (overlay.open && openedByClick.current) overlay.close(true); else { openedByClick.current = true; overlay.openOverlay(); } }} onFocus={() => overlay.openOverlay()} onBlur={(event) => { if (!floating.current?.contains(event.relatedTarget as Node)) overlay.close(false, 'hover-leave'); }}><Info size={15} aria-hidden="true" /></button>
     {overlay.open && typeof document !== 'undefined' ? createPortal(<div ref={floating} id={overlay.id} role="tooltip" data-pdf-exclude className={`overlay-portal-layer tooltip-popover tooltip-popover-${position?.placement ?? 'top'}${position ? ' tooltip-popover-ready' : ''}`} style={style}>{label}</div>, document.body) : null}
   </span>;
 }
