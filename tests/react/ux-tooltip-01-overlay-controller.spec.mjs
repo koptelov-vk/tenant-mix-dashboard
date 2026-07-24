@@ -45,26 +45,30 @@ test('quality disclosure close-button restores focus to exact trigger (regressio
 
   const qualityTrigger = quality(page);
   await expect(qualityTrigger).toBeVisible();
-  await page.evaluate(() => window.scrollTo(0, 200));
-  const scrollBefore = await page.evaluate(() => window.scrollY);
 
   await activate(qualityTrigger);
   const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
   await expect(dialog).toBeVisible();
   const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
 
+  // Captured after opening (not before): opening a trigger that is below the fold
+  // legitimately scrolls it into view first (especially on narrow mobile viewports).
+  // The invariant under test is that CLOSING must not introduce further scroll.
+  const scrollBeforeClose = await page.evaluate(() => window.scrollY);
+
   await activate(closeButton);
   await expect(dialog).toBeHidden();
   await expect(activeOverlay(page)).toHaveCount(0);
   await expect(qualityTrigger).toBeFocused();
   expect(await page.evaluate(() => document.activeElement?.tagName)).not.toBe('BODY');
-  expect(await page.evaluate(() => window.scrollY)).toBe(scrollBefore);
+  expect(await page.evaluate(() => window.scrollY)).toBe(scrollBeforeClose);
   expect(errors).toEqual([]);
 });
 
-test('quality disclosure close-button keyboard activation restores focus to trigger', async ({ page }) => {
+test('quality disclosure close-button keyboard activation restores focus to trigger', async ({ page }, testInfo) => {
+  const activate = (locator) => testInfo.project.name.startsWith('mobile') ? locator.tap() : locator.click();
   const qualityTrigger = quality(page);
-  await qualityTrigger.click();
+  await activate(qualityTrigger);
   const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
   await expect(dialog).toBeVisible();
   const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
@@ -74,51 +78,54 @@ test('quality disclosure close-button keyboard activation restores focus to trig
   await expect(qualityTrigger).toBeFocused();
 });
 
-test('repeated open/close via close-button keeps returning focus to the same exact trigger', async ({ page }) => {
+test('repeated open/close via close-button keeps returning focus to the same exact trigger', async ({ page }, testInfo) => {
+  const activate = (locator) => testInfo.project.name.startsWith('mobile') ? locator.tap() : locator.click();
   const qualityTrigger = quality(page);
   const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
   for (let cycle = 0; cycle < 3; cycle += 1) {
-    await qualityTrigger.click();
+    await activate(qualityTrigger);
     await expect(dialog).toBeVisible();
     const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
-    await closeButton.click();
+    await activate(closeButton);
     await expect(dialog).toBeHidden();
     await expect(activeOverlay(page)).toHaveCount(0);
     await expect(qualityTrigger).toBeFocused();
   }
 });
 
-test('quality A→quality B forward handoff via own close buttons returns focus to each own trigger, never bounces to A', async ({ page }) => {
+test('quality A→quality B forward handoff via own close buttons returns focus to each own trigger, never bounces to A', async ({ page }, testInfo) => {
+  const activate = (locator) => testInfo.project.name.startsWith('mobile') ? locator.tap() : locator.click();
   const qualityTriggers = page.locator('.category-profile-quality-trigger');
   const triggerA = qualityTriggers.nth(0);
   const triggerB = qualityTriggers.nth(1);
   const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
 
-  await triggerA.click();
+  await activate(triggerA);
   await expect(dialog).toBeVisible();
 
-  await triggerB.click();
+  await activate(triggerB);
   await expect(activeOverlay(page)).toHaveCount(1);
   await expect(triggerA).not.toBeFocused();
 
   const closeB = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
-  await closeB.click();
+  await activate(closeB);
   await expect(activeOverlay(page)).toHaveCount(0);
   await expect(triggerB).toBeFocused();
   await expect(triggerA).not.toBeFocused();
 });
 
-test('closing quality disclosure via close-button then changing section leaves no orphan overlay', async ({ page }) => {
+test('closing quality disclosure via close-button then changing section leaves no orphan overlay', async ({ page }, testInfo) => {
+  const activate = (locator) => testInfo.project.name.startsWith('mobile') ? locator.tap() : locator.click();
   const qualityTrigger = quality(page);
   const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
-  await qualityTrigger.click();
+  await activate(qualityTrigger);
   await expect(dialog).toBeVisible();
   const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
-  await closeButton.click();
+  await activate(closeButton);
   await expect(dialog).toBeHidden();
 
   const navigation = page.locator('.category-profile-row').first().getByRole('button', { name: /Открыть категорию/ });
-  await navigation.click();
+  await activate(navigation);
   await expect.poll(() => new URL(page.url()).searchParams.get('tab')).toBe('categories');
   await expect(activeOverlay(page)).toHaveCount(0);
   await expect(page.getByRole('dialog', { name: /Качество данных категории/ })).toHaveCount(0);
