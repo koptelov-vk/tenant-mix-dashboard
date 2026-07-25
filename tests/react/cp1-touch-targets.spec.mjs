@@ -7,6 +7,10 @@ const configurations = [
   { name: 'portrait-430', width: 430, height: 932 },
   { name: 'landscape-568', width: 568, height: 320 },
   { name: 'landscape-667', width: 667, height: 375 },
+  // Issue #159: the confirmed production overlap viewport (812x375) sits between the
+  // already-covered 667 and 844 landscape widths and was not previously exercised —
+  // that gap is exactly why the header-actions overlap went undetected.
+  { name: 'landscape-812', width: 812, height: 375 },
   { name: 'landscape-844', width: 844, height: 390 },
   { name: 'landscape-932', width: 932, height: 430 },
   { name: 'desktop-1366', width: 1366, height: 900 },
