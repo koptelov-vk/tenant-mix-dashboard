@@ -31,24 +31,43 @@ function reviewSignalText(count: number) {
   return `${count.toLocaleString('ru-RU')} действующих записей требуют дополнительной проверки, но включены в расчёт`;
 }
 
-function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
+export function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const open = Boolean(anchor);
   const excludedCount = profile.excludedUnknownCount + profile.excludedConflictingCount;
   const hasExcluded = excludedCount > 0;
   const hasIncludedReview = profile.manualReviewCount > 0;
 
   const overlay = useControlledOverlay({
-    open: Boolean(anchor),
+    open,
     setOpen: (next) => setAnchor(next ? triggerRef.current?.getBoundingClientRect() ?? null : null),
     triggerRef,
     contentRef: popoverRef,
   });
 
+  // Autofocuses the dialog exactly once per open transition — keyed on `open`,
+  // not `anchor`, so the reposition recalculations below (which produce a new
+  // anchor rect on every resize/scroll) never reschedule it. Immediately
+  // before applying it, re-check that focus hasn't already been intentionally
+  // moved somewhere inside the dialog (e.g. onto the close button) between
+  // scheduling this frame and it actually running: without that guard, a
+  // frame that lands late (under load) can silently steal focus back onto the
+  // dialog container itself, so a subsequent Enter keypress lands on a
+  // non-interactive element instead of the focused button (issue #162).
   useEffect(() => {
-    if (!anchor) return;
-    const focusFrame = requestAnimationFrame(() => popoverRef.current?.focus());
+    if (!open) return;
+    const frame = requestAnimationFrame(() => {
+      const popover = popoverRef.current;
+      if (!popover || popover.contains(document.activeElement)) return;
+      popover.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     const reposition = () => {
       const rect = triggerRef.current?.getBoundingClientRect();
       if (rect) setAnchor(rect);
@@ -59,13 +78,12 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
     window.visualViewport?.addEventListener('resize', reposition);
     window.visualViewport?.addEventListener('scroll', reposition);
     return () => {
-      cancelAnimationFrame(focusFrame);
       window.removeEventListener('resize', reposition);
       window.removeEventListener('scroll', reposition, true);
       window.visualViewport?.removeEventListener('resize', reposition);
       window.visualViewport?.removeEventListener('scroll', reposition);
     };
-  }, [anchor]);
+  }, [open]);
 
   return <div className="category-profile-quality-signals">
     <button
@@ -74,7 +92,7 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
       data-overlay-trigger
       className={`category-profile-quality-trigger ${hasExcluded ? 'is-limited' : 'is-review-only'}`}
       aria-label={`Показать качество данных категории ${profile.category}`}
-      aria-expanded={Boolean(anchor)}
+      aria-expanded={open}
       aria-controls={overlay.id}
       onClick={overlay.toggle}
     >
