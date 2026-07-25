@@ -1,0 +1,96 @@
+name: Issue 162 corrective Linux CI repetition (temporary)
+
+# Disposable verification-only workflow. Confirms the #162 corrective fix
+# (branch fix/162-quality-disclosure-focus-race, this branch is forked from
+# its exact head) achieves 0/10 failures on real Linux CI for the exact
+# unmodified regression test, on both desktop and mobile-webkit-320,
+# workers=1, retries=0, 10 independent process invocations each, alternating.
+# This workflow is NOT part of the corrective PR's diff and will not be
+# merged; it exists only to produce CI-native repetition evidence for PR
+# #165, the same way PR #164 did for the pre-fix diagnostic.
+# No deploy job, no Pages/production permissions, no push-trigger for main.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/issue-162-corrective-repetition.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: issue-162-corrective-repetition
+  cancel-in-progress: false
+
+jobs:
+  repetition:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12', cache: pip }
+      - uses: pnpm/action-setup@v4
+        with: { version: '11.9.0' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: pnpm }
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
+      - name: Build normalized aggregates
+        run: pnpm build:aggregates
+      - name: Build React production artifact
+        run: pnpm build
+
+      - name: Run 10 desktop + 10 mobile-webkit-320 independent invocations (alternating, exact unmodified test)
+        id: repetition
+        run: |
+          set +e
+          mkdir -p ci-repetition-results
+          summary="ci-repetition-results/summary.json"
+          echo "[" > "$summary"
+          first=true
+          TEST_TITLE="quality disclosure close-button keyboard activation restores focus to trigger"
+
+          for i in $(seq 1 10); do
+            for project in desktop mobile-webkit-320; do
+              run_id="${project}-run${i}"
+              echo "=== $run_id ==="
+              start=$(date -u +%Y-%m-%dT%H:%M:%SZ); t0=$(date +%s%3N)
+              npx playwright test \
+                --config=playwright.react.config.mjs \
+                --project="$project" \
+                --workers=1 \
+                --retries=0 \
+                -g "$TEST_TITLE" \
+                --reporter=list,json \
+                --output="ci-repetition-results/${run_id}" \
+                > "ci-repetition-results/${run_id}.log" 2>&1
+              code=$?
+              t1=$(date +%s%3N); end=$(date -u +%Y-%m-%dT%H:%M:%SZ); duration_ms=$((t1 - t0))
+              if [ "$first" = true ]; then first=false; else echo "," >> "$summary"; fi
+              printf '{"run_id":"%s","project":"%s","iteration":%d,"start":"%s","end":"%s","exit_code":%d,"process_duration_ms":%d}' \
+                "$run_id" "$project" "$i" "$start" "$end" "$code" "$duration_ms" >> "$summary"
+              echo "exit=$code duration_ms=$duration_ms"
+            done
+          done
+          echo "]" >> "$summary"
+          cat "$summary"
+        env:
+          CI: "true"
+
+      - name: Upload repetition evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue-162-corrective-repetition-evidence
+          path: |
+            ci-repetition-results/
+          if-no-files-found: warn
+          retention-days: 14
