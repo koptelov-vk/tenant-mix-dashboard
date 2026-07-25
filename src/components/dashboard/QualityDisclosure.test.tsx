@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { OverlayControllerProvider } from '../ui/OverlayController';
 import { QualityDisclosure } from './CategoryProfile';
 import type { CategoryProfileStats } from '../../types/dashboard';
@@ -32,50 +32,40 @@ function renderDisclosure() {
   );
 }
 
-afterEach(() => {
-  document.body.innerHTML = '';
-  vi.useRealTimers();
-});
+afterEach(() => { document.body.innerHTML = ''; });
 
-describe('QualityDisclosure deferred autofocus vs. intentional focus race (issue #162)', () => {
-  it('does not steal focus back onto the dialog once it has already moved to the close button (regression: #162 race)', () => {
-    vi.useFakeTimers({ toFake: ['requestAnimationFrame'] });
+describe('QualityDisclosure synchronous autofocus vs. intentional focus race (issue #162)', () => {
+  it('autofocuses the dialog synchronously on open, in the same act() as the opening click', () => {
+    renderDisclosure();
+
+    const trigger = screen.getByRole('button', { name: /Показать качество данных категории/ });
+    act(() => { fireEvent.click(trigger); });
+
+    // No timer flush, no extra tick: useLayoutEffect runs in the same commit
+    // as the click that opened the dialog, so focus must already be inside
+    // by the time this synchronous assertion runs.
+    const dialog = screen.getByRole('dialog', { name: /Качество данных категории/ });
+    expect(document.activeElement).toBe(dialog);
+  });
+
+  it('does not steal focus back onto the dialog once it has moved to the close button (regression: #162 Enter race)', () => {
     renderDisclosure();
 
     const trigger = screen.getByRole('button', { name: /Показать качество данных категории/ });
     act(() => { fireEvent.click(trigger); });
 
     const closeButton = screen.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
-    // Reproduces the exact failing CI sequence: focus is intentionally moved
-    // to the close button BEFORE the dialog's own scheduled autofocus frame
-    // has had a chance to run.
     act(() => { closeButton.focus(); });
     expect(document.activeElement).toBe(closeButton);
 
-    // Flush the pending requestAnimationFrame — this is the previously-buggy
-    // moment where the stale autofocus call would silently reclaim focus.
-    act(() => { vi.runOnlyPendingTimers(); });
-
+    // Nothing scheduled/deferred remains to fire and reclaim focus later —
+    // this is the direct consequence of autofocus now being synchronous
+    // rather than a requestAnimationFrame callback that could land after
+    // this explicit focus() call.
     expect(document.activeElement).toBe(closeButton);
   });
 
-  it('still autofocuses the dialog on open when nothing else has claimed focus', () => {
-    vi.useFakeTimers({ toFake: ['requestAnimationFrame'] });
-    renderDisclosure();
-
-    const trigger = screen.getByRole('button', { name: /Показать качество данных категории/ });
-    act(() => { fireEvent.click(trigger); });
-
-    const dialog = screen.getByRole('dialog', { name: /Качество данных категории/ });
-    expect(document.activeElement).not.toBe(dialog);
-
-    act(() => { vi.runOnlyPendingTimers(); });
-
-    expect(document.activeElement).toBe(dialog);
-  });
-
-  it('cancels the pending autofocus frame on close before it fires (no stale focus jump)', () => {
-    vi.useFakeTimers({ toFake: ['requestAnimationFrame'] });
+  it('closing and reopening does not leave any stray focus jump behind', () => {
     renderDisclosure();
 
     const trigger = screen.getByRole('button', { name: /Показать качество данных категории/ });
@@ -84,14 +74,16 @@ describe('QualityDisclosure deferred autofocus vs. intentional focus race (issue
     const closeButton = screen.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
     act(() => { fireEvent.click(closeButton); });
     expect(document.activeElement).toBe(trigger);
+    expect(screen.queryByRole('dialog', { name: /Качество данных категории/ })).toBeNull();
 
-    // The frame scheduled by the now-closed (unmounted) dialog must not fire
-    // and must not throw or move focus away from the restored trigger.
-    expect(() => { act(() => { vi.runOnlyPendingTimers(); }); }).not.toThrow();
-    expect(document.activeElement).toBe(trigger);
+    // Reopening must autofocus again cleanly (no residual state from the
+    // previous open/close cycle).
+    act(() => { fireEvent.click(trigger); });
+    const dialog = screen.getByRole('dialog', { name: /Качество данных категории/ });
+    expect(document.activeElement).toBe(dialog);
   });
 
-  it('keyboard Enter on the close button still closes the dialog and returns focus to the trigger when focus is established normally (real timers)', () => {
+  it('keyboard Enter on the close button still closes the dialog and returns focus to the trigger when focus is established normally', () => {
     renderDisclosure();
 
     const trigger = screen.getByRole('button', { name: /Показать качество данных категории/ });
