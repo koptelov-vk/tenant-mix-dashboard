@@ -1,6 +1,6 @@
 import { AlertTriangle, ChevronRight, Info, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { AnalysisContext, CategoryProfileStats } from '../../types/dashboard';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { useControlledOverlay } from '../ui/OverlayController';
@@ -31,24 +31,53 @@ function reviewSignalText(count: number) {
   return `${count.toLocaleString('ru-RU')} действующих записей требуют дополнительной проверки, но включены в расчёт`;
 }
 
-function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
+export function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const open = Boolean(anchor);
   const excludedCount = profile.excludedUnknownCount + profile.excludedConflictingCount;
   const hasExcluded = excludedCount > 0;
   const hasIncludedReview = profile.manualReviewCount > 0;
 
   const overlay = useControlledOverlay({
-    open: Boolean(anchor),
+    open,
     setOpen: (next) => setAnchor(next ? triggerRef.current?.getBoundingClientRect() ?? null : null),
     triggerRef,
     contentRef: popoverRef,
   });
 
+  // Autofocuses the dialog exactly once per open transition — keyed on `open`,
+  // not `anchor`, so the reposition recalculations below (which produce a new
+  // anchor rect on every resize/scroll) never reschedule it. Runs in
+  // useLayoutEffect (synchronously, in the same commit as the open, before
+  // the browser can process any further input) rather than via
+  // requestAnimationFrame: a deferred-to-next-frame autofocus left a real gap
+  // in which the browser could act on an intervening event before focus ever
+  // landed in the dialog. Two different failure shapes came from that same
+  // gap: (a) an explicitly-set focus (e.g. via .focus() on the close button)
+  // landing before the deferred frame, which the frame would then silently
+  // reclaim back onto the dialog container, breaking Enter-to-close; and
+  // (b) nothing having claimed focus yet when Tab fires, so Tab's native
+  // next-tabbable-element lookup skips right past the still-unfocused dialog
+  // and lands on the next sibling's own focusable trigger instead — for the
+  // adjacent calculation Tooltip (which opens on focus, see Tooltip.tsx),
+  // that silently opens it and, via OverlayController's single-active-overlay
+  // handoff, dismisses this dialog before the user ever reaches its close
+  // button. Making the autofocus synchronous with the open removes the gap
+  // entirely instead of guarding against symptoms of it. The
+  // already-focused-inside check is kept as defense in depth for any future
+  // caller that focuses something inside the dialog before this effect runs
+  // in the same commit (issue #162).
+  useLayoutEffect(() => {
+    if (!open) return;
+    const popover = popoverRef.current;
+    if (!popover || popover.contains(document.activeElement)) return;
+    popover.focus();
+  }, [open]);
+
   useEffect(() => {
-    if (!anchor) return;
-    const focusFrame = requestAnimationFrame(() => popoverRef.current?.focus());
+    if (!open) return;
     const reposition = () => {
       const rect = triggerRef.current?.getBoundingClientRect();
       if (rect) setAnchor(rect);
@@ -59,13 +88,12 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
     window.visualViewport?.addEventListener('resize', reposition);
     window.visualViewport?.addEventListener('scroll', reposition);
     return () => {
-      cancelAnimationFrame(focusFrame);
       window.removeEventListener('resize', reposition);
       window.removeEventListener('scroll', reposition, true);
       window.visualViewport?.removeEventListener('resize', reposition);
       window.visualViewport?.removeEventListener('scroll', reposition);
     };
-  }, [anchor]);
+  }, [open]);
 
   return <div className="category-profile-quality-signals">
     <button
@@ -74,7 +102,7 @@ function QualityDisclosure({ profile }: { profile: CategoryProfileStats }) {
       data-overlay-trigger
       className={`category-profile-quality-trigger ${hasExcluded ? 'is-limited' : 'is-review-only'}`}
       aria-label={`Показать качество данных категории ${profile.category}`}
-      aria-expanded={Boolean(anchor)}
+      aria-expanded={open}
       aria-controls={overlay.id}
       onClick={overlay.toggle}
     >

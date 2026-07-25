@@ -261,3 +261,144 @@ for (const width of [320, 375, 390, 430]) {
     });
   }
 }
+
+// Issue #162 keyboard acceptance: real Tab / Shift+Tab / Space / Enter
+// keyboard contract of QualityDisclosure (never via .focus() as a Tab
+// substitute), covering both the deferred-autofocus-vs-Enter race and the
+// Tab-vs-adjacent-Tooltip cross-overlay handoff race, both fixed by making
+// QualityDisclosure's autofocus synchronous (useLayoutEffect) instead of
+// deferred (requestAnimationFrame). Complements — does not replace or
+// modify — the existing tests above.
+test.describe('quality disclosure real keyboard navigation (issue #162 acceptance)', () => {
+  test('initial focus lands inside the dialog synchronously on open, before any keyboard input', async ({ page, isMobile }) => {
+    const activate = (locator) => isMobile ? locator.tap() : locator.click();
+    const qualityTrigger = quality(page);
+
+    await activate(qualityTrigger);
+    const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+    await expect(dialog).toBeVisible();
+
+    // No wait, no extra tick: this is the exact same task the open() click
+    // handler ran in, so if autofocus were still deferred to a later frame
+    // this would be the moment it hadn't happened yet.
+    expect(await dialog.evaluate((el) => document.activeElement === el)).toBe(true);
+  });
+
+  test('Tab moves focus onto the close button, and the adjacent calculation Tooltip does not open', async ({ page, isMobile }) => {
+    const activate = (locator) => isMobile ? locator.tap() : locator.click();
+    const qualityTrigger = quality(page);
+
+    await activate(qualityTrigger);
+    const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+    await expect(dialog).toBeVisible();
+    await expect(qualityTrigger).toHaveAttribute('aria-expanded', 'true');
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+
+    await page.keyboard.press('Tab');
+
+    const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
+    await expect(closeButton).toBeFocused();
+    await expect(dialog).toBeVisible();
+    await expect(activeOverlay(page)).toHaveCount(1);
+    await expect(qualityTrigger).toHaveAttribute('aria-expanded', 'true');
+    // The regression check for the Tab cross-overlay race: the sibling
+    // calculation Tooltip must not have opened as a side effect.
+    await expect(page.getByRole('tooltip')).toHaveCount(0);
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollBefore);
+  });
+
+  test('Shift+Tab moves focus backward without landing on <body> or the dialog container', async ({ page, isMobile }) => {
+    const activate = (locator) => isMobile ? locator.tap() : locator.click();
+    const qualityTrigger = quality(page);
+
+    await activate(qualityTrigger);
+    const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Tab');
+    const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
+    await expect(closeButton).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+
+    // Not a scroll-position assertion here: the dialog is a non-modal
+    // (aria-modal="false"), non-focus-trapped popover portaled to the end of
+    // document.body, so Shift+Tab out of it correctly lands on whatever
+    // precedes the whole portal in flattened document tab order — an
+    // unrelated, distant element by design, identical before and after this
+    // fix, and out of scope for the autofocus-race contract this Issue
+    // covers. What IS in scope and asserted below: focus must not land on
+    // <body>, and — the actual regression check — the (now synchronous)
+    // autofocus must not have reclaimed it back onto the dialog container;
+    // the disclosure itself must remain open (correct non-modal behavior:
+    // tabbing out does not dismiss it).
+    expect(await page.evaluate(() => document.activeElement?.tagName)).not.toBe('BODY');
+    expect(await closeButton.evaluate((el) => document.activeElement === el)).toBe(false);
+    expect(await dialog.evaluate((el) => document.activeElement === el)).toBe(false);
+    await expect(dialog).toBeVisible();
+    await expect(activeOverlay(page)).toHaveCount(1);
+    await expect(qualityTrigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('Space on a Tab-focused close button closes the dialog and returns focus to the exact trigger', async ({ page, isMobile }) => {
+    const activate = (locator) => isMobile ? locator.tap() : locator.click();
+    const qualityTrigger = quality(page);
+
+    await activate(qualityTrigger);
+    const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+    await expect(dialog).toBeVisible();
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+    await page.keyboard.press('Tab');
+    const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
+    await expect(closeButton).toBeFocused();
+
+    await page.keyboard.press('Space');
+
+    await expect(dialog).toBeHidden();
+    await expect(activeOverlay(page)).toHaveCount(0);
+    await expect(qualityTrigger).toHaveAttribute('aria-expanded', 'false');
+    await expect(qualityTrigger).toBeFocused();
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollBefore);
+
+    // No close-then-reopen: the dialog must stay gone, not flicker back.
+    await expect(dialog).toHaveCount(0);
+  });
+
+  test('Enter on a Tab-focused (not .focus()-set) close button closes the dialog and returns focus to the exact trigger', async ({ page, isMobile }) => {
+    const activate = (locator) => isMobile ? locator.tap() : locator.click();
+    const qualityTrigger = quality(page);
+
+    await activate(qualityTrigger);
+    const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+    await expect(dialog).toBeVisible();
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+    await page.keyboard.press('Tab');
+    const closeButton = dialog.getByRole('button', { name: 'Закрыть сведения о качестве данных' });
+    await expect(closeButton).toBeFocused();
+
+    await page.keyboard.press('Enter');
+
+    await expect(dialog).toBeHidden();
+    await expect(activeOverlay(page)).toHaveCount(0);
+    await expect(qualityTrigger).toBeFocused();
+    expect(await page.evaluate(() => window.scrollY)).toBe(scrollBefore);
+  });
+
+  test('intentional handoff: deliberately focusing the calculation Tooltip still opens it and dismisses the quality dialog', async ({ page, isMobile }) => {
+    const activate = (locator) => isMobile ? locator.tap() : locator.click();
+    const qualityTrigger = quality(page);
+    const calculationTrigger = calculation(page);
+
+    await activate(qualityTrigger);
+    const dialog = page.getByRole('dialog', { name: /Качество данных категории/ });
+    await expect(dialog).toBeVisible();
+
+    // Deliberate action, not incidental Tab traversal: this must keep working
+    // exactly as documented — a different overlay's own trigger receiving
+    // focus is legitimate handoff, not a bug.
+    await calculationTrigger.focus();
+
+    await expect(page.getByRole('tooltip')).toBeVisible();
+    await expect(dialog).toHaveCount(0);
+    await expect(activeOverlay(page)).toHaveCount(1);
+  });
+});
