@@ -7,6 +7,10 @@ const configurations = [
   { name: 'portrait-430', width: 430, height: 932 },
   { name: 'landscape-568', width: 568, height: 320 },
   { name: 'landscape-667', width: 667, height: 375 },
+  // Issue #159: the confirmed production overlap viewport (812x375) sits between the
+  // already-covered 667 and 844 landscape widths and was not previously exercised —
+  // that gap is exactly why the header-actions overlap went undetected.
+  { name: 'landscape-812', width: 812, height: 375 },
   { name: 'landscape-844', width: 844, height: 390 },
   { name: 'landscape-932', width: 932, height: 430 },
   { name: 'desktop-1366', width: 1366, height: 900 },
@@ -130,6 +134,23 @@ for (const configuration of configurations) {
     await copyLink.click();
     const clipboardWrites = await page.evaluate(() => window.__cp1ClipboardWrites);
     expect(clipboardWrites.at(-1)).toBe(page.url());
+
+    // Issue #159: assertControlContract's corner probes are inset 4px from each control's own
+    // edge, so an overlap narrower than that inset (the original defect measured ~2.5px) can
+    // land outside every probe point and pass undetected. Compute the actual bounding-box
+    // intersection between adjacent header actions directly so a sub-4px overlap cannot hide.
+    if (configuration.name === 'landscape-812') {
+      const overlapArea = (a, b) => {
+        const width = Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x));
+        const height = Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
+        return width * height;
+      };
+      const savedViewsBox = await savedViews.boundingBox();
+      const exportBox = await exportTrigger.boundingBox();
+      const copyLinkBox = await copyLink.boundingBox();
+      expect.soft(overlapArea(savedViewsBox, exportBox), 'Saved Views <-> Export bounding-box overlap area').toBe(0);
+      expect.soft(overlapArea(exportBox, copyLinkBox), 'Export <-> Copy Link bounding-box overlap area').toBe(0);
+    }
 
     const resetFilters = page.getByRole('button', { name: 'Сбросить фильтры', exact: true });
     const refresh = page.getByRole('button', { name: 'Обновить данные', exact: true });
