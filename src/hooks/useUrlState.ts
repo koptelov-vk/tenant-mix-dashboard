@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { defaultDashboardFilters, useDashboardStore, type DashboardFilters, type DashboardPage, type PeerGroupMode } from '../stores/dashboardStore';
-import type { MetricMode, SourceQuality } from '../types/dashboard';
+import type { CategoryBenchmarkMode, MetricMode, SourceQuality } from '../types/dashboard';
 
 const pages: DashboardPage[] = ['overview', 'comparability', 'categories', 'brands', 'upcoming', 'quality', 'history'];
 const metrics: MetricMode[] = ['absolute', 'share', 'density'];
+const categoryProfileModes: CategoryBenchmarkMode[] = ['count', 'share'];
 const peerGroups: PeerGroupMode[] = ['same-class', 'all', 'custom'];
 const qualities: SourceQuality[] = ['Высокая', 'Средняя', 'Низкая'];
 const list = (params: URLSearchParams, key: string) => params.get(key)?.split(',').map((value) => value.trim()).filter(Boolean) ?? [];
@@ -16,6 +17,8 @@ function readUrl(): Partial<DashboardFilters> {
   const params = new URLSearchParams(window.location.search);
   const page = params.get('tab') as DashboardPage;
   const metric = params.get('metric') as MetricMode;
+  const categoryProfileMode = params.get('cpMode') as CategoryBenchmarkMode;
+  const categoryProfileShowAll = params.get('cpShowAll') === '1';
   const group = params.get('group') as PeerGroupMode;
   const categories = list(params, 'categories');
   const legacyCategory = params.get('category');
@@ -26,6 +29,8 @@ function readUrl(): Partial<DashboardFilters> {
     categories: resolvedCategories,
     activePage: pages.includes(page) ? page : defaultDashboardFilters.activePage,
     metric: metrics.includes(metric) ? metric : defaultDashboardFilters.metric,
+    categoryProfileMode: categoryProfileModes.includes(categoryProfileMode) ? categoryProfileMode : defaultDashboardFilters.categoryProfileMode,
+    categoryProfileShowAll,
     peerGroup: peerGroups.includes(group) ? group : defaultDashboardFilters.peerGroup,
     selectedMalls: list(params, 'malls'), cities: list(params, 'cities'),
     sourceQualities: list(params, 'quality').filter((value): value is SourceQuality => qualities.includes(value as SourceQuality)),
@@ -39,6 +44,8 @@ function toUrl(state: DashboardFilters): string {
   const params = new URLSearchParams();
   const categories = state.categories ?? (state.category !== 'Все категории' ? [state.category] : []);
   params.set('focus', state.focusMall); params.set('tab', state.activePage); params.set('group', state.peerGroup); params.set('metric', state.metric);
+  if (state.categoryProfileMode !== defaultDashboardFilters.categoryProfileMode) params.set('cpMode', state.categoryProfileMode);
+  if (state.categoryProfileShowAll) params.set('cpShowAll', '1');
   if (categories.length) params.set('categories', categories.join(','));
   if (state.selectedMalls.length) params.set('malls', state.selectedMalls.join(','));
   if (state.cities.length) params.set('cities', state.cities.join(','));
@@ -72,5 +79,5 @@ export function useUrlState() {
     }
     const next = toUrl(state);
     if (`${window.location.pathname}${window.location.search}` !== next) window.history.pushState(null, '', next);
-  }, [state.focusMall, state.categories, state.metric, state.activePage, state.peerGroup, state.selectedMalls, state.cities, state.sourceQualities, state.gapN, state.glaMin, state.glaMax, state.gbaMin, state.gbaMax]);
+  }, [state.focusMall, state.categories, state.metric, state.categoryProfileMode, state.categoryProfileShowAll, state.activePage, state.peerGroup, state.selectedMalls, state.cities, state.sourceQualities, state.gapN, state.glaMin, state.glaMax, state.gbaMin, state.gbaMax]);
 }

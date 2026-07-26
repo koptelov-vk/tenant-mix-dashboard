@@ -1,10 +1,73 @@
-import { AlertTriangle, ChevronRight, Info, X } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronRight, Info, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { AnalysisContext, CategoryProfileStats } from '../../types/dashboard';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { AnalysisContext, CategoryBenchmarkPayload, CategoryProfileStats } from '../../types/dashboard';
+import { sortCategoryBenchmarkPayloads } from '../../lib/analysis';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { useControlledOverlay } from '../ui/OverlayController';
 import { Tooltip } from '../ui/Tooltip';
+
+const COLLAPSED_ROW_COUNT = 8;
+
+const stateText: Record<CategoryBenchmarkPayload['state'], string> = {
+  ok: 'рассчитано',
+  no_peers: 'нет объектов сравнения',
+  no_data: 'нет данных',
+  partial_quality: 'расчёт ограничен',
+  quality_excluded: 'показатель не рассчитан',
+  conflicting: 'конфликтующие данные',
+};
+
+function formatCount(value: number) {
+  return value.toLocaleString('ru-RU');
+}
+
+function formatShare(value: number) {
+  return `${(value * 100).toLocaleString('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}%`;
+}
+
+function deviationText(benchmark: CategoryBenchmarkPayload, mode: 'count' | 'share'): string {
+  const stats = mode === 'count' ? benchmark.count : benchmark.share;
+  if (stats.deviation == null) return `Отклонение недоступно (${stateText[benchmark.state]})`;
+  const rounded = mode === 'count' ? stats.deviation : Math.round(stats.deviation * 10) / 10;
+  const unit = mode === 'count' ? (Math.abs(rounded) === 1 ? 'бренд' : 'брендов') : 'п.п.';
+  const sign = rounded > 0 ? '+' : '';
+  const direction = rounded > 0 ? '▲ выше' : rounded < 0 ? '▼ ниже' : '● на уровне';
+  return `${direction} медианы группы на ${sign}${rounded.toLocaleString('ru-RU', { maximumFractionDigits: 1 })} ${unit}`;
+}
+
+function accessibleBenchmarkText(benchmark: CategoryBenchmarkPayload, mode: 'count' | 'share'): string {
+  const focusValue = mode === 'count'
+    ? (benchmark.count.focusValue == null ? 'нет данных' : formatCount(benchmark.count.focusValue))
+    : (benchmark.share.focusShareExact == null ? 'нет данных' : formatShare(benchmark.share.focusShareExact));
+  const peerMedian = mode === 'count'
+    ? (benchmark.count.peerMedian == null ? 'нет данных' : formatCount(benchmark.count.peerMedian))
+    : (benchmark.share.peerMedianShareExact == null ? 'нет данных' : formatShare(benchmark.share.peerMedianShareExact));
+  const rawDeviation = mode === 'count' ? benchmark.count.deviation : benchmark.share.deviation;
+  const unit = mode === 'count' ? 'brands' : 'percentage_points';
+  const deviation = rawDeviation == null ? 'недоступно' : `${rawDeviation.toLocaleString('ru-RU', { maximumFractionDigits: 1 })} ${unit}`;
+  return `Категория ${benchmark.categoryId}. Фокус ${focusValue}. Медиана группы ${peerMedian}. Отклонение ${deviation}. Состояние: ${stateText[benchmark.state]}.`;
+}
+
+function CategoryBenchmarkBar({ benchmark, mode }: { benchmark: CategoryBenchmarkPayload; mode: 'count' | 'share' }) {
+  const stats = mode === 'count' ? benchmark.count : benchmark.share;
+  const focusValue = mode === 'count' ? benchmark.count.focusValue : (benchmark.share.focusShareExact == null ? null : benchmark.share.focusShareExact * 100);
+  const peerMedian = mode === 'count' ? benchmark.count.peerMedian : (benchmark.share.peerMedianShareExact == null ? null : benchmark.share.peerMedianShareExact * 100);
+  const peerScaleValues = mode === 'count' ? benchmark.count.peerValues : benchmark.share.peerSharesExact.map((value) => value * 100);
+  const scaleMax = Math.max(1, focusValue ?? 0, peerMedian ?? 0, ...peerScaleValues);
+  const focusPercent = focusValue == null ? 0 : Math.min(100, (focusValue / scaleMax) * 100);
+  const medianPercent = peerMedian == null ? null : Math.min(100, (peerMedian / scaleMax) * 100);
+
+  return <div className="category-benchmark-bar" role="img" aria-label={accessibleBenchmarkText(benchmark, mode)}>
+    <div className="category-benchmark-track">
+      <div className="category-benchmark-focus" style={{ width: `${focusPercent}%` }} />
+      {medianPercent != null ? <div className="category-benchmark-median-marker" style={{ left: `${medianPercent}%` }} aria-hidden="true" /> : null}
+    </div>
+    <span className={`category-benchmark-deviation${stats.deviation != null && stats.deviation > 0 ? ' is-above' : stats.deviation != null && stats.deviation < 0 ? ' is-below' : ''}`}>
+      {deviationText(benchmark, mode)}
+    </span>
+  </div>;
+}
 
 const brandWord = (count: number) => count % 10 === 1 && count % 100 !== 11 ? 'бренд' : count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20) ? 'бренда' : 'брендов';
 const exclusiveWord = (count: number) => count % 10 === 1 && count % 100 !== 11 ? 'эксклюзивный' : 'эксклюзивных';
@@ -149,6 +212,13 @@ export function QualityDisclosure({ profile }: { profile: CategoryProfileStats }
 export function CategoryProfile({ context, loading = false }: { context: AnalysisContext; loading?: boolean }) {
   const setCategories = useDashboardStore((state) => state.setCategories);
   const setActivePage = useDashboardStore((state) => state.setActivePage);
+  const mode = useDashboardStore((state) => state.categoryProfileMode);
+  const setCategoryProfileMode = useDashboardStore((state) => state.setCategoryProfileMode);
+  const showAll = useDashboardStore((state) => state.categoryProfileShowAll);
+  const setCategoryProfileShowAll = useDashboardStore((state) => state.setCategoryProfileShowAll);
+
+  const sortedBenchmarks = useMemo(() => sortCategoryBenchmarkPayloads(context.categoryBenchmarks, mode), [context.categoryBenchmarks, mode]);
+  const profileByCategory = useMemo(() => new Map(context.categoryProfiles.map((profile) => [profile.category, profile])), [context.categoryProfiles]);
 
   if (loading) return <div className="category-profile-state" role="status">Пересчитываем профиль по категориям…</div>;
   if (!context.focusInSelectedGroup) return <div className="category-profile-state warning">Фокусный объект не входит в текущую группу.</div>;
@@ -164,25 +234,38 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
     setActivePage('categories');
   };
   const partial = context.categoryProfiles.some((profile) => profile.excludedUnknownCount + profile.excludedConflictingCount > 0);
+  const hiddenCount = Math.max(0, sortedBenchmarks.length - COLLAPSED_ROW_COUNT);
 
   return <div className="category-profile-list">
-    <p className="category-profile-note"><Info size={16} aria-hidden="true" />Количество брендов и эксклюзивность характеризуют структуру tenant-mix относительно выбранной группы и не подтверждают коммерческую эффективность категории.</p>
+    <p className="category-profile-note"><Info size={16} aria-hidden="true" />Количество брендов и эксклюзивность характеризуют структуру tenant-mix относительно выбранной группы и не подтверждают коммерческую эффективность категории. Отклонение показывает разницу с медианой группы сравнения (фокусный объект в медиану не входит).</p>
     {partial ? <div className="category-profile-partial" role="status"><AlertTriangle size={16} aria-hidden="true" />Расчёт выполнен по доступным данным. Часть записей исключена.</div> : null}
-    {context.categoryProfiles.map((profile) => {
+    <div className="category-profile-mode-toggle" role="group" aria-label="Режим отображения показателя">
+      <button type="button" aria-pressed={mode === 'count'} onClick={() => setCategoryProfileMode('count')}>Количество</button>
+      <button type="button" aria-pressed={mode === 'share'} onClick={() => setCategoryProfileMode('share')}>Доля</button>
+    </div>
+    {sortedBenchmarks.map((benchmark, index) => {
+      const profile = profileByCategory.get(benchmark.categoryId);
+      if (!profile) return null;
       const hasExcluded = profile.excludedUnknownCount + profile.excludedConflictingCount > 0;
       const hasIncludedReview = profile.manualReviewCount > 0;
       const hasQualitySignal = hasExcluded || hasIncludedReview;
+      const isCollapsedAway = !showAll && index >= COLLAPSED_ROW_COUNT;
       const mainValue = profile.allRowsExcludedByQuality
         ? 'Показатель не рассчитан · данные требуют проверки'
         : profile.displayPercent == null
           ? `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · нет данных`
           : `${profile.exclusiveCount} ${exclusiveWord(profile.exclusiveCount)} · ${profile.displayPercent}% категории`;
-      return <div className={`category-profile-row${hasQualitySignal ? ' has-quality-signal' : ''}${hasExcluded && hasIncludedReview ? ' has-mixed-quality' : ''}`} key={profile.category}>
+      return <div
+        className={`category-profile-row${hasQualitySignal ? ' has-quality-signal' : ''}${hasExcluded && hasIncludedReview ? ' has-mixed-quality' : ''}${isCollapsedAway ? ' category-profile-row-collapsed' : ''}`}
+        key={profile.category}
+        aria-hidden={isCollapsedAway || undefined}
+      >
         <button className="category-profile-open" type="button" onClick={() => openCategory(profile.category)} aria-label={`Открыть категорию ${profile.category}`}>
           <span className="category-profile-copy">
             <strong>{profile.category}</strong>
             <span>{profile.totalBrands} {brandWord(profile.totalBrands)}</span>
             <b>{mainValue}</b>
+            <CategoryBenchmarkBar benchmark={benchmark} mode={mode} />
             <span className="category-profile-meta">
               {profile.upcomingCount ? <em>+{profile.upcomingCount} скоро открытие</em> : null}
             </span>
@@ -193,5 +276,8 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
         <Tooltip className="category-profile-tooltip" accessibleLabel={`Пояснение расчёта для категории ${profile.category}`} label={tooltip(profile, context)} />
       </div>;
     })}
+    {!showAll && hiddenCount > 0 ? <button type="button" className="category-profile-show-all" aria-expanded={showAll} onClick={() => setCategoryProfileShowAll(true)}>
+      <ChevronDown size={16} aria-hidden="true" />Показать все {sortedBenchmarks.length} категорий
+    </button> : null}
   </div>;
 }

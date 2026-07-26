@@ -178,6 +178,50 @@ export interface BenchmarkStats {
   categoryGaps: string[];
 }
 
+/** Comparison/data/quality state shared by count and share modes — matches the accepted #141 contract's `state`/`quality.state` values. */
+export type CategoryBenchmarkState = 'ok' | 'no_peers' | 'no_data' | 'partial_quality' | 'quality_excluded' | 'conflicting';
+export type CategoryBenchmarkMode = 'count' | 'share';
+
+export interface CategoryBenchmarkCountStats {
+  focusValue: number | null;
+  peerMedian: number | null;
+  deviation: number | null;
+  deviationUnit: 'brands';
+  peerValues: number[];
+}
+
+export interface CategoryBenchmarkShareStats {
+  focusShareExact: number | null;
+  peerMedianShareExact: number | null;
+  shareExactDelta: number | null;
+  deviation: number | null;
+  deviationUnit: 'percentage_points';
+  peerSharesExact: number[];
+}
+
+/** Canonical CategoryBenchmarkPayload per #134/#141 contract — one payload consumed by desktop, mobile, and PDF. */
+export interface CategoryBenchmarkPayload {
+  payloadId: string;
+  payloadVersion: string;
+  categoryId: string;
+  focusObjectId: string;
+  peerObjectIds: string[];
+  count: CategoryBenchmarkCountStats;
+  share: CategoryBenchmarkShareStats;
+  defaultMode: 'count';
+  availableModes: CategoryBenchmarkMode[];
+  focusExcludedFromMedian: true;
+  state: CategoryBenchmarkState;
+  quality: { state: CategoryBenchmarkState; limitations: string[] };
+  peerCount: number;
+  includedCount: number;
+  excludedCount: number;
+  methodologyId: string;
+  methodologyVersion: string;
+  dataVersion: string;
+  dataSnapshotAt: string;
+}
+
 export interface AnalysisContext {
   focusMall: MallSummary;
   peerMalls: MallSummary[];
@@ -188,6 +232,7 @@ export interface AnalysisContext {
   mallStats: MallSliceStats[];
   categoryStats: CategorySliceStats[];
   categoryProfiles: CategoryProfileStats[];
+  categoryBenchmarks: CategoryBenchmarkPayload[];
   categories: string[];
   uniqueness: UniquenessStats;
   intersections: IntersectionStats;
