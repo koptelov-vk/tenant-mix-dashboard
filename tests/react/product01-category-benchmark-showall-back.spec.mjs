@@ -20,7 +20,7 @@ test.describe('Issue #170 correction: "Показать все" survives browser
     await page.goBack();
     await expect(page).toHaveURL(/cpShowAll=1/);
     await expect(page.locator('.category-profile-row.category-profile-row-collapsed')).toHaveCount(0);
-    await expect(page.locator('.category-profile-show-all')).toHaveCount(0);
+    await expect(page.locator('.category-profile-show-all')).toHaveText('Свернуть');
   });
 
   test('Share mode + Показать все -> open category -> Back -> Share and expanded both restored', async ({ page }) => {
@@ -51,7 +51,7 @@ test.describe('Issue #170 correction: "Показать все" survives browser
 
     await page.goBack();
     await expect(page.locator('.category-profile-row.category-profile-row-collapsed')).toHaveCount(0);
-    await expect(page.locator('.category-profile-show-all')).toHaveCount(0);
+    await expect(page.locator('.category-profile-show-all')).toHaveText('Свернуть');
   });
 
   test('keyboard: trigger reachable by Tab, Enter expands, aria-expanded flips, last row reachable after Back', async ({ page }) => {
@@ -61,7 +61,8 @@ test.describe('Issue #170 correction: "Показать все" survives browser
     await showAll.focus();
     await expect(showAll).toHaveAttribute('aria-expanded', 'false');
     await page.keyboard.press('Enter');
-    await expect(page.locator('.category-profile-show-all')).toHaveCount(0);
+    await expect(showAll).toHaveAttribute('aria-expanded', 'true');
+    await expect(showAll).toHaveText('Свернуть');
     await expect(page.locator('.category-profile-row.category-profile-row-collapsed')).toHaveCount(0);
 
     await page.locator('.category-profile-open').first().click();
