@@ -1,4 +1,4 @@
-import { AlertTriangle, ChevronDown, ChevronRight, Info, X } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronRight, ChevronUp, Info, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { AnalysisContext, CategoryBenchmarkPayload, CategoryProfileStats } from '../../types/dashboard';
@@ -7,7 +7,7 @@ import { useDashboardStore } from '../../stores/dashboardStore';
 import { useControlledOverlay } from '../ui/OverlayController';
 import { Tooltip } from '../ui/Tooltip';
 
-const COLLAPSED_ROW_COUNT = 8;
+const COLLAPSED_ROW_COUNT = 4;
 
 /** Short visible-UI state labels (compact badge/inline text) — human wording, never the raw enum token. */
 const stateText: Record<CategoryBenchmarkPayload['state'], string> = {
@@ -305,7 +305,7 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
 
   return <div className="category-profile-list" role="region" aria-label="Профиль по категориям" aria-describedby={sortingDescriptionId}>
     <p id={sortingDescriptionId} className="sr-only">Категории отсортированы по отклонению от медианы группы по {sortingUnitWord}, по убыванию. При равном отклонении используется название категории по алфавиту.</p>
-    <p className="category-profile-note"><Info size={16} aria-hidden="true" />Количество брендов и эксклюзивность характеризуют структуру tenant-mix относительно выбранной группы и не подтверждают коммерческую эффективность категории. Отклонение показывает разницу с медианой группы сравнения (фокусный объект в медиану не входит).</p>
+    <p className="category-profile-note"><Info size={16} aria-hidden="true" />Структура tenant-mix относительно выбранной группы; не оценка коммерческой эффективности. Отклонение — от медианы группы без фокусного объекта.</p>
     {partial ? <div className="category-profile-partial" role="status"><AlertTriangle size={16} aria-hidden="true" />Расчёт выполнен по доступным данным. Часть записей исключена.</div> : null}
     <div className="category-profile-mode-toggle" data-pdf-exclude role="group" aria-label="Режим отображения показателя">
       <button type="button" aria-pressed={mode === 'count'} onClick={() => setCategoryProfileMode('count')}>Количество</button>
@@ -340,12 +340,12 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
         <button className="category-profile-open" type="button" onClick={() => openCategory(profile.category)} aria-label={`Открыть категорию ${profile.category}`}>
           <span className="category-profile-copy">
             <strong>{profile.category}</strong>
-            <span>{profile.totalBrands} {brandWord(profile.totalBrands)}</span>
-            <b>{mainValue}</b>
-            <CategoryBenchmarkBar benchmark={benchmark} mode={mode} />
-            <span className="category-profile-meta">
+            <span className="category-profile-values">
+              <span>{profile.totalBrands} {brandWord(profile.totalBrands)}</span>
+              <b>{mainValue}</b>
               {profile.upcomingCount ? <em>+{profile.upcomingCount} скоро открытие</em> : null}
             </span>
+            <CategoryBenchmarkBar benchmark={benchmark} mode={mode} />
           </span>
           <ChevronRight aria-hidden="true" />
         </button>
@@ -353,8 +353,9 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
         <Tooltip className="category-profile-tooltip" accessibleLabel={`Пояснение расчёта для категории ${profile.category}`} label={tooltip(profile, context)} />
       </div>;
     })}
-    {!showAll && hiddenCount > 0 ? <button type="button" className="category-profile-show-all" data-pdf-exclude aria-expanded={showAll} onClick={() => setCategoryProfileShowAll(true)}>
-      <ChevronDown size={16} aria-hidden="true" />Показать все {sortedBenchmarks.length} категорий
+    {hiddenCount > 0 ? <button type="button" className="category-profile-show-all" data-pdf-exclude aria-expanded={showAll} onClick={() => setCategoryProfileShowAll(!showAll)}>
+      {showAll ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
+      {showAll ? 'Свернуть' : `Показать все ${sortedBenchmarks.length} категорий`}
     </button> : null}
   </div>;
 }

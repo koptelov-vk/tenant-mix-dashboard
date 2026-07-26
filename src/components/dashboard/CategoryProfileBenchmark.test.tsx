@@ -107,7 +107,7 @@ function buildManyCategoriesContext() {
 }
 
 describe('CategoryProfile "Показать все" / last-row reachability / long labels', () => {
-  it('collapses beyond 8 rows by default, with all rows present in the DOM (no internal scroll — a page-level "Показать все" reveal, not virtualization)', () => {
+  it('collapses beyond 4 rows by default, with all rows present in the DOM (no internal scroll — a page-level "Показать все" reveal, not virtualization)', () => {
     render(
       <OverlayControllerProvider>
         <CategoryProfile context={buildManyCategoriesContext()} />
@@ -116,7 +116,7 @@ describe('CategoryProfile "Показать все" / last-row reachability / lo
     const allRows = document.querySelectorAll('.category-profile-row');
     const hiddenRows = document.querySelectorAll('.category-profile-row.category-profile-row-collapsed');
     expect(allRows.length).toBe(13);
-    expect(hiddenRows.length).toBe(13 - 8);
+    expect(hiddenRows.length).toBe(13 - 4);
     expect(document.querySelector<HTMLElement>('.category-profile-list')?.style.overflow).not.toBe('auto');
   });
 
@@ -130,8 +130,12 @@ describe('CategoryProfile "Показать все" / last-row reachability / lo
     fireEvent.click(showAll);
     const hiddenAfter = document.querySelectorAll('.category-profile-row.category-profile-row-collapsed');
     expect(hiddenAfter.length).toBe(0);
+    const collapse = screen.getByRole('button', { name: 'Свернуть' });
+    expect(collapse.getAttribute('aria-expanded')).toBe('true');
     const longLabelRow = screen.getByText(/Товары для дома, мебель, интерьер/);
     expect(longLabelRow).toBeTruthy();
+    fireEvent.click(collapse);
+    expect(document.querySelectorAll('.category-profile-row.category-profile-row-collapsed').length).toBe(13 - 4);
   });
 });
 
