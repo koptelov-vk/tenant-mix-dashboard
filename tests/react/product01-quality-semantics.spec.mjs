@@ -39,6 +39,7 @@ test('PRODUCT-01-UI-03 separates excluded and included-review signals', async ({
   const mixed = page.locator('.category-profile-row.has-mixed-quality');
   if (await mixed.count()) {
     await page.keyboard.press('Escape');
+    await expect(mixed.first().locator('.category-profile-review-signal')).toBeVisible();
     await mixed.first().locator('.category-profile-quality-trigger').click();
     await expect(dialog).toContainText('Исключено из расчёта');
     await expect(dialog).toContainText('Включено, но требует проверки');
