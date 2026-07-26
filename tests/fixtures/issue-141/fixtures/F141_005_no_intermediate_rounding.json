@@ -1,0 +1,92 @@
+{
+  "acceptanceCriterion": "No intermediate rounding",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "No intermediate rounding. focusShareExact 0.257; peerMedianShareExact 0.202; deviation 5.5 percentage_points; state ok.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": null,
+      "deviationUnit": "brands",
+      "focusValue": null,
+      "peerMedian": null,
+      "peerValues": []
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_005_no_intermediate_rounding",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [
+      "peer-1",
+      "peer-2",
+      "peer-3"
+    ],
+    "provenance": {
+      "rawInputSha256": "35b7479d2f41e043d3788e29962f5817f67599915f851a7939c2059ba1d19af2",
+      "sourceFixtureId": "F141_005_no_intermediate_rounding"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "confirmed"
+    },
+    "share": {
+      "deviation": 5.499999999999999,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": 0.257,
+      "peerMedianShareExact": 0.202,
+      "peerSharesExact": [
+        0.101,
+        0.202,
+        0.303
+      ],
+      "shareExactDelta": 0.05499999999999999
+    },
+    "state": "ok"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "66e0c76d36a7ed9d3dba6b75a5d66aefe16188cffcb2c84dfe225d6bfedd4bed",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "qualityLimitations": [],
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "66e0c76d36a7ed9d3dba6b75a5d66aefe16188cffcb2c84dfe225d6bfedd4bed",
+    "component": "horizontal_benchmark_bar",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "mode": "share",
+    "nonColorMeaning": true,
+    "state": "ok"
+  },
+  "fixtureId": "F141_005_no_intermediate_rounding",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "focus": 0.257,
+    "mode": "share",
+    "peers": [
+      0.101,
+      0.202,
+      0.303
+    ]
+  },
+  "sourceIssue": "#141"
+}

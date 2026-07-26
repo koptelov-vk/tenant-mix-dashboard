@@ -1,0 +1,29 @@
+{
+  "consumerCalculations": [],
+  "count": {
+    "deviation": null,
+    "deviationUnit": "brands",
+    "focusValue": null,
+    "peerMedian": 12.0,
+    "peerValues": [
+      10,
+      14
+    ]
+  },
+  "fixtureId": "F141_013_all_quality_excluded",
+  "payloadDigest": "4bf9bd8de940789975d8601ebbda05b7c0a4bfa322e2ce99da94ec24c6fa4762",
+  "payloadId": "category-benchmark:F141_013_all_quality_excluded",
+  "quality": {
+    "limitations": [],
+    "state": "quality_excluded"
+  },
+  "share": {
+    "deviation": null,
+    "deviationUnit": "percentage_points",
+    "focusShareExact": null,
+    "peerMedianShareExact": null,
+    "peerSharesExact": [],
+    "shareExactDelta": null
+  },
+  "state": "quality_excluded"
+}

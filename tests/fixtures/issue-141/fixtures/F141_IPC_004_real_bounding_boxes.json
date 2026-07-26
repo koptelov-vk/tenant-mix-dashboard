@@ -1,0 +1,70 @@
+{
+  "acceptanceCriterion": "Real bounding boxes",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "IMPLEMENTATION_PHASE_CHECK",
+  "expectedAccessibilityText": "Real bounding boxes: implementation evidence not available.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": null,
+      "deviationUnit": "brands",
+      "focusValue": null,
+      "peerMedian": null,
+      "peerValues": []
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_IPC_004_real_bounding_boxes",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [],
+    "provenance": {
+      "rawInputSha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "sourceFixtureId": "F141_IPC_004_real_bounding_boxes"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "confirmed"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "ok"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "a93c608ca98970e91bbaff165c20beaabda1da921fea20b9f0a6bc28fee90e60",
+    "consumerCalculations": [],
+    "status": "IMPLEMENTATION_PHASE_CHECK"
+  },
+  "expectedUiState": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "a93c608ca98970e91bbaff165c20beaabda1da921fea20b9f0a6bc28fee90e60",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "status": "IMPLEMENTATION_PHASE_CHECK"
+  },
+  "fixtureId": "F141_IPC_004_real_bounding_boxes",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {},
+  "sourceIssue": "#141"
+}

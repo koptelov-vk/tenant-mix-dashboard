@@ -1,0 +1,13 @@
+{
+  "expectedRejection": true,
+  "fixtureId": "N141_001_fraction_marked_percentage_points",
+  "mutatedContract": {
+    "deviation": 0.055,
+    "deviationUnit": "percentage_points",
+    "focusShareExact": 0.255,
+    "mutation": "fractional_unit",
+    "peerMedianShareExact": 0.2,
+    "shareExactDelta": 0.055
+  },
+  "sourceIssue": "#141"
+}

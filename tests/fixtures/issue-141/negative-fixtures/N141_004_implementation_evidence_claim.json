@@ -1,0 +1,10 @@
+{
+  "expectedRejection": true,
+  "fixtureId": "N141_004_implementation_evidence_claim",
+  "mutatedContract": {
+    "executionPhase": "SPECIFICATION_PHASE",
+    "implementationEvidenceAvailable": true,
+    "mutation": "implementation_evidence"
+  },
+  "sourceIssue": "#141"
+}

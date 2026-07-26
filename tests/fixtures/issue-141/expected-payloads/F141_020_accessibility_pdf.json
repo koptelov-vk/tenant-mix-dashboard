@@ -1,0 +1,37 @@
+{
+  "availableModes": [
+    "count",
+    "share"
+  ],
+  "categoryId": "fixture-category",
+  "count": {
+    "deviation": null,
+    "deviationUnit": "brands",
+    "focusValue": 15,
+    "peerMedian": null,
+    "peerValues": []
+  },
+  "defaultMode": "count",
+  "focusExcludedFromMedian": true,
+  "focusObjectId": "focus",
+  "payloadId": "category-benchmark:F141_020_accessibility_pdf",
+  "payloadVersion": "1.0.0",
+  "peerObjectIds": [],
+  "provenance": {
+    "rawInputSha256": "70f6b9a26e7d70f5bf37da8fb2893cf608e16157b20dac6f674fe1e4d657c3a1",
+    "sourceFixtureId": "F141_020_accessibility_pdf"
+  },
+  "quality": {
+    "limitations": [],
+    "state": "confirmed"
+  },
+  "share": {
+    "deviation": null,
+    "deviationUnit": "percentage_points",
+    "focusShareExact": null,
+    "peerMedianShareExact": null,
+    "peerSharesExact": [],
+    "shareExactDelta": null
+  },
+  "state": "ok"
+}

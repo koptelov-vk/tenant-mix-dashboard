@@ -1,0 +1,90 @@
+{
+  "acceptanceCriterion": "Partial quality",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "Partial quality; state partial_quality; focus 12; median 12.0; deviation 0.0.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": 0.0,
+      "deviationUnit": "brands",
+      "focusValue": 12,
+      "peerMedian": 12.0,
+      "peerValues": [
+        10,
+        14
+      ]
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_012_partial_quality",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [
+      "peer-1",
+      "peer-2"
+    ],
+    "provenance": {
+      "rawInputSha256": "aaedead0ba7794bc87f0d5ace5787acc70b42b5dd8adc4bc958f4a36c894d546",
+      "sourceFixtureId": "F141_012_partial_quality"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "partial_quality"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "partial_quality"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "91580c745eeae1a800bbf020c149a1ff79c593591e4c44ece08d8df73a14af42",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "qualityLimitations": [
+      "partial_quality"
+    ],
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "91580c745eeae1a800bbf020c149a1ff79c593591e4c44ece08d8df73a14af42",
+    "component": "horizontal_benchmark_bar",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "mode": "count",
+    "nonColorMeaning": true,
+    "state": "partial_quality"
+  },
+  "fixtureId": "F141_012_partial_quality",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "focus": 12,
+    "peers": [
+      10,
+      14
+    ]
+  },
+  "sourceIssue": "#141"
+}

@@ -1,0 +1,27 @@
+{
+  "checksumErrors": 0,
+  "errors": [],
+  "expectedFailures": 4,
+  "fractionalPpMislabelCases": 1,
+  "fractionalPpMislabelRejected": 1,
+  "implementationEvidenceAvailable": false,
+  "implementationPhaseChecks": 6,
+  "manifestErrors": 0,
+  "negativeFixtures": 4,
+  "package": "#141",
+  "packageValid": true,
+  "positiveFailed": 0,
+  "positiveFixtures": 26,
+  "positivePassed": 26,
+  "schemaErrors": 0,
+  "semanticErrors": 0,
+  "statuses": [
+    "FIXTURE_SCHEMA_VALID",
+    "EXPECTED_PAYLOADS_VALID",
+    "IMMUTABLE_FIXTURE_PACKAGE_PREPARED_FOR_REVIEW",
+    "IMPLEMENTATION_EVIDENCE_NOT_AVAILABLE"
+  ],
+  "subOnePercentagePointPassed": 3,
+  "subOnePercentagePointPositiveCases": 3,
+  "unexpectedPasses": 0
+}

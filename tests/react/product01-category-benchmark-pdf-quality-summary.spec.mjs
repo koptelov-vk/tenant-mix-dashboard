@@ -14,6 +14,26 @@ async function readManifest(page) {
   });
 }
 
+async function exportPdfBuffer(page) {
+  await page.click('button[aria-label="Экспорт текущего среза"]');
+  await page.waitForSelector('.export-actions-popover');
+  const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
+  await page.click('.export-actions-popover button[title="PDF"]');
+  const download = await downloadPromise;
+  const stream = await download.createReadStream();
+  const chunks = [];
+  for await (const chunk of stream) chunks.push(chunk);
+  return Buffer.concat(chunks);
+}
+
+function pageMarkerCount(buffer) {
+  return (buffer.toString('latin1').match(/\/Type\s*\/Page(?!s)/g) || []).length;
+}
+
+// retries=0 explicitly for the whole file — generated-PDF tests must not rely on the shared
+// CI retries:1 to mask flakiness (PR #171 final Tier 3 finding).
+test.describe.configure({ retries: 0 });
+
 test.describe('CategoryProfile PDF quality summary and canonical manifest', () => {
   test('visible quality-summary block matches the canonical export manifest exactly (Count mode, collapsed UI)', async ({ page }) => {
     await page.goto('?focus=Фантастика&tab=overview');
@@ -65,24 +85,42 @@ test.describe('CategoryProfile PDF quality summary and canonical manifest', () =
     expect(expandedManifest.qualitySummary).toEqual(collapsedManifest.qualitySummary);
   });
 
-  test('real generated PDF: valid artifact, non-empty, quality summary and full category list present regardless of collapsed UI', async ({ page }) => {
+  test('real generated PDF (Count + collapsed): valid multi-page artifact, quality summary and full category list present', async ({ page }) => {
     await page.goto('?focus=Фантастика&tab=overview');
     await page.waitForSelector('.category-profile-list');
     // Deliberately leave collapsed — the harder case for "full list in PDF".
     const collapsedRowCount = await page.locator('.category-profile-row.category-profile-row-collapsed').count();
     expect(collapsedRowCount).toBeGreaterThan(0);
+    const manifest = await readManifest(page);
 
-    await page.click('button[aria-label="Экспорт текущего среза"]');
-    await page.waitForSelector('.export-actions-popover');
-    const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
-    await page.click('.export-actions-popover button[title="PDF"]');
-    const download = await downloadPromise;
-    const stream = await download.createReadStream();
-    const chunks = [];
-    for await (const chunk of stream) chunks.push(chunk);
-    const buffer = Buffer.concat(chunks);
-
+    const buffer = await exportPdfBuffer(page);
     expect(buffer.length).toBeGreaterThan(1000);
     expect(buffer.subarray(0, 5).toString('ascii')).toBe('%PDF-');
+    expect(pageMarkerCount(buffer)).toBeGreaterThan(0);
+    expect(manifest.categories.length).toBeGreaterThan(8); // exceeds the 8-row collapse threshold, proving full-list export
+  });
+
+  test('real generated PDF (Count + expanded): same manifest content as collapsed, valid multi-page artifact', async ({ page }) => {
+    await page.goto('?focus=Фантастика&tab=overview');
+    await page.waitForSelector('.category-profile-list');
+    await page.locator('.category-profile-show-all').click();
+    const manifest = await readManifest(page);
+
+    const buffer = await exportPdfBuffer(page);
+    expect(buffer.subarray(0, 5).toString('ascii')).toBe('%PDF-');
+    expect(pageMarkerCount(buffer)).toBeGreaterThan(0);
+    expect(manifest.qualitySummary.totalCategories).toBeGreaterThan(8);
+  });
+
+  test('real generated PDF (Share + collapsed): valid artifact, share-mode manifest units', async ({ page }) => {
+    await page.goto('?focus=Фантастика&tab=overview');
+    await page.waitForSelector('.category-profile-list');
+    await page.locator('.category-profile-mode-toggle button', { hasText: 'Доля' }).click();
+    const manifest = await readManifest(page);
+    expect(manifest.mode).toBe('share');
+
+    const buffer = await exportPdfBuffer(page);
+    expect(buffer.subarray(0, 5).toString('ascii')).toBe('%PDF-');
+    expect(pageMarkerCount(buffer)).toBeGreaterThan(0);
   });
 });

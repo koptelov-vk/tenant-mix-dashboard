@@ -1,0 +1,79 @@
+{
+  "acceptanceCriterion": "No peers",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "No peers; state no_peers; focus 10; median None; deviation None.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": null,
+      "deviationUnit": "brands",
+      "focusValue": 10,
+      "peerMedian": null,
+      "peerValues": []
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_010_no_peers",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [],
+    "provenance": {
+      "rawInputSha256": "a87b33ab34e9aeb94a811a1ea80a0a16ddbac1029f0452a74032f76942e71766",
+      "sourceFixtureId": "F141_010_no_peers"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "no_peers"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "no_peers"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "ee44751a0a40a0727c81a33b83151d1907d73c6b91d592476f8d22e0d1a82c5d",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "qualityLimitations": [],
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "ee44751a0a40a0727c81a33b83151d1907d73c6b91d592476f8d22e0d1a82c5d",
+    "component": "horizontal_benchmark_bar",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "mode": "count",
+    "nonColorMeaning": true,
+    "state": "no_peers"
+  },
+  "fixtureId": "F141_010_no_peers",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "focus": 10,
+    "peers": []
+  },
+  "sourceIssue": "#141"
+}

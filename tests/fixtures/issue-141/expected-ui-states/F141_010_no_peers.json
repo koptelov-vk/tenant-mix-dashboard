@@ -1,0 +1,13 @@
+{
+  "availableModes": [
+    "count",
+    "share"
+  ],
+  "canonicalPayloadDigest": "ee44751a0a40a0727c81a33b83151d1907d73c6b91d592476f8d22e0d1a82c5d",
+  "component": "horizontal_benchmark_bar",
+  "consumerCalculations": [],
+  "defaultMode": "count",
+  "mode": "count",
+  "nonColorMeaning": true,
+  "state": "no_peers"
+}

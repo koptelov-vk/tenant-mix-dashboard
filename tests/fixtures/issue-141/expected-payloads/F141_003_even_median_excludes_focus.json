@@ -1,0 +1,47 @@
+{
+  "availableModes": [
+    "count",
+    "share"
+  ],
+  "categoryId": "fixture-category",
+  "count": {
+    "deviation": 0.0,
+    "deviationUnit": "brands",
+    "focusValue": 25,
+    "peerMedian": 25.0,
+    "peerValues": [
+      10,
+      20,
+      30,
+      40
+    ]
+  },
+  "defaultMode": "count",
+  "focusExcludedFromMedian": true,
+  "focusObjectId": "focus",
+  "payloadId": "category-benchmark:F141_003_even_median_excludes_focus",
+  "payloadVersion": "1.0.0",
+  "peerObjectIds": [
+    "peer-1",
+    "peer-2",
+    "peer-3",
+    "peer-4"
+  ],
+  "provenance": {
+    "rawInputSha256": "00345f8d3a9e600af4227fee9200934457300b4827f42c16f51fc79587fbf792",
+    "sourceFixtureId": "F141_003_even_median_excludes_focus"
+  },
+  "quality": {
+    "limitations": [],
+    "state": "confirmed"
+  },
+  "share": {
+    "deviation": null,
+    "deviationUnit": "percentage_points",
+    "focusShareExact": null,
+    "peerMedianShareExact": null,
+    "peerSharesExact": [],
+    "shareExactDelta": null
+  },
+  "state": "ok"
+}

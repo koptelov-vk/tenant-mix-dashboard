@@ -1,0 +1,26 @@
+{
+  "consumerCalculations": [],
+  "count": {
+    "deviation": null,
+    "deviationUnit": "brands",
+    "focusValue": null,
+    "peerMedian": null,
+    "peerValues": []
+  },
+  "fixtureId": "F141_IPC_004_real_bounding_boxes",
+  "payloadDigest": "a93c608ca98970e91bbaff165c20beaabda1da921fea20b9f0a6bc28fee90e60",
+  "payloadId": "category-benchmark:F141_IPC_004_real_bounding_boxes",
+  "quality": {
+    "limitations": [],
+    "state": "confirmed"
+  },
+  "share": {
+    "deviation": null,
+    "deviationUnit": "percentage_points",
+    "focusShareExact": null,
+    "peerMedianShareExact": null,
+    "peerSharesExact": [],
+    "shareExactDelta": null
+  },
+  "state": "ok"
+}

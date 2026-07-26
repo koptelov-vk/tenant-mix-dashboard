@@ -1,0 +1,11 @@
+{
+  "expectedRejection": true,
+  "fixtureId": "N141_002_consumer_median",
+  "mutatedContract": {
+    "consumerCalculations": [
+      "median"
+    ],
+    "mutation": "consumer_calculation"
+  },
+  "sourceIssue": "#141"
+}

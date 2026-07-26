@@ -1,0 +1,92 @@
+{
+  "acceptanceCriterion": "Count default / Share available",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "Count default / Share available. Фокус 15; медиана 20; отклонение -5 brands; состояние ok.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": -5,
+      "deviationUnit": "brands",
+      "focusValue": 15,
+      "peerMedian": 20,
+      "peerValues": [
+        10,
+        20,
+        30
+      ]
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_001_count_default_share_available",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [
+      "peer-1",
+      "peer-2",
+      "peer-3"
+    ],
+    "provenance": {
+      "rawInputSha256": "7477909b12969e2c0c75e7dd45fbcf498576c7ae1e6342b637463e6e810f2365",
+      "sourceFixtureId": "F141_001_count_default_share_available"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "confirmed"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "ok"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "2d97818b5e1df2429407e1cad9ef22bb019d0f002c61eedc627247ab68d14042",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "qualityLimitations": [],
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "2d97818b5e1df2429407e1cad9ef22bb019d0f002c61eedc627247ab68d14042",
+    "component": "horizontal_benchmark_bar",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "mode": "count",
+    "nonColorMeaning": true,
+    "state": "ok"
+  },
+  "fixtureId": "F141_001_count_default_share_available",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "focus": 15,
+    "mode": "count",
+    "peers": [
+      10,
+      20,
+      30
+    ]
+  },
+  "sourceIssue": "#141"
+}

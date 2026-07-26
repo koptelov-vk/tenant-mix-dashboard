@@ -1,0 +1,92 @@
+{
+  "acceptanceCriterion": "Median zero",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "Median zero. Фокус 5; медиана 0; отклонение 5 brands; состояние ok.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": 5,
+      "deviationUnit": "brands",
+      "focusValue": 5,
+      "peerMedian": 0,
+      "peerValues": [
+        0,
+        0,
+        10
+      ]
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_007_median_zero",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [
+      "peer-1",
+      "peer-2",
+      "peer-3"
+    ],
+    "provenance": {
+      "rawInputSha256": "36906891a572309ebbcd7d8fb732262d77dc1eb94bfac2dd5a6301d052da6e94",
+      "sourceFixtureId": "F141_007_median_zero"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "confirmed"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "ok"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "aa9d080b8d64e90132bcb2e884ef01c4a621fe6099bd3bec42f5a3ee008479f2",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "qualityLimitations": [],
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "aa9d080b8d64e90132bcb2e884ef01c4a621fe6099bd3bec42f5a3ee008479f2",
+    "component": "horizontal_benchmark_bar",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "mode": "count",
+    "nonColorMeaning": true,
+    "state": "ok"
+  },
+  "fixtureId": "F141_007_median_zero",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "focus": 5,
+    "mode": "count",
+    "peers": [
+      0,
+      0,
+      10
+    ]
+  },
+  "sourceIssue": "#141"
+}

@@ -303,11 +303,11 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
   const exportManifest = buildCategoryBenchmarkExportManifest(sortedBenchmarks, mode);
   const summary = exportManifest.qualitySummary;
 
-  return <div className="category-profile-list" aria-describedby={sortingDescriptionId}>
+  return <div className="category-profile-list" role="region" aria-label="Профиль по категориям" aria-describedby={sortingDescriptionId}>
     <p id={sortingDescriptionId} className="sr-only">Категории отсортированы по отклонению от медианы группы по {sortingUnitWord}, по убыванию. При равном отклонении используется название категории по алфавиту.</p>
     <p className="category-profile-note"><Info size={16} aria-hidden="true" />Количество брендов и эксклюзивность характеризуют структуру tenant-mix относительно выбранной группы и не подтверждают коммерческую эффективность категории. Отклонение показывает разницу с медианой группы сравнения (фокусный объект в медиану не входит).</p>
     {partial ? <div className="category-profile-partial" role="status"><AlertTriangle size={16} aria-hidden="true" />Расчёт выполнен по доступным данным. Часть записей исключена.</div> : null}
-    <div className="category-profile-mode-toggle" role="group" aria-label="Режим отображения показателя">
+    <div className="category-profile-mode-toggle" data-pdf-exclude role="group" aria-label="Режим отображения показателя">
       <button type="button" aria-pressed={mode === 'count'} onClick={() => setCategoryProfileMode('count')}>Количество</button>
       <button type="button" aria-pressed={mode === 'share'} onClick={() => setCategoryProfileMode('share')}>Доля</button>
     </div>
@@ -353,7 +353,7 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
         <Tooltip className="category-profile-tooltip" accessibleLabel={`Пояснение расчёта для категории ${profile.category}`} label={tooltip(profile, context)} />
       </div>;
     })}
-    {!showAll && hiddenCount > 0 ? <button type="button" className="category-profile-show-all" aria-expanded={showAll} onClick={() => setCategoryProfileShowAll(true)}>
+    {!showAll && hiddenCount > 0 ? <button type="button" className="category-profile-show-all" data-pdf-exclude aria-expanded={showAll} onClick={() => setCategoryProfileShowAll(true)}>
       <ChevronDown size={16} aria-hidden="true" />Показать все {sortedBenchmarks.length} категорий
     </button> : null}
   </div>;

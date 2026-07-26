@@ -384,17 +384,24 @@ export function toCanonicalBenchmarkPayload(payload: CategoryBenchmarkPayload): 
  * the canonical payload it was built from.
  */
 export function buildCategoryBenchmarkExportManifest(payloads: CategoryBenchmarkPayload[], mode: 'count' | 'share'): CategoryBenchmarkExportManifest {
+  // Every per-category row is a projection of the ONE canonical payload (via
+  // toCanonicalBenchmarkPayload) — the manifest performs no calculation of its own and
+  // reads no field that isn't already on the canonical, schema-validated shape. Only the
+  // wrapper-level identity fields (mode, dataVersion, methodologyId, ...) come from the
+  // richer internal model, because the immutable #141 schema itself carries no
+  // methodology/versioning identity at all (see PR #171 Tier 3 canonical-payload finding).
   const categories = payloads.map((payload) => {
-    const stats = mode === 'count' ? payload.count : payload.share;
+    const canonical = toCanonicalBenchmarkPayload(payload);
+    const stats = mode === 'count' ? canonical.count : canonical.share;
     return {
-      categoryId: payload.categoryId,
+      categoryId: canonical.categoryId,
       mode,
-      focusValueRaw: mode === 'count' ? payload.count.focusValue : payload.share.focusShareExact,
-      peerMedianRaw: mode === 'count' ? payload.count.peerMedian : payload.share.peerMedianShareExact,
+      focusValueRaw: mode === 'count' ? canonical.count.focusValue : canonical.share.focusShareExact,
+      peerMedianRaw: mode === 'count' ? canonical.count.peerMedian : canonical.share.peerMedianShareExact,
       deviationRaw: stats.deviation,
       deviationUnit: stats.deviationUnit,
-      state: payload.state,
-      limitations: payload.quality.limitations,
+      state: canonical.state,
+      limitations: canonical.quality.limitations,
     };
   });
   const qualitySummary: CategoryBenchmarkQualitySummary = {

@@ -64,14 +64,18 @@ describe('CategoryProfile benchmark accessibility and PDF contract (F141_019/F14
     expect(bars).toHaveLength(1);
   });
 
-  it('announces the active (deterministic, automatic) sorting order via a single canonical accessible description, without a fake sort control', () => {
+  it('exposes a named, real accessibility-tree region (role=region + accessible name), with the sorting description reachable via aria-describedby — not just a generic non-focusable wrapper', () => {
     renderProfile();
-    const list = document.querySelector('.category-profile-list');
-    const describedById = list?.getAttribute('aria-describedby');
+    const region = screen.getByRole('region', { name: 'Профиль по категориям' });
+    expect(region).toBeTruthy();
+    const describedById = region.getAttribute('aria-describedby');
     expect(describedById).toBeTruthy();
     const description = document.getElementById(describedById as string);
     expect(description?.textContent).toMatch(/отсортированы по отклонению от медианы группы по количеству брендов, по убыванию/);
     expect(document.querySelectorAll('[data-sort-control]')).toHaveLength(0);
+    // Sorting description must not be duplicated onto every row's own accessible name.
+    const rowButtons = document.querySelectorAll('.category-profile-open');
+    rowButtons.forEach((button) => expect(button.getAttribute('aria-describedby')).toBeNull());
   });
 
   it('mode toggle and "Показать все" controls are hidden from PDF capture via the .pdf-rendering override (no separate PDF-only markup, no tooltip/popover included by default)', () => {

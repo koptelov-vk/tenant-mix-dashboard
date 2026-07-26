@@ -1,0 +1,10 @@
+{
+  "availableModes": [
+    "count",
+    "share"
+  ],
+  "canonicalPayloadDigest": "0bcced0401d9e5fcefbb73a8702eae7af4c74b7b064d9b98ca362abccd3dee7f",
+  "consumerCalculations": [],
+  "defaultMode": "count",
+  "status": "IMPLEMENTATION_PHASE_CHECK"
+}
