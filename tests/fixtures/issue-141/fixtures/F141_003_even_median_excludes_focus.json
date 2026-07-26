@@ -1,0 +1,95 @@
+{
+  "acceptanceCriterion": "Even peer median excludes focus",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "Even peer median excludes focus. Фокус 25; медиана 25.0; отклонение 0.0 brands; состояние ok.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": 0.0,
+      "deviationUnit": "brands",
+      "focusValue": 25,
+      "peerMedian": 25.0,
+      "peerValues": [
+        10,
+        20,
+        30,
+        40
+      ]
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_003_even_median_excludes_focus",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [
+      "peer-1",
+      "peer-2",
+      "peer-3",
+      "peer-4"
+    ],
+    "provenance": {
+      "rawInputSha256": "00345f8d3a9e600af4227fee9200934457300b4827f42c16f51fc79587fbf792",
+      "sourceFixtureId": "F141_003_even_median_excludes_focus"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "confirmed"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "ok"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "0d0ef223f1e452765565d8b5622bfb8844f2ae7047180481cf538bdd3ece2b65",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "qualityLimitations": [],
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "0d0ef223f1e452765565d8b5622bfb8844f2ae7047180481cf538bdd3ece2b65",
+    "component": "horizontal_benchmark_bar",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "mode": "count",
+    "nonColorMeaning": true,
+    "state": "ok"
+  },
+  "fixtureId": "F141_003_even_median_excludes_focus",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "focus": 25,
+    "mode": "count",
+    "peers": [
+      10,
+      20,
+      30,
+      40
+    ]
+  },
+  "sourceIssue": "#141"
+}

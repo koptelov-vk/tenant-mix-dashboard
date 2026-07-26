@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "acceptanceCriterion": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "environment": {
+      "const": "fixture_only"
+    },
+    "evidenceType": {
+      "enum": [
+        "synthetic_reproducible_fixture",
+        "contract_negative_fixture"
+      ]
+    },
+    "executionPhase": {
+      "enum": [
+        "SPECIFICATION_PHASE",
+        "IMPLEMENTATION_PHASE_CHECK"
+      ]
+    },
+    "expectedAccessibilityText": {
+      "type": "string"
+    },
+    "expectedPayload": {
+      "type": "object"
+    },
+    "expectedPdfExportState": {
+      "type": "object"
+    },
+    "expectedUiState": {
+      "type": "object"
+    },
+    "fixtureId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "inputContext": {
+      "type": "object"
+    },
+    "rawInput": {
+      "type": "object"
+    },
+    "sourceIssue": {
+      "pattern": "^#(141|142|126)$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "fixtureId",
+    "sourceIssue",
+    "acceptanceCriterion",
+    "inputContext",
+    "rawInput",
+    "expectedPayload",
+    "expectedUiState",
+    "expectedAccessibilityText",
+    "expectedPdfExportState",
+    "environment",
+    "evidenceType",
+    "executionPhase"
+  ],
+  "type": "object"
+}

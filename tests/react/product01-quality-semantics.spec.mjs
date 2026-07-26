@@ -3,6 +3,17 @@ import AxeBuilder from '@axe-core/playwright';
 
 test('PRODUCT-01-UI-03 separates excluded and included-review signals', async ({ page }) => {
   await page.goto('?focus=Фантастика&tab=overview');
+  await page.waitForSelector('.category-profile-list');
+
+  // Issue #170's collapsed-by-default CategoryProfile list ("Показать все") can hide the first
+  // DOM-order quality trigger of a given kind (excluded vs included-but-review) below the fold.
+  // Expand the list first so `.first()` below always resolves to a visible row — the accepted
+  // #170 collapsed/show-all contract itself is not being changed, only this test's selector.
+  const showAll = page.locator('.category-profile-show-all');
+  if (await showAll.count()) {
+    await showAll.click();
+    await expect(page.locator('.category-profile-row.category-profile-row-collapsed')).toHaveCount(0);
+  }
 
   const limited = page.locator('.category-profile-quality-trigger.is-limited');
   const reviewOnly = page.locator('.category-profile-quality-trigger.is-review-only');

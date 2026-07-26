@@ -18,6 +18,7 @@ import './styles/package3-final.css';
 import './styles/package4-methodology.css';
 import './styles/category-profile.css';
 import './styles/category-profile-quality.css';
+import './styles/category-benchmark.css';
 import './styles/export-actions.css';
 import './styles/upcoming-table-responsive.css';
 import './styles/interactive-controls.css';

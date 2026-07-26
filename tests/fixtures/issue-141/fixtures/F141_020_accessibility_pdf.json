@@ -1,0 +1,79 @@
+{
+  "acceptanceCriterion": "Accessibility and PDF contract",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "Категория Обувь. Фокус 15. Медиана 12. Выше на 3 бренда.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": null,
+      "deviationUnit": "brands",
+      "focusValue": 15,
+      "peerMedian": null,
+      "peerValues": []
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_020_accessibility_pdf",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [],
+    "provenance": {
+      "rawInputSha256": "70f6b9a26e7d70f5bf37da8fb2893cf608e16157b20dac6f674fe1e4d657c3a1",
+      "sourceFixtureId": "F141_020_accessibility_pdf"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "confirmed"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "ok"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "34d7d309a3ca91e0e0458df5c57022654b75c8b3bb3233359a3d7789b5803f26",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "qualityLimitations": [],
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "accessibleNamePresent": true,
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "34d7d309a3ca91e0e0458df5c57022654b75c8b3bb3233359a3d7789b5803f26",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "nonColorMeaning": true
+  },
+  "fixtureId": "F141_020_accessibility_pdf",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "category": "Обувь",
+    "deviation": 3,
+    "focus": 15,
+    "median": 12
+  },
+  "sourceIssue": "#141"
+}

@@ -1,0 +1,11 @@
+{
+  "accessibleNamePresent": true,
+  "availableModes": [
+    "count",
+    "share"
+  ],
+  "canonicalPayloadDigest": "34d7d309a3ca91e0e0458df5c57022654b75c8b3bb3233359a3d7789b5803f26",
+  "consumerCalculations": [],
+  "defaultMode": "count",
+  "nonColorMeaning": true
+}

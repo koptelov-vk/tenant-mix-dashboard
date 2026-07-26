@@ -10,6 +10,7 @@ function currentFilters(state: ReturnType<typeof useDashboardStore.getState>): D
     focusMall: state.focusMall, category: state.category, metric: state.metric, activePage: state.activePage, peerGroup: state.peerGroup,
     selectedMalls: [...state.selectedMalls], cities: [...state.cities], sourceQualities: [...state.sourceQualities], gapN: state.gapN,
     glaMin: state.glaMin, glaMax: state.glaMax, gbaMin: state.gbaMin, gbaMax: state.gbaMax, hideSmallCategories: state.hideSmallCategories,
+    categoryProfileMode: state.categoryProfileMode, categoryProfileShowAll: state.categoryProfileShowAll,
   };
 }
 

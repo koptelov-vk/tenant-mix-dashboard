@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "availableModes": {
+      "const": [
+        "count",
+        "share"
+      ]
+    },
+    "categoryId": {
+      "type": "string"
+    },
+    "count": {
+      "type": "object"
+    },
+    "defaultMode": {
+      "const": "count"
+    },
+    "focusExcludedFromMedian": {
+      "const": true
+    },
+    "focusObjectId": {
+      "type": "string"
+    },
+    "payloadId": {
+      "type": "string"
+    },
+    "payloadVersion": {
+      "const": "1.0.0"
+    },
+    "peerObjectIds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "quality": {
+      "type": "object"
+    },
+    "share": {
+      "type": "object"
+    },
+    "state": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "payloadId",
+    "payloadVersion",
+    "categoryId",
+    "focusObjectId",
+    "peerObjectIds",
+    "count",
+    "share",
+    "quality",
+    "provenance",
+    "state",
+    "defaultMode",
+    "availableModes",
+    "focusExcludedFromMedian"
+  ],
+  "type": "object"
+}

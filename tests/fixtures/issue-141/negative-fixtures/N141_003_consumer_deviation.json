@@ -1,0 +1,11 @@
+{
+  "expectedRejection": true,
+  "fixtureId": "N141_003_consumer_deviation",
+  "mutatedContract": {
+    "consumerCalculations": [
+      "deviation"
+    ],
+    "mutation": "consumer_calculation"
+  },
+  "sourceIssue": "#141"
+}

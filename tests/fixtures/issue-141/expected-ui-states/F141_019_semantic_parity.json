@@ -1,0 +1,12 @@
+{
+  "availableModes": [
+    "count",
+    "share"
+  ],
+  "canonicalPayloadDigest": "6c1545f6d2d96262acaf54369aebc3b39fde369eaad95fd3196aebb49cbc4a33",
+  "consumerCalculations": [],
+  "defaultMode": "count",
+  "desktop": "same",
+  "mobile": "same",
+  "nonColorMeaning": true
+}

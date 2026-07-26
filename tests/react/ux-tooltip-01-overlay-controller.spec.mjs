@@ -3,7 +3,17 @@ import AxeBuilder from '@axe-core/playwright';
 
 const calculation = (page) => page.getByRole('button', { name: /Пояснение расчёта для категории/ }).first();
 const quality = (page) => page.locator('.category-profile-quality-trigger').first();
-const activeOverlay = (page) => page.locator('[data-pdf-exclude]:visible');
+// Canonical overlay identity: OverlayController.tsx exports OVERLAY_PORTAL_CLASS
+// ('overlay-portal-layer') and applies it to every controller-owned overlay's content
+// root (Tooltip, ExportActionsMenu, GlobalFilters, Navigation, SavedViewsMenu,
+// MultiFilter, CategoryProfile's quality popover) alongside data-pdf-exclude. The
+// PDF-exclusion attribute alone is not an overlay marker: CategoryProfile's
+// persistently visible mode-toggle group and show-all button also carry
+// data-pdf-exclude (they must be hidden from PDF export) without ever being overlays,
+// which made the old `[data-pdf-exclude]:visible` selector overcount by exactly those
+// two elements. `.overlay-portal-layer` is conditionally rendered only while an
+// overlay is open, so it alone is a correct 0/1 activity count.
+const activeOverlay = (page) => page.locator('.overlay-portal-layer:visible');
 
 test.beforeEach(async ({ page }) => { await page.goto('?focus=Фантастика&tab=overview'); });
 
@@ -401,4 +411,42 @@ test.describe('quality disclosure real keyboard navigation (issue #162 acceptanc
     await expect(dialog).toHaveCount(0);
     await expect(activeOverlay(page)).toHaveCount(1);
   });
+});
+
+test('persistently visible data-pdf-exclude controls (CategoryProfile mode toggle and show-all) are never counted as active overlays', async ({ page }, testInfo) => {
+  const activate = (locator) => testInfo.project.name.startsWith('mobile') ? locator.tap() : locator.click();
+  const modeToggle = page.locator('.category-profile-mode-toggle');
+  const showAll = page.locator('.category-profile-show-all');
+
+  // Given: two persistently visible non-overlay controls carry data-pdf-exclude
+  // (they must be hidden from PDF export) and no overlay is open. urlBefore is
+  // captured only after the initial state has settled, so it isn't racing the
+  // app's own unrelated asynchronous URL-state normalization (a pre-existing,
+  // out-of-scope behavior) — this assertion is about the overlay leaving the URL
+  // unchanged, not about that normalization's timing.
+  await expect(modeToggle).toBeVisible();
+  await expect(modeToggle).toHaveAttribute('data-pdf-exclude', 'true');
+  await expect(showAll).toBeVisible();
+  await expect(showAll).toHaveAttribute('data-pdf-exclude', 'true');
+  await expect(activeOverlay(page)).toHaveCount(0);
+  const urlBefore = page.url();
+
+  // When: one real tooltip is opened.
+  const calculationTrigger = calculation(page);
+  await activate(calculationTrigger);
+  await expect(activeOverlay(page)).toHaveCount(1);
+  // The two non-overlay controls remain visible and pdf-excluded, but are still not
+  // counted — proving the canonical selector, not just an absence of overlays, is
+  // what excludes them.
+  await expect(modeToggle).toBeVisible();
+  await expect(showAll).toBeVisible();
+
+  // After close: back to zero, focus restored, no lingering overlay-portal-layer node,
+  // and the URL/navigation context is exactly what it was before the overlay opened.
+  await activate(calculationTrigger);
+  await expect(activeOverlay(page)).toHaveCount(0);
+  await expect(calculationTrigger).toBeFocused();
+  expect(page.url()).toBe(urlBefore);
+  await expect(modeToggle).toBeVisible();
+  await expect(showAll).toBeVisible();
 });
