@@ -199,20 +199,40 @@ export interface CategoryBenchmarkShareStats {
   peerSharesExact: number[];
 }
 
-/** Canonical CategoryBenchmarkPayload per #134/#141 contract — one payload consumed by desktop, mobile, and PDF. */
-export interface CategoryBenchmarkPayload {
+/**
+ * Exact-schema canonical payload per the accepted, immutable #141 contract
+ * (schema/canonical-benchmark-payload.schema.json, SHA-256
+ * bb94c627bd27fd8aa83b6a3ca9763af17e2c36dfec82ebaab27eba0067912ebf):
+ * additionalProperties:false, exactly these 13 top-level keys, no more.
+ * `count`/`share`/`quality`/`provenance` are `{type: object}` in the schema
+ * (no further top-level constraint) — their de facto shape here matches the
+ * accepted fixtures' `expectedPayload`.
+ */
+export interface CanonicalCategoryBenchmarkPayload141 {
   payloadId: string;
-  payloadVersion: string;
+  payloadVersion: '1.0.0';
   categoryId: string;
   focusObjectId: string;
   peerObjectIds: string[];
   count: CategoryBenchmarkCountStats;
   share: CategoryBenchmarkShareStats;
+  quality: { state: CategoryBenchmarkState; limitations: string[] };
+  provenance: Record<string, never>;
+  state: CategoryBenchmarkState;
   defaultMode: 'count';
   availableModes: CategoryBenchmarkMode[];
   focusExcludedFromMedian: true;
-  state: CategoryBenchmarkState;
-  quality: { state: CategoryBenchmarkState; limitations: string[] };
+}
+
+/**
+ * Internal calculation model — a strict superset of CanonicalCategoryBenchmarkPayload141.
+ * Carries additional metadata (methodology identity, peer/inclusion counts) that
+ * Issue #170's minimum-fields contract requires as semantics, but which the immutable
+ * #141 schema's `additionalProperties:false` does not allow as top-level payload keys.
+ * `toCanonicalBenchmarkPayload()` is the one pure adapter that strips this down to the
+ * exact schema shape for anything that must validate against #141 directly.
+ */
+export interface CategoryBenchmarkPayload extends CanonicalCategoryBenchmarkPayload141 {
   peerCount: number;
   includedCount: number;
   excludedCount: number;
@@ -220,6 +240,40 @@ export interface CategoryBenchmarkPayload {
   methodologyVersion: string;
   dataVersion: string;
   dataSnapshotAt: string;
+}
+
+/** One row of the PDF/export quality summary — built only from real per-category canonical states, no invented metrics. */
+export interface CategoryBenchmarkExportRow {
+  categoryId: string;
+  mode: CategoryBenchmarkMode;
+  focusValueRaw: number | null;
+  peerMedianRaw: number | null;
+  deviationRaw: number | null;
+  deviationUnit: 'brands' | 'percentage_points';
+  state: CategoryBenchmarkState;
+  limitations: string[];
+}
+
+/** Category counts by state — the PDF quality summary is rendered directly from this, never a separately-invented metric. */
+export interface CategoryBenchmarkQualitySummary {
+  totalCategories: number;
+  fullData: number;
+  partialQuality: number;
+  conflicting: number;
+  qualityExcluded: number;
+  noData: number;
+  noPeers: number;
+  excludedRecordCount: number;
+}
+
+export interface CategoryBenchmarkExportManifest {
+  mode: CategoryBenchmarkMode;
+  dataVersion: string;
+  dataSnapshotAt: string;
+  methodologyId: string;
+  methodologyVersion: string;
+  categories: CategoryBenchmarkExportRow[];
+  qualitySummary: CategoryBenchmarkQualitySummary;
 }
 
 export interface AnalysisContext {

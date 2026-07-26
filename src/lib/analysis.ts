@@ -2,7 +2,10 @@ import type {
   AnalysisContext,
   BenchmarkStats,
   BrandGap,
+  CanonicalCategoryBenchmarkPayload141,
+  CategoryBenchmarkExportManifest,
   CategoryBenchmarkPayload,
+  CategoryBenchmarkQualitySummary,
   CategoryBenchmarkState,
   CategoryProfileStats,
   CategorySliceStats,
@@ -315,11 +318,12 @@ export function buildCategoryBenchmarkPayloads(
         deviationUnit: 'percentage_points',
         peerSharesExact,
       },
+      quality: { state, limitations: profile?.qualityIssues ?? [] },
+      provenance: {},
+      state,
       defaultMode: 'count',
       availableModes: ['count', 'share'],
       focusExcludedFromMedian: true,
-      state,
-      quality: { state, limitations: profile?.qualityIssues ?? [] },
       peerCount: peerMalls.length,
       includedCount: sourceRowCount - excludedCount,
       excludedCount,
@@ -345,6 +349,114 @@ export function sortCategoryBenchmarkPayloads(payloads: CategoryBenchmarkPayload
     if (deviationA !== deviationB) return deviationB - deviationA;
     return a.categoryId.localeCompare(b.categoryId, 'ru');
   });
+}
+
+/**
+ * The one pure canonical adapter: internal calculation model -> exact #141 schema shape.
+ * Whitelists only the 13 keys schema/canonical-benchmark-payload.schema.json allows
+ * (additionalProperties:false) — methodologyId/Version, dataVersion/SnapshotAt, and the
+ * peer/inclusion counts are Issue #170 minimum-fields semantics that live on the internal
+ * model but are not valid top-level canonical-payload keys under the immutable schema.
+ */
+export function toCanonicalBenchmarkPayload(payload: CategoryBenchmarkPayload): CanonicalCategoryBenchmarkPayload141 {
+  return {
+    payloadId: payload.payloadId,
+    payloadVersion: payload.payloadVersion,
+    categoryId: payload.categoryId,
+    focusObjectId: payload.focusObjectId,
+    peerObjectIds: payload.peerObjectIds,
+    count: payload.count,
+    share: payload.share,
+    quality: payload.quality,
+    provenance: payload.provenance,
+    state: payload.state,
+    defaultMode: payload.defaultMode,
+    availableModes: payload.availableModes,
+    focusExcludedFromMedian: payload.focusExcludedFromMedian,
+  };
+}
+
+/**
+ * PDF/export quality summary and per-category manifest, built only from the same canonical
+ * payloads the UI renders — no separate PDF-side calculation, no invented metrics. Used both
+ * to render the visible PDF quality-summary block and as committed test evidence (embedded as
+ * a hidden JSON sidecar in the DOM at export time) that the generated PDF's content matches
+ * the canonical payload it was built from.
+ */
+export function buildCategoryBenchmarkExportManifest(payloads: CategoryBenchmarkPayload[], mode: 'count' | 'share'): CategoryBenchmarkExportManifest {
+  const categories = payloads.map((payload) => {
+    const stats = mode === 'count' ? payload.count : payload.share;
+    return {
+      categoryId: payload.categoryId,
+      mode,
+      focusValueRaw: mode === 'count' ? payload.count.focusValue : payload.share.focusShareExact,
+      peerMedianRaw: mode === 'count' ? payload.count.peerMedian : payload.share.peerMedianShareExact,
+      deviationRaw: stats.deviation,
+      deviationUnit: stats.deviationUnit,
+      state: payload.state,
+      limitations: payload.quality.limitations,
+    };
+  });
+  const qualitySummary: CategoryBenchmarkQualitySummary = {
+    totalCategories: payloads.length,
+    fullData: payloads.filter((p) => p.state === 'ok').length,
+    partialQuality: payloads.filter((p) => p.state === 'partial_quality').length,
+    conflicting: payloads.filter((p) => p.state === 'conflicting').length,
+    qualityExcluded: payloads.filter((p) => p.state === 'quality_excluded').length,
+    noData: payloads.filter((p) => p.state === 'no_data').length,
+    noPeers: payloads.filter((p) => p.state === 'no_peers').length,
+    excludedRecordCount: payloads.reduce((sum, p) => sum + p.excludedCount, 0),
+  };
+  const first = payloads[0];
+  return {
+    mode,
+    dataVersion: first?.dataVersion ?? '',
+    dataSnapshotAt: first?.dataSnapshotAt ?? '',
+    methodologyId: first?.methodologyId ?? '',
+    methodologyVersion: first?.methodologyVersion ?? '',
+    categories,
+    qualitySummary,
+  };
+}
+
+const CANONICAL_PAYLOAD_141_ALLOWED_KEYS = new Set([
+  'payloadId', 'payloadVersion', 'categoryId', 'focusObjectId', 'peerObjectIds',
+  'count', 'share', 'quality', 'provenance', 'state', 'defaultMode', 'availableModes', 'focusExcludedFromMedian',
+]);
+const CANONICAL_PAYLOAD_141_REQUIRED_KEYS = [...CANONICAL_PAYLOAD_141_ALLOWED_KEYS];
+
+/**
+ * Structural validation mirroring schema/canonical-benchmark-payload.schema.json
+ * (SHA-256 bb94c627bd27fd8aa83b6a3ca9763af17e2c36dfec82ebaab27eba0067912ebf) exactly:
+ * additionalProperties:false, the same 13 required keys, and the same `const` values.
+ * The literal schema.json file lives only in the externally-supplied immutable acceptance
+ * artifact (no reproducible CI-fetchable location exists for it — see PR #171 Tier 3
+ * review), so this function encodes the identical constraints read directly from that
+ * file rather than re-deriving or guessing them, and is validated against real fixture
+ * values in categoryBenchmarkSchema.test.ts.
+ */
+export function validateCanonicalPayload141(value: unknown): string[] {
+  const errors: string[] = [];
+  if (typeof value !== 'object' || value === null) return ['payload is not an object'];
+  const record = value as Record<string, unknown>;
+  const keys = Object.keys(record);
+  for (const key of keys) if (!CANONICAL_PAYLOAD_141_ALLOWED_KEYS.has(key)) errors.push(`additionalProperties:false violated by "${key}"`);
+  for (const key of CANONICAL_PAYLOAD_141_REQUIRED_KEYS) if (!(key in record)) errors.push(`missing required "${key}"`);
+  if (typeof record.categoryId !== 'string') errors.push('categoryId must be string');
+  if (typeof record.focusObjectId !== 'string') errors.push('focusObjectId must be string');
+  if (!Array.isArray(record.peerObjectIds) || record.peerObjectIds.some((item) => typeof item !== 'string')) errors.push('peerObjectIds must be string[]');
+  if (typeof record.count !== 'object' || record.count === null) errors.push('count must be object');
+  if (typeof record.share !== 'object' || record.share === null) errors.push('share must be object');
+  if (typeof record.quality !== 'object' || record.quality === null) errors.push('quality must be object');
+  if (typeof record.provenance !== 'object' || record.provenance === null) errors.push('provenance must be object');
+  if (typeof record.state !== 'string') errors.push('state must be string');
+  if (record.payloadVersion !== '1.0.0') errors.push('payloadVersion must const "1.0.0"');
+  if (record.defaultMode !== 'count') errors.push('defaultMode must const "count"');
+  if (record.focusExcludedFromMedian !== true) errors.push('focusExcludedFromMedian must const true');
+  if (!Array.isArray(record.availableModes) || record.availableModes.length !== 2 || record.availableModes[0] !== 'count' || record.availableModes[1] !== 'share') {
+    errors.push('availableModes must const ["count","share"]');
+  }
+  return errors;
 }
 
 function buildIntersections(rows: TenantRow[], focusMall: MallSummary): IntersectionStats {

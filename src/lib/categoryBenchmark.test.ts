@@ -280,6 +280,7 @@ describe('sortCategoryBenchmarkPayloads (#141 F141_015/016/017)', () => {
     payloadId: `category-benchmark:${categoryId}`, payloadVersion: '1.0.0', categoryId, focusObjectId: 'focus', peerObjectIds: [],
     count: { focusValue: null, peerMedian: null, deviation, deviationUnit: 'brands', peerValues: [] },
     share: { focusShareExact: null, peerMedianShareExact: null, shareExactDelta: null, deviation: null, deviationUnit: 'percentage_points', peerSharesExact: [] },
+    provenance: {},
     defaultMode: 'count', availableModes: ['count', 'share'], focusExcludedFromMedian: true,
     state: 'ok', quality: { state: 'ok', limitations: [] },
     peerCount: 0, includedCount: 0, excludedCount: 0,

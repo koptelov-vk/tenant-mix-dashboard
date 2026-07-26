@@ -2,13 +2,14 @@ import { AlertTriangle, ChevronDown, ChevronRight, Info, X } from 'lucide-react'
 import { createPortal } from 'react-dom';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { AnalysisContext, CategoryBenchmarkPayload, CategoryProfileStats } from '../../types/dashboard';
-import { sortCategoryBenchmarkPayloads } from '../../lib/analysis';
+import { buildCategoryBenchmarkExportManifest, sortCategoryBenchmarkPayloads } from '../../lib/analysis';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { useControlledOverlay } from '../ui/OverlayController';
 import { Tooltip } from '../ui/Tooltip';
 
 const COLLAPSED_ROW_COUNT = 8;
 
+/** Short visible-UI state labels (compact badge/inline text) — human wording, never the raw enum token. */
 const stateText: Record<CategoryBenchmarkPayload['state'], string> = {
   ok: 'рассчитано',
   no_peers: 'нет объектов сравнения',
@@ -16,6 +17,19 @@ const stateText: Record<CategoryBenchmarkPayload['state'], string> = {
   partial_quality: 'расчёт ограничен',
   quality_excluded: 'показатель не рассчитан',
   conflicting: 'конфликтующие данные',
+};
+
+/**
+ * Full sentence per accessible-state, used only in the accessible name (never the raw
+ * `partial_quality`/`quality_excluded`/etc. enum token, per PR #171 Tier 3 accessibility finding).
+ */
+const dataQualityStateSentence: Record<CategoryBenchmarkPayload['state'], string> = {
+  ok: 'Данные подтверждены',
+  no_peers: 'Нет объектов сравнения',
+  no_data: 'Нет данных',
+  partial_quality: 'Расчёт ограничен по качеству данных',
+  quality_excluded: 'Показатель исключён из расчёта по качеству данных',
+  conflicting: 'Обнаружены конфликтующие данные',
 };
 
 function formatCount(value: number) {
@@ -26,27 +40,78 @@ function formatShare(value: number) {
   return `${(value * 100).toLocaleString('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}%`;
 }
 
+function pluralize(value: number, one: string, few: string, many: string): string {
+  const abs = Math.abs(Math.round(value));
+  const mod10 = abs % 10;
+  const mod100 = abs % 100;
+  if (mod10 === 1 && mod100 !== 11) return one;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
+  return many;
+}
+
+const brandWord = (count: number) => pluralize(count, 'бренд', 'бренда', 'брендов');
+const exclusiveWord = (count: number) => pluralize(count, 'эксклюзивный', 'эксклюзивных', 'эксклюзивных');
+const pointWord = (count: number) => pluralize(count, 'процентный пункт', 'процентных пункта', 'процентных пунктов');
+const peerWord = (count: number) => pluralize(count, 'объект', 'объекта', 'объектов');
+
+function comparisonWording(deviation: number | null): string | null {
+  if (deviation == null) return null;
+  if (deviation > 0) return 'выше медианы группы';
+  if (deviation < 0) return 'ниже медианы группы';
+  return 'на уровне медианы группы';
+}
+
 function deviationText(benchmark: CategoryBenchmarkPayload, mode: 'count' | 'share'): string {
   const stats = mode === 'count' ? benchmark.count : benchmark.share;
   if (stats.deviation == null) return `Отклонение недоступно (${stateText[benchmark.state]})`;
   const rounded = mode === 'count' ? stats.deviation : Math.round(stats.deviation * 10) / 10;
-  const unit = mode === 'count' ? (Math.abs(rounded) === 1 ? 'бренд' : 'брендов') : 'п.п.';
+  const unit = mode === 'count' ? brandWord(rounded) : 'п.п.';
   const sign = rounded > 0 ? '+' : '';
   const direction = rounded > 0 ? '▲ выше' : rounded < 0 ? '▼ ниже' : '● на уровне';
   return `${direction} медианы группы на ${sign}${rounded.toLocaleString('ru-RU', { maximumFractionDigits: 1 })} ${unit}`;
 }
 
+/**
+ * Full accessible name for the benchmark bar. Every value carries a human-readable Russian
+ * unit/state word — the raw canonical-payload tokens `brands`, `percentage_points`,
+ * `partial_quality`, `conflicting`, `quality_excluded`, etc. are never spoken to the user
+ * (PR #171 Tier 3 accessibility finding).
+ */
 function accessibleBenchmarkText(benchmark: CategoryBenchmarkPayload, mode: 'count' | 'share'): string {
-  const focusValue = mode === 'count'
-    ? (benchmark.count.focusValue == null ? 'нет данных' : formatCount(benchmark.count.focusValue))
-    : (benchmark.share.focusShareExact == null ? 'нет данных' : formatShare(benchmark.share.focusShareExact));
-  const peerMedian = mode === 'count'
-    ? (benchmark.count.peerMedian == null ? 'нет данных' : formatCount(benchmark.count.peerMedian))
-    : (benchmark.share.peerMedianShareExact == null ? 'нет данных' : formatShare(benchmark.share.peerMedianShareExact));
-  const rawDeviation = mode === 'count' ? benchmark.count.deviation : benchmark.share.deviation;
-  const unit = mode === 'count' ? 'brands' : 'percentage_points';
-  const deviation = rawDeviation == null ? 'недоступно' : `${rawDeviation.toLocaleString('ru-RU', { maximumFractionDigits: 1 })} ${unit}`;
-  return `Категория ${benchmark.categoryId}. Фокус ${focusValue}. Медиана группы ${peerMedian}. Отклонение ${deviation}. Состояние: ${stateText[benchmark.state]}.`;
+  const focusValue = mode === 'count' ? benchmark.count.focusValue : benchmark.share.focusShareExact;
+  const peerMedian = mode === 'count' ? benchmark.count.peerMedian : benchmark.share.peerMedianShareExact;
+  const deviation = mode === 'count' ? benchmark.count.deviation : benchmark.share.deviation;
+
+  const focusSentence = focusValue == null
+    ? 'В фокусном объекте нет данных.'
+    : mode === 'count'
+      ? `В фокусном объекте ${formatCount(focusValue)} ${brandWord(focusValue)}.`
+      : `В фокусном объекте ${formatShare(focusValue)}.`;
+
+  const peerSentence = peerMedian == null
+    ? 'Медиана группы недоступна.'
+    : mode === 'count'
+      ? `Медиана группы ${formatCount(peerMedian)} ${brandWord(peerMedian)}.`
+      : `Медиана группы ${formatShare(peerMedian)}.`;
+
+  const comparison = comparisonWording(deviation);
+  let deviationSentence: string;
+  if (deviation == null || comparison == null) {
+    deviationSentence = 'Отклонение недоступно.';
+  } else if (deviation === 0) {
+    deviationSentence = `Отклонение отсутствует. Фокусный объект ${comparison}.`;
+  } else {
+    const magnitude = Math.abs(mode === 'count' ? deviation : Math.round(deviation * 10) / 10);
+    const sign = deviation > 0 ? 'плюс' : 'минус';
+    const unitWord = mode === 'count' ? brandWord(magnitude) : pointWord(magnitude);
+    deviationSentence = `Отклонение ${sign} ${magnitude.toLocaleString('ru-RU', { maximumFractionDigits: 1 })} ${unitWord}. Фокусный объект ${comparison}.`;
+  }
+
+  const stateSentence = `${dataQualityStateSentence[benchmark.state]}.`;
+  const limitationSentence = benchmark.quality.limitations.length ? ` ${benchmark.quality.limitations.join(' ')}` : '';
+  const peerContextSentence = benchmark.peerCount > 0 ? ` Группа сравнения: ${benchmark.peerCount} ${peerWord(benchmark.peerCount)}.` : '';
+
+  return `Категория «${benchmark.categoryId}». ${focusSentence} ${peerSentence} ${deviationSentence} ${stateSentence}${limitationSentence}${peerContextSentence}`;
 }
 
 function CategoryBenchmarkBar({ benchmark, mode }: { benchmark: CategoryBenchmarkPayload; mode: 'count' | 'share' }) {
@@ -68,9 +133,6 @@ function CategoryBenchmarkBar({ benchmark, mode }: { benchmark: CategoryBenchmar
     </span>
   </div>;
 }
-
-const brandWord = (count: number) => count % 10 === 1 && count % 100 !== 11 ? 'бренд' : count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20) ? 'бренда' : 'брендов';
-const exclusiveWord = (count: number) => count % 10 === 1 && count % 100 !== 11 ? 'эксклюзивный' : 'эксклюзивных';
 
 function tooltip(profile: CategoryProfileStats, context: AnalysisContext) {
   const exact = profile.exactPercent == null ? 'нет данных' : `${profile.exactPercent.toLocaleString('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}%`;
@@ -236,13 +298,28 @@ export function CategoryProfile({ context, loading = false }: { context: Analysi
   const partial = context.categoryProfiles.some((profile) => profile.excludedUnknownCount + profile.excludedConflictingCount > 0);
   const hiddenCount = Math.max(0, sortedBenchmarks.length - COLLAPSED_ROW_COUNT);
 
-  return <div className="category-profile-list">
+  const sortingDescriptionId = 'category-profile-sorting-description';
+  const sortingUnitWord = mode === 'count' ? 'количеству брендов' : 'доле категории';
+  const exportManifest = buildCategoryBenchmarkExportManifest(sortedBenchmarks, mode);
+  const summary = exportManifest.qualitySummary;
+
+  return <div className="category-profile-list" aria-describedby={sortingDescriptionId}>
+    <p id={sortingDescriptionId} className="sr-only">Категории отсортированы по отклонению от медианы группы по {sortingUnitWord}, по убыванию. При равном отклонении используется название категории по алфавиту.</p>
     <p className="category-profile-note"><Info size={16} aria-hidden="true" />Количество брендов и эксклюзивность характеризуют структуру tenant-mix относительно выбранной группы и не подтверждают коммерческую эффективность категории. Отклонение показывает разницу с медианой группы сравнения (фокусный объект в медиану не входит).</p>
     {partial ? <div className="category-profile-partial" role="status"><AlertTriangle size={16} aria-hidden="true" />Расчёт выполнен по доступным данным. Часть записей исключена.</div> : null}
     <div className="category-profile-mode-toggle" role="group" aria-label="Режим отображения показателя">
       <button type="button" aria-pressed={mode === 'count'} onClick={() => setCategoryProfileMode('count')}>Количество</button>
       <button type="button" aria-pressed={mode === 'share'} onClick={() => setCategoryProfileMode('share')}>Доля</button>
     </div>
+    <dl className="category-profile-quality-summary" aria-label="Сводка качества расчёта по категориям">
+      <div><dt>Категорий с полными данными</dt><dd>{summary.fullData}</dd></div>
+      <div><dt>Категорий с ограниченным расчётом</dt><dd>{summary.partialQuality}</dd></div>
+      <div><dt>Категорий с конфликтующими данными</dt><dd>{summary.conflicting}</dd></div>
+      <div><dt>Категорий, исключённых по качеству</dt><dd>{summary.qualityExcluded}</dd></div>
+      <div><dt>Категорий без данных</dt><dd>{summary.noData}</dd></div>
+      <div><dt>Исключённых/ограниченных записей</dt><dd>{summary.excludedRecordCount}</dd></div>
+    </dl>
+    <script type="application/json" id="category-benchmark-export-manifest" data-pdf-exclude>{JSON.stringify(exportManifest)}</script>
     {sortedBenchmarks.map((benchmark, index) => {
       const profile = profileByCategory.get(benchmark.categoryId);
       if (!profile) return null;
