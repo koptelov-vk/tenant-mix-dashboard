@@ -15,6 +15,7 @@ import { EMPTY_FILTER, matchesFilter, uniqueOptions } from '../components/ui/Mul
 import { MultiFilter } from '../components/ui/MultiFilter';
 import { ActiveTableFilters, type ActiveTableFilter } from '../components/table/ActiveTableFilters';
 import { DataTableEmptyState } from '../components/table/DataTableEmptyState';
+import { formatCountRu } from '../lib/utils';
 
 type SortKey = 'brand' | 'characteristic' | 'category' | 'malls';
 const headers: Array<[SortKey, string]> = [['brand', 'Бренд'], ['characteristic', 'Характеристика'], ['category', 'Категория'], ['malls', 'Объекты']];
@@ -49,7 +50,7 @@ export default function BrandsPage({ context, data }: { context: AnalysisContext
   const mallCount = new Set(rows.flatMap((row) => row.malls)).size;
   const categoryCount = new Set(rows.map((row) => row.category)).size;
 
-  return <><div className="page-heading"><div><h1>Бренды</h1><p>{rows.length.toLocaleString('ru-RU')} брендов · {mallCount} объектов · {categoryCount} категорий</p></div><div className="page-actions"><Button variant="outline" onClick={() => downloadBrandCsv(rows)}><Download size={17} />CSV</Button><Button variant="outline" onClick={() => downloadBrandXlsx(rows)}><FileSpreadsheet size={17} />XLSX</Button></div></div>
+  return <><div className="page-heading"><div><h1>Бренды</h1><p>{rows.length.toLocaleString('ru-RU')} брендов · {formatCountRu(mallCount, ['объект', 'объекта', 'объектов'])} · {categoryCount} категорий</p></div><div className="page-actions"><Button variant="outline" onClick={() => downloadBrandCsv(rows)}><Download size={17} />CSV</Button><Button variant="outline" onClick={() => downloadBrandXlsx(rows)}><FileSpreadsheet size={17} />XLSX</Button></div></div>
     <Card className="registry brand-registry unified-table-panel"><div className="registry-toolbar"><label className="search-field"><Search size={18} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Поиск бренда, категории или объекта" aria-label="Поиск по брендам" />{search ? <button onClick={() => setSearch('')} aria-label="Очистить поиск"><X size={16} /></button> : null}</label><span className="registry-result-count" role="status" aria-live="polite"><strong>{rows.length.toLocaleString('ru-RU')}</strong> брендов</span></div>
       <div className="brand-mobile-controls" aria-label="Фильтры и сортировка брендов"><label><span>Сортировка</span><select value={sort.key} onChange={(event) => setSort({ key: event.target.value as SortKey, direction: sort.direction })}>{headers.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label><Button variant="outline" onClick={() => setSort((current) => ({ ...current, direction: current.direction === 'asc' ? 'desc' : 'asc' }))}>{sort.direction === 'asc' ? 'По возрастанию' : 'По убыванию'}</Button>{headers.map(([key, label]) => <MultiFilter key={key} label={label} options={options[key]} value={filters[key]} onChange={(value) => setColumnFilter(key, value)} />)}</div>
       <ActiveTableFilters filters={activeFilters} onRemove={(key) => setColumnFilter(key as SortKey, [])} onReset={resetLocal} />
