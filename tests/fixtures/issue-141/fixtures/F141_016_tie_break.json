@@ -1,0 +1,88 @@
+{
+  "acceptanceCriterion": "Deterministic tie-break",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "Ties use canonical id.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": null,
+      "deviationUnit": "brands",
+      "focusValue": null,
+      "peerMedian": null,
+      "peerValues": []
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_016_tie_break",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [],
+    "provenance": {
+      "rawInputSha256": "5ce8e9d529d618fbbf62391505c3ebfb96b3d40c4885c9da64513b889df819fb",
+      "sourceFixtureId": "F141_016_tie_break"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "confirmed"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "ok"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "78c1e2b4374d4625919febd1497c6a0ecc8961055260c3e4f81f53e42f185bb7",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "allRowsPreserved": true,
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "78c1e2b4374d4625919febd1497c6a0ecc8961055260c3e4f81f53e42f185bb7",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "state": "ok"
+  },
+  "fixtureId": "F141_016_tie_break",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "rows": [
+      {
+        "deviation": 2,
+        "id": "b"
+      },
+      {
+        "deviation": 2,
+        "id": "a"
+      },
+      {
+        "deviation": 1,
+        "id": "c"
+      }
+    ]
+  },
+  "sourceIssue": "#141"
+}

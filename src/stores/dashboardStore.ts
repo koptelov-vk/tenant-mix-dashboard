@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { MetricMode, SourceQuality } from '../types/dashboard';
+import type { CategoryBenchmarkMode, MetricMode, SourceQuality } from '../types/dashboard';
 
 export type DashboardPage = 'overview' | 'comparability' | 'categories' | 'brands' | 'upcoming' | 'quality' | 'history';
 export type PeerGroupMode = 'same-class' | 'all' | 'custom';
@@ -23,6 +23,8 @@ export interface DashboardFilters {
   gbaMin: number | null;
   gbaMax: number | null;
   hideSmallCategories: boolean;
+  categoryProfileMode: CategoryBenchmarkMode;
+  categoryProfileShowAll: boolean;
 }
 
 interface DashboardState extends DashboardFilters {
@@ -39,6 +41,8 @@ interface DashboardState extends DashboardFilters {
   setGapN: (value: number) => void;
   setAreaFilter: (key: 'glaMin' | 'glaMax' | 'gbaMin' | 'gbaMax', value: number | null) => void;
   setHideSmallCategories: (value: boolean) => void;
+  setCategoryProfileMode: (mode: CategoryBenchmarkMode) => void;
+  setCategoryProfileShowAll: (value: boolean) => void;
   hydrate: (state: Partial<DashboardFilters>) => void;
   reset: () => void;
 }
@@ -47,6 +51,7 @@ export const defaultDashboardFilters: DashboardFilters & { categories: string[] 
   focusMall: 'Фантастика', category: 'Все категории', categories: [], metric: 'absolute', activePage: 'overview', peerGroup: 'same-class',
   selectedMalls: [], cities: [], sourceQualities: [], gapN: 3,
   glaMin: null, glaMax: null, gbaMin: null, gbaMax: null, hideSmallCategories: true,
+  categoryProfileMode: 'count', categoryProfileShowAll: false,
 };
 
 export const useDashboardStore = create<DashboardState>((set) => ({
@@ -66,6 +71,8 @@ export const useDashboardStore = create<DashboardState>((set) => ({
   setGapN: (gapN) => set({ gapN: Math.max(1, Math.round(gapN)) }),
   setAreaFilter: (key, value) => set({ [key]: value }),
   setHideSmallCategories: (hideSmallCategories) => set({ hideSmallCategories }),
+  setCategoryProfileMode: (categoryProfileMode) => set({ categoryProfileMode }),
+  setCategoryProfileShowAll: (categoryProfileShowAll) => set({ categoryProfileShowAll }),
   hydrate: (state) => set((current) => ({
     ...state,
     categories: state.categories ?? (state.category && state.category !== 'Все категории' ? [state.category] : current.categories),

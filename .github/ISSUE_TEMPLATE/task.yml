@@ -1,0 +1,91 @@
+name: Canonical task
+description: Create one implementation or process task with a single executor
+title: "[TASK] "
+body:
+  - type: markdown
+    attributes:
+      value: "Use this form when no existing Issue has the same purpose. One Issue has one implementation executor."
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What confirmed problem must be solved?
+    validations:
+      required: true
+  - type: textarea
+    id: facts
+    attributes:
+      label: Confirmed facts
+      description: Sources, current SHA, files, screenshots or other evidence.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options: [P0, P1, P2, P3]
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk tier
+      options: [Tier 1, Tier 2, Tier 3]
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+    validations:
+      required: true
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Approved decisions and invariants
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Required tests and evidence
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and blockers
+    validations:
+      required: true
+  - type: input
+    id: executor
+    attributes:
+      label: Implementation executor
+      description: One person or AI executor. Do not list multiple parallel executors.
+    validations:
+      required: true
+  - type: input
+    id: reviewer
+    attributes:
+      label: Reviewer
+      description: Independent reviewer for Tier 3; use "not required" only when justified by tier.
+    validations:
+      required: true

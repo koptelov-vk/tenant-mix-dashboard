@@ -1,0 +1,90 @@
+{
+  "acceptanceCriterion": "All quality excluded",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "All quality excluded; state quality_excluded; focus None; median None; deviation None.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": null,
+      "deviationUnit": "brands",
+      "focusValue": null,
+      "peerMedian": 12.0,
+      "peerValues": [
+        10,
+        14
+      ]
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_013_all_quality_excluded",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [
+      "peer-1",
+      "peer-2"
+    ],
+    "provenance": {
+      "rawInputSha256": "d9d6c35cf0b2fd2f2e36d5849a7dde0c353a53dc47f63038231e2e6effaeaec1",
+      "sourceFixtureId": "F141_013_all_quality_excluded"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "quality_excluded"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "quality_excluded"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "4bf9bd8de940789975d8601ebbda05b7c0a4bfa322e2ce99da94ec24c6fa4762",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "qualityLimitations": [
+      "quality_excluded"
+    ],
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "4bf9bd8de940789975d8601ebbda05b7c0a4bfa322e2ce99da94ec24c6fa4762",
+    "component": "horizontal_benchmark_bar",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "mode": "count",
+    "nonColorMeaning": true,
+    "state": "quality_excluded"
+  },
+  "fixtureId": "F141_013_all_quality_excluded",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "focus": null,
+    "peers": [
+      10,
+      14
+    ]
+  },
+  "sourceIssue": "#141"
+}

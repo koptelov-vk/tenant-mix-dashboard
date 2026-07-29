@@ -1,0 +1,491 @@
+{
+  "meta": {
+    "version": "synthetic-test-1.0.0",
+    "snapshotDate": "2026-07-26"
+  },
+  "rows": [
+    {
+      "mall": "Фантастика",
+      "city": "Тестгород",
+      "brand": "F1",
+      "brandNormalized": "f1",
+      "category": "Синтетика полные данные",
+      "sourceUrl": "https://example.test/F1",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Фантастика",
+      "city": "Тестгород",
+      "brand": "F2",
+      "brandNormalized": "f2",
+      "category": "Синтетика полные данные",
+      "sourceUrl": "https://example.test/F2",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Peer1",
+      "city": "Тестгород",
+      "brand": "P1a",
+      "brandNormalized": "p1a",
+      "category": "Синтетика полные данные",
+      "sourceUrl": "https://example.test/P1a",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Peer2",
+      "city": "Тестгород",
+      "brand": "P2a",
+      "brandNormalized": "p2a",
+      "category": "Синтетика полные данные",
+      "sourceUrl": "https://example.test/P2a",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Фантастика",
+      "city": "Тестгород",
+      "brand": "F3",
+      "brandNormalized": "f3",
+      "category": "Синтетика частично",
+      "sourceUrl": "https://example.test/F3",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Фантастика",
+      "city": "Тестгород",
+      "brand": "F4",
+      "brandNormalized": "f4",
+      "category": "Синтетика частично",
+      "sourceUrl": "https://example.test/F4",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "unknown"
+    },
+    {
+      "mall": "Peer1",
+      "city": "Тестгород",
+      "brand": "P1b",
+      "brandNormalized": "p1b",
+      "category": "Синтетика частично",
+      "sourceUrl": "https://example.test/P1b",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Peer2",
+      "city": "Тестгород",
+      "brand": "P2b",
+      "brandNormalized": "p2b",
+      "category": "Синтетика частично",
+      "sourceUrl": "https://example.test/P2b",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Фантастика",
+      "city": "Тестгород",
+      "brand": "F5",
+      "brandNormalized": "f5",
+      "category": "Синтетика конфликт",
+      "sourceUrl": "https://example.test/F5",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Фантастика",
+      "city": "Тестгород",
+      "brand": "F6",
+      "brandNormalized": "f6",
+      "category": "Синтетика конфликт",
+      "sourceUrl": "https://example.test/F6",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "conflicting"
+    },
+    {
+      "mall": "Peer1",
+      "city": "Тестгород",
+      "brand": "P1c",
+      "brandNormalized": "p1c",
+      "category": "Синтетика конфликт",
+      "sourceUrl": "https://example.test/P1c",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Peer2",
+      "city": "Тестгород",
+      "brand": "P2c",
+      "brandNormalized": "p2c",
+      "category": "Синтетика конфликт",
+      "sourceUrl": "https://example.test/P2c",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Фантастика",
+      "city": "Тестгород",
+      "brand": "F7",
+      "brandNormalized": "f7",
+      "category": "Синтетика качество исключено",
+      "sourceUrl": "https://example.test/F7",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "unknown"
+    },
+    {
+      "mall": "Фантастика",
+      "city": "Тестгород",
+      "brand": "F8",
+      "brandNormalized": "f8",
+      "category": "Синтетика качество исключено",
+      "sourceUrl": "https://example.test/F8",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "unknown"
+    },
+    {
+      "mall": "Peer1",
+      "city": "Тестгород",
+      "brand": "P1d",
+      "brandNormalized": "p1d",
+      "category": "Синтетика качество исключено",
+      "sourceUrl": "https://example.test/P1d",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    },
+    {
+      "mall": "Peer2",
+      "city": "Тестгород",
+      "brand": "P2d",
+      "brandNormalized": "p2d",
+      "category": "Синтетика качество исключено",
+      "sourceUrl": "https://example.test/P2d",
+      "sourceType": "официальный сайт",
+      "sourceQuality": "Высокая",
+      "checkedAt": "2026-07-26",
+      "rowStatus": "active"
+    }
+  ],
+  "mallSummary": [
+    {
+      "mall": "Фантастика",
+      "city": "Тестгород",
+      "mallClass": "Тестовый",
+      "gla": 50000,
+      "gba": 60000,
+      "glaConfirmed": true,
+      "brandCount": 4,
+      "categoryCount": 3,
+      "categoryCounts": {
+        "Синтетика полные данные": 2,
+        "Синтетика частично": 1,
+        "Синтетика конфликт": 1
+      }
+    },
+    {
+      "mall": "Peer1",
+      "city": "Тестгород",
+      "mallClass": "Тестовый",
+      "gla": 50000,
+      "gba": 60000,
+      "glaConfirmed": true,
+      "brandCount": 4,
+      "categoryCount": 4,
+      "categoryCounts": {
+        "Синтетика полные данные": 1,
+        "Синтетика частично": 1,
+        "Синтетика конфликт": 1,
+        "Синтетика качество исключено": 1
+      }
+    },
+    {
+      "mall": "Peer2",
+      "city": "Тестгород",
+      "mallClass": "Тестовый",
+      "gla": 50000,
+      "gba": 60000,
+      "glaConfirmed": true,
+      "brandCount": 4,
+      "categoryCount": 4,
+      "categoryCounts": {
+        "Синтетика полные данные": 1,
+        "Синтетика частично": 1,
+        "Синтетика конфликт": 1,
+        "Синтетика качество исключено": 1
+      }
+    }
+  ],
+  "categoryMatrix": {
+    "categories": [
+      "Синтетика полные данные",
+      "Синтетика частично",
+      "Синтетика конфликт",
+      "Синтетика качество исключено",
+      "Синтетика нет данных"
+    ]
+  },
+  "brandPresence": {
+    "f1": {
+      "brand": "F1",
+      "brandNormalized": "f1",
+      "category": "Синтетика полные данные",
+      "malls": [
+        "Фантастика"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Фантастика",
+          "url": "https://example.test/F1",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "f2": {
+      "brand": "F2",
+      "brandNormalized": "f2",
+      "category": "Синтетика полные данные",
+      "malls": [
+        "Фантастика"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Фантастика",
+          "url": "https://example.test/F2",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "p1a": {
+      "brand": "P1a",
+      "brandNormalized": "p1a",
+      "category": "Синтетика полные данные",
+      "malls": [
+        "Peer1"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Peer1",
+          "url": "https://example.test/P1a",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "p2a": {
+      "brand": "P2a",
+      "brandNormalized": "p2a",
+      "category": "Синтетика полные данные",
+      "malls": [
+        "Peer2"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Peer2",
+          "url": "https://example.test/P2a",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "f3": {
+      "brand": "F3",
+      "brandNormalized": "f3",
+      "category": "Синтетика частично",
+      "malls": [
+        "Фантастика"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Фантастика",
+          "url": "https://example.test/F3",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "p1b": {
+      "brand": "P1b",
+      "brandNormalized": "p1b",
+      "category": "Синтетика частично",
+      "malls": [
+        "Peer1"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Peer1",
+          "url": "https://example.test/P1b",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "p2b": {
+      "brand": "P2b",
+      "brandNormalized": "p2b",
+      "category": "Синтетика частично",
+      "malls": [
+        "Peer2"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Peer2",
+          "url": "https://example.test/P2b",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "f5": {
+      "brand": "F5",
+      "brandNormalized": "f5",
+      "category": "Синтетика конфликт",
+      "malls": [
+        "Фантастика"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Фантастика",
+          "url": "https://example.test/F5",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "p1c": {
+      "brand": "P1c",
+      "brandNormalized": "p1c",
+      "category": "Синтетика конфликт",
+      "malls": [
+        "Peer1"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Peer1",
+          "url": "https://example.test/P1c",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "p2c": {
+      "brand": "P2c",
+      "brandNormalized": "p2c",
+      "category": "Синтетика конфликт",
+      "malls": [
+        "Peer2"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Peer2",
+          "url": "https://example.test/P2c",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "p1d": {
+      "brand": "P1d",
+      "brandNormalized": "p1d",
+      "category": "Синтетика качество исключено",
+      "malls": [
+        "Peer1"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Peer1",
+          "url": "https://example.test/P1d",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    },
+    "p2d": {
+      "brand": "P2d",
+      "brandNormalized": "p2d",
+      "category": "Синтетика качество исключено",
+      "malls": [
+        "Peer2"
+      ],
+      "mallCount": 1,
+      "sources": [
+        {
+          "mall": "Peer2",
+          "url": "https://example.test/P2d",
+          "type": "официальный сайт",
+          "quality": "Высокая",
+          "checkedAt": "2026-07-26"
+        }
+      ]
+    }
+  },
+  "mallSimilarity": [],
+  "brandGaps": {},
+  "upcoming": [],
+  "dataQuality": {
+    "snapshotDate": "2026-07-26",
+    "rows": 16,
+    "malls": 3,
+    "brands": 16,
+    "emptyBrands": 0,
+    "emptyNormalizedBrands": 0,
+    "duplicateMallBrandPairs": 0,
+    "invalidUrls": 0,
+    "mallsWithoutGla": 0,
+    "manualReviewRows": 0
+  }
+}

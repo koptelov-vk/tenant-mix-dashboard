@@ -1,0 +1,92 @@
+{
+  "acceptanceCriterion": "Focus zero",
+  "environment": "fixture_only",
+  "evidenceType": "synthetic_reproducible_fixture",
+  "executionPhase": "SPECIFICATION_PHASE",
+  "expectedAccessibilityText": "Focus zero. Фокус 0; медиана 10; отклонение -10 brands; состояние ok.",
+  "expectedPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "deviation": -10,
+      "deviationUnit": "brands",
+      "focusValue": 0,
+      "peerMedian": 10,
+      "peerValues": [
+        5,
+        10,
+        15
+      ]
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F141_006_focus_zero",
+    "payloadVersion": "1.0.0",
+    "peerObjectIds": [
+      "peer-1",
+      "peer-2",
+      "peer-3"
+    ],
+    "provenance": {
+      "rawInputSha256": "4ff369f69bf8faef265a8fed66c8a56eb3d7bd35e79a8c7d37c739be6c53f898",
+      "sourceFixtureId": "F141_006_focus_zero"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "confirmed"
+    },
+    "share": {
+      "deviation": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "ok"
+  },
+  "expectedPdfExportState": {
+    "canonicalPayloadDigest": "a75b18853e6fb8a334ae1586a5859f552b21d090c4e36c907e38cd8d520ea8ae",
+    "consumerCalculations": [],
+    "fullList": true,
+    "include": true,
+    "qualityLimitations": [],
+    "transientUiExcluded": true
+  },
+  "expectedUiState": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "canonicalPayloadDigest": "a75b18853e6fb8a334ae1586a5859f552b21d090c4e36c907e38cd8d520ea8ae",
+    "component": "horizontal_benchmark_bar",
+    "consumerCalculations": [],
+    "defaultMode": "count",
+    "mode": "count",
+    "nonColorMeaning": true,
+    "state": "ok"
+  },
+  "fixtureId": "F141_006_focus_zero",
+  "inputContext": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "defaultMode": "count",
+    "variant": "A_horizontal_benchmark_bar"
+  },
+  "rawInput": {
+    "focus": 0,
+    "mode": "count",
+    "peers": [
+      5,
+      10,
+      15
+    ]
+  },
+  "sourceIssue": "#141"
+}

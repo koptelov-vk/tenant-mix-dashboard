@@ -1,0 +1,67 @@
+/* CP-1 shared interactive geometry. This file is loaded after consumer styles
+   so breakpoint-specific rules cannot shrink the usable target below 44px. */
+.brand-home-action {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.brand-copy {
+  display: grid;
+  min-width: 0;
+}
+
+@media (max-width: 350px) {
+  .brand-copy {
+    display: none;
+  }
+}
+
+.header-actions .button,
+.header-actions > .saved-views-root > .button,
+.header-actions > .export-actions-root > .button {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 2px;
+}
+
+/* Issue #159: header-actions previously allowed flex-shrink on Saved Views / Export /
+   Copy Link, so at widths where their full-label content didn't quite fit (e.g. 812px)
+   the browser's shrink resolution let adjacent boxes overlap by a few sub-pixels instead
+   of reporting a layout failure. Locking flex-shrink to 0 makes each control keep its
+   natural content width — any width shortfall becomes visible wrapping/overflow instead
+   of a silent, hit-testable overlap. Paired with an earlier icon-only collapse below so
+   the natural width itself stays small enough to fit through the gap this used to expose. */
+.header-actions .button {
+  flex-shrink: 0;
+}
+
+/* Text labels were only hidden below 761px, leaving 761-900px (which includes the
+   812px production defect viewport) showing full-label buttons whose combined natural
+   width can exceed the available header-actions track. Extending the icon-only collapse
+   through 900px removes that gap without touching the narrower, already-covered and
+   already-tested 430px reachability contract for Reset Filters / Refresh (see
+   tests/react/cp1-touch-targets.spec.mjs). */
+@media (max-width: 900px) {
+  .header-actions .desktop-label {
+    display: none;
+  }
+}
+
+.navigation .nav-more > button {
+  width: 100%;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.tooltip > button {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  margin: 0;
+}

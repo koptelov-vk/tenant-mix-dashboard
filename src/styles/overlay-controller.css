@@ -1,0 +1,12 @@
+.overlay-portal-layer { z-index: 1000; }
+.category-profile-tooltip > button { width: 44px; height: 44px; }
+.category-profile-tooltip > button:focus-visible { outline: 3px solid rgba(37, 99, 235, .25); outline-offset: 2px; }
+.pdf-rendering [data-pdf-exclude], .pdf-capture [data-pdf-exclude] { display: none !important; }
+
+@media (max-width: 640px) {
+  .tooltip-popover {
+    max-width: calc(100vw - max(24px, env(safe-area-inset-left) + env(safe-area-inset-right)));
+    max-height: calc(100dvh - max(24px, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+    overflow: auto;
+  }
+}

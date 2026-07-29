@@ -1,5 +1,12 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
+import {
+  APP_ID,
+  dataVersionFor,
+  validateAppVersion,
+  validateDataVersion,
+  validateSnapshotDate,
+} from './build-info-contract.mjs';
 
 const root = 'dist';
 const fail = (message) => {
@@ -45,16 +52,65 @@ const parseJson = (path, label) => {
 };
 const buildInfo = parseJson(join(root, 'build-info.json'), 'build-info.json');
 const dashboardData = parseJson(join(root, 'data/dashboard_data.json'), 'dashboard_data.json');
+const buildInfoSchema = parseJson(join('config', 'build-info.schema.json'), 'build-info schema');
+const classifierMetadata = parseJson(join('config', 'classifier.json'), 'classifier metadata');
 
-if (buildInfo) {
+if (buildInfo && buildInfoSchema) {
+  for (const field of buildInfoSchema.required ?? []) {
+    const value = buildInfo[field];
+    if (typeof value !== 'string' || !value.trim()) fail(`build-info ${field} is missing or empty`);
+  }
   if (buildInfo.status !== 'production') fail(`build-info status must be production, got ${buildInfo.status}`);
-  if (buildInfo.app !== 'tenant-mix-react') fail(`unexpected app id in build-info: ${buildInfo.app}`);
-  if (!buildInfo.build) fail('build-info build SHA is missing');
+  if (buildInfo.app !== APP_ID) fail(`unexpected app id in build-info: ${buildInfo.app}`);
   if (!buildInfo.generatedAt || Number.isNaN(Date.parse(buildInfo.generatedAt))) fail('build-info generatedAt is missing or invalid');
-  if (typeof buildInfo.methodologyVersion !== 'string' || !buildInfo.methodologyVersion.trim()) fail('build-info methodologyVersion is missing or empty');
+  try {
+    validateAppVersion(buildInfo.appVersion);
+    validateDataVersion(buildInfo.dataVersion);
+    validateSnapshotDate(buildInfo.dataSnapshotAt);
+  } catch (error) {
+    fail(error.message);
+  }
+  if (buildInfo.dataSnapshotAt === buildInfo.generatedAt) {
+    fail('build-info dataSnapshotAt must not equal generatedAt');
+  }
   if (process.env.GITHUB_SHA && buildInfo.build !== process.env.GITHUB_SHA) {
     fail(`build-info SHA ${buildInfo.build} does not match GITHUB_SHA ${process.env.GITHUB_SHA}`);
   }
+  if (process.env.GITHUB_SHA && buildInfo.deploymentId === 'local') {
+    fail('build-info deploymentId must not be local when GITHUB_SHA is set');
+  }
+  if (process.env.GITHUB_RUN_ID && buildInfo.deploymentId !== process.env.GITHUB_RUN_ID) {
+    fail(`build-info deploymentId ${buildInfo.deploymentId} does not match GITHUB_RUN_ID ${process.env.GITHUB_RUN_ID}`);
+  }
+}
+
+const packageMetadata = parseJson('package.json', 'package.json');
+if (buildInfo?.appVersion && packageMetadata?.version && buildInfo.appVersion !== packageMetadata.version) {
+  fail(`appVersion mismatch: build-info=${buildInfo.appVersion}, package.json=${packageMetadata.version}`);
+}
+
+const dashboardDataBytes = readFileSync(join(root, 'data/dashboard_data.json'));
+const canonicalDataVersion = dataVersionFor(dashboardDataBytes);
+if (buildInfo?.dataVersion && buildInfo.dataVersion !== canonicalDataVersion) {
+  fail(`dataVersion mismatch: build-info=${buildInfo.dataVersion}, artifact=${canonicalDataVersion}`);
+}
+
+const aggregateSnapshotAt = dashboardData?.meta?.snapshotDate;
+try {
+  validateSnapshotDate(aggregateSnapshotAt);
+} catch (error) {
+  fail(`aggregate ${error.message}`);
+}
+if (buildInfo?.dataSnapshotAt && aggregateSnapshotAt && buildInfo.dataSnapshotAt !== aggregateSnapshotAt) {
+  fail(`dataSnapshotAt mismatch: build-info=${buildInfo.dataSnapshotAt}, aggregate=${aggregateSnapshotAt}`);
+}
+
+const canonicalClassifierVersion = classifierMetadata?.classifierVersion;
+if (typeof canonicalClassifierVersion !== 'string' || !canonicalClassifierVersion.trim()) {
+  fail('config/classifier.json classifierVersion is missing or empty');
+}
+if (buildInfo?.classifierVersion && canonicalClassifierVersion && buildInfo.classifierVersion !== canonicalClassifierVersion) {
+  fail(`classifierVersion mismatch: build-info=${buildInfo.classifierVersion}, canonical=${canonicalClassifierVersion}`);
 }
 
 const aggregateVersion = dashboardData?.meta?.methodologyVersion;
@@ -64,4 +120,4 @@ if (buildInfo?.methodologyVersion && aggregateVersion && buildInfo.methodologyVe
 }
 
 if (process.exitCode) process.exit(process.exitCode);
-console.log(`Production artifact validated: ${files.length} files, one canonical index, build ${buildInfo.build}, methodology ${buildInfo.methodologyVersion}`);
+console.log(`Production artifact validated: ${files.length} files, one canonical index, build ${buildInfo.build}, app ${buildInfo.appVersion}, data ${buildInfo.dataVersion}, snapshot ${buildInfo.dataSnapshotAt}, methodology ${buildInfo.methodologyVersion}, classifier ${buildInfo.classifierVersion}, deployment ${buildInfo.deploymentId}`);
