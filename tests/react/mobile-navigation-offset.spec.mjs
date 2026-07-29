@@ -41,7 +41,19 @@ async function readHeaderContract(page) {
   });
 }
 
+async function waitForMeasuredHeaderOffset(page) {
+  await expect.poll(() => page.evaluate(() => {
+    const header = document.querySelector('.app-header');
+    if (!(header instanceof HTMLElement)) return null;
+    const offset = Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--mobile-header-offset'),
+    ) || 0;
+    return Math.abs(offset - header.getBoundingClientRect().height);
+  })).toBeLessThanOrEqual(1);
+}
+
 async function assertTargetBelowHeader(page, selector) {
+  await waitForMeasuredHeaderOffset(page);
   await page.locator(selector).first().evaluate((element) => element.scrollIntoView({ block: 'start' }));
   await expect.poll(() => page.locator(selector).first().evaluate((target) => {
     const header = document.querySelector('.app-header');
@@ -51,6 +63,7 @@ async function assertTargetBelowHeader(page, selector) {
 }
 
 async function assertTargetAlignedBelowHeader(page, selector) {
+  await waitForMeasuredHeaderOffset(page);
   await page.locator(selector).first().evaluate((element) => element.scrollIntoView({ block: 'start' }));
   await expect.poll(() => page.locator(selector).first().evaluate((target) => {
     const header = document.querySelector('.app-header');
