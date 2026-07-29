@@ -1,0 +1,11 @@
+:root {
+  --mobile-header-offset: 0px;
+}
+
+html {
+  scroll-padding-top: var(--mobile-header-offset);
+}
+
+.app-header {
+  padding-top: env(safe-area-inset-top);
+}
