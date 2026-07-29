@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { AnalysisContext, CategoryBenchmarkPayload, CategoryProfileStats } from '../../types/dashboard';
 import { buildCategoryBenchmarkExportManifest, sortCategoryBenchmarkPayloads } from '../../lib/analysis';
+import { formatCountRu } from '../../lib/utils';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { useControlledOverlay } from '../ui/OverlayController';
 import { Tooltip } from '../ui/Tooltip';
@@ -136,7 +137,7 @@ function CategoryBenchmarkBar({ benchmark, mode }: { benchmark: CategoryBenchmar
 
 function tooltip(profile: CategoryProfileStats, context: AnalysisContext) {
   const exact = profile.exactPercent == null ? 'нет данных' : `${profile.exactPercent.toLocaleString('ru-RU', { maximumFractionDigits: 1, minimumFractionDigits: 1 })}%`;
-  return `${profile.exclusiveCount} эксклюзивных брендов из ${profile.totalBrands} учитываемых брендов категории — ${exact}. Рассчитано относительно текущей выбранной группы из ${context.displayMalls.length} объектов. Фокусный объект исключён из множества сравнения. Включены только нормализованные действующие бренды. «Скоро открытие», закрытые, неизвестные и конфликтующие статусы не включены. Эксклюзивность не подтверждает коммерческую эффективность категории.`;
+  return `${profile.exclusiveCount} эксклюзивных брендов из ${profile.totalBrands} учитываемых брендов категории — ${exact}. Рассчитано относительно текущей выбранной группы из ${formatCountRu(context.displayMalls.length, ['объект', 'объекта', 'объектов'])}. Фокусный объект исключён из множества сравнения. Включены только нормализованные действующие бренды. «Скоро открытие», закрытые, неизвестные и конфликтующие статусы не включены. Эксклюзивность не подтверждает коммерческую эффективность категории.`;
 }
 
 function qualityPosition(anchor: DOMRect) {

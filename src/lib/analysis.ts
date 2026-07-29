@@ -18,6 +18,7 @@ import type {
   TenantRow,
   UniquenessStats,
 } from '../types/dashboard';
+import { formatCountRu } from './utils';
 
 /** Static methodology identity for the category peer-benchmark — matches issue #141 manifest's `methodologyIds`/`methodologyVersions` exactly; not a new methodology decision. */
 export const CATEGORY_BENCHMARK_METHODOLOGY = {
@@ -491,7 +492,7 @@ function buildUniqueness(allActiveRows: TenantRow[], intersections: Intersection
   const group = new Set([...intersections.presence].filter(([, malls]) => malls.size === 1).map(([brand]) => brand));
   const focusExclusive = new Set([...intersections.focusBrands].filter((brand) => intersections.presence.get(brand)?.size === 1));
   const global = new Set([...intersections.focusBrands].filter((brand) => globalPresence.get(brand)?.size === 1));
-  return { global, group, focusExclusive, scopeLabel: `Уникальность рассчитана внутри группы из ${displayMalls.length} объектов` };
+  return { global, group, focusExclusive, scopeLabel: `Уникальность рассчитана внутри группы из ${formatCountRu(displayMalls.length, ['объект', 'объекта', 'объектов'])}` };
 }
 
 function buildSimilarities(rows: TenantRow[], focusMall: MallSummary, peerMalls: MallSummary[]): MallSimilarity[] {

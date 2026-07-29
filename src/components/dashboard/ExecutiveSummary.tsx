@@ -1,6 +1,6 @@
 import { CircleCheck, Info, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import type { AnalysisContext } from '../../types/dashboard';
-import { formatNumber, formatPercent } from '../../lib/utils';
+import { formatCountRu, formatNumber, formatPercent } from '../../lib/utils';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { Card, CardHeader } from '../ui/Card';
 
@@ -15,7 +15,7 @@ export function ExecutiveSummary({ context }: { context: AnalysisContext }) {
   const nearest = context.similarities[0];
   const rankText = context.benchmark.rank == null
     ? `${context.focusMall.mall}: нет позиции в группе по числу брендов текущего среза, потому что учитываемых брендов нет.`
-    : `${context.focusMall.mall} занимает ${context.benchmark.rank}-е место из ${context.benchmark.totalInGroup} объектов по числу брендов текущего среза.`;
+    : `${context.focusMall.mall} занимает ${context.benchmark.rank}-е место из ${formatCountRu(context.benchmark.totalInGroup, ['объект', 'объекта', 'объектов'])} по числу брендов текущего среза.`;
   const items = [
     { icon: context.benchmark.rank === 1 ? CircleCheck : Minus, tone: 'neutral', text: rankText, page: 'comparability' as const },
     above ? { icon: TrendingUp, tone: 'positive', text: `Доля категории «${above.category}» на ${formatNumber.format(above.delta * 100)} п.п. выше медианы группы сравнения.`, page: 'categories' as const } : null,

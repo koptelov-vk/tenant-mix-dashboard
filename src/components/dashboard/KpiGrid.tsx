@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { AnalysisContext } from '../../types/dashboard';
-import { formatNumber, formatPercent } from '../../lib/utils';
+import { formatCountRu, formatNumber, formatPercent } from '../../lib/utils';
 import { Tooltip } from '../ui/Tooltip';
 import { useControlledOverlay } from '../ui/OverlayController';
 
@@ -17,7 +17,7 @@ export function KpiGrid({ context }: { context: AnalysisContext }) {
   const rankAvailable = context.benchmark.rank != null;
   const items = [
     { label: 'Бренды фокусного объекта', value: formatNumber.format(focusCount), note: context.benchmark.peerMedian == null ? 'медиана н/д' : `медиана группы ${formatNumber.format(context.benchmark.peerMedian)}`, formula: 'Различные нормализованные бренды фокусного объекта в текущем срезе.' },
-    { label: 'Позиция в группе', value: rankAvailable ? `${context.benchmark.rank}-е` : 'Нет позиции', note: rankAvailable ? `из ${context.benchmark.totalInGroup} объектов` : 'нет учитываемых брендов', formula: 'Плотный рейтинг по числу брендов текущего среза. Нулевое значение не получает позицию; равные положительные значения получают одинаковое место.' },
+    { label: 'Позиция в группе', value: rankAvailable ? `${context.benchmark.rank}-е` : 'Нет позиции', note: rankAvailable ? `из ${formatCountRu(context.benchmark.totalInGroup, ['объект', 'объекта', 'объектов'])}` : 'нет учитываемых брендов', formula: 'Плотный рейтинг по числу брендов текущего среза. Нулевое значение не получает позицию; равные положительные значения получают одинаковое место.' },
     { label: 'Эксклюзивы', value: formatNumber.format(exclusiveCount), note: `${formatPercent(focusCount ? exclusiveCount / focusCount : 0)} брендов объекта`, formula: 'Бренд есть в фокусном объекте и отсутствует у всех объектов текущей группы сравнения.' },
     { label: 'Пересечение с группой', value: formatNumber.format(intersectionCount), note: `${formatPercent(focusCount ? intersectionCount / focusCount : 0)} брендов объекта`, formula: 'Бренды фокусного объекта, представленные хотя бы у одного выбранного конкурента.' },
     { label: 'Категории ниже медианы', value: formatNumber.format(context.benchmark.categoryGaps.length), note: context.benchmark.categoryGaps.length ? 'Показать полный список' : 'нет отклонений', formula: 'Категории, где число брендов фокусного объекта ниже медианы текущей группы сравнения.' },
