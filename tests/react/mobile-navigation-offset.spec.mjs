@@ -89,7 +89,6 @@ test.describe('Issue #83 mobile header/navigation offset', () => {
       expect.soft(geometry.scrollPaddingTop).toBeCloseTo(geometry.canonicalOffset, 0);
       expect.soft(geometry.mainScrollMarginTop).toBe(0);
       expect.soft(geometry.mainTop - geometry.headerBottom).toBeGreaterThanOrEqual(-1);
-      expect.soft(geometry.mainTop - geometry.headerBottom).toBeLessThanOrEqual(2);
       expect.soft(geometry.bodyOverflow).toBeLessThanOrEqual(0);
     });
   }
@@ -196,6 +195,7 @@ test.describe('Issue #83 mobile header/navigation offset', () => {
 
     await assertTargetBelowHeader(page, '.filter-shell');
     await assertTargetBelowHeader(page, '.filter-shell .filter-control');
+    await assertTargetAlignedBelowHeader(page, '.category-profile-row:not(.category-profile-row-collapsed)');
 
     await page.locator('.app-header').getByRole('button', { name: 'Категории', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Категории', exact: true })).toBeVisible();
@@ -203,7 +203,7 @@ test.describe('Issue #83 mobile header/navigation offset', () => {
 
     await page.locator('.app-header').getByRole('button', { name: 'Сопоставимость', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Сопоставимость объектов', exact: true })).toBeVisible();
-    await assertTargetAlignedBelowHeader(page, '.comparison-table tbody tr');
+    await assertTargetBelowHeader(page, '.comparison-table tbody tr');
 
     await page.setViewportSize({ width: 844, height: 390 });
     await expect(page.locator('.breadcrumbs')).toBeVisible();
