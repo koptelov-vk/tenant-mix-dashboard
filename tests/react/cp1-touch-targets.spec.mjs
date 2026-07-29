@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 const configurations = [
-  { name: 'portrait-320', width: 320, height: 700 },
-  { name: 'portrait-375', width: 375, height: 812 },
+  { name: 'portrait-320', width: 320, height: 568 },
+  { name: 'portrait-375', width: 375, height: 667 },
   { name: 'portrait-390', width: 390, height: 844 },
   { name: 'portrait-430', width: 430, height: 932 },
   { name: 'landscape-568', width: 568, height: 320 },
@@ -13,7 +13,9 @@ const configurations = [
   { name: 'landscape-812', width: 812, height: 375 },
   { name: 'landscape-844', width: 844, height: 390 },
   { name: 'landscape-932', width: 932, height: 430 },
-  { name: 'desktop-1366', width: 1366, height: 900 },
+  { name: 'desktop-1366', width: 1366, height: 768 },
+  { name: 'desktop-1440', width: 1440, height: 900 },
+  { name: 'desktop-1920', width: 1920, height: 1080 },
 ];
 
 // Corner probes are inset far enough that a border-radius up to ~12px cannot clip them into
@@ -98,6 +100,25 @@ for (const configuration of configurations) {
     });
     await page.setViewportSize({ width: configuration.width, height: configuration.height });
     await page.goto('?focus=Фантастика&tab=overview');
+
+    // Decision F: the persistent BrandLockup is one native home action. Its complete
+    // interactive rectangle, not only the symbol, must remain reachable and unwrapped.
+    const brandHome = page.getByRole('button', { name: 'Tenant Mix Analytics', exact: true });
+    const brandBox = await assertControlContract(page, brandHome, { accessibleName: 'Tenant Mix Analytics', contractName: 'BrandLockup home action' });
+    assertWithinViewport(brandBox, configuration);
+    const brandGeometry = await brandHome.evaluate((element) => {
+      const copy = element.querySelector('.brand-copy');
+      const textRows = copy ? [...copy.querySelectorAll('strong, small')] : [];
+      return {
+        overflow: element.scrollWidth > element.clientWidth || element.scrollHeight > element.clientHeight,
+        wrapped: getComputedStyle(copy).display !== 'none' && textRows.some((row) => {
+          const style = getComputedStyle(row);
+          return row.getBoundingClientRect().height > Number.parseFloat(style.fontSize) * 1.6;
+        }),
+      };
+    });
+    expect.soft(brandGeometry.overflow, 'BrandLockup clipping').toBe(false);
+    expect.soft(brandGeometry.wrapped, 'BrandLockup title/subtitle wrapping').toBe(false);
 
     // 1. Generic KPI tooltip trigger — accessible name is the shared default label.
     const kpiTooltip = page.locator('.kpi .tooltip > button').first();

@@ -5,13 +5,20 @@ import { Button } from '../ui/Button';
 import { Navigation } from './Navigation';
 import { SavedViewsMenu } from './SavedViewsMenu';
 import { ExportActionsMenu } from './ExportActionsMenu';
+import { useOverlayController } from '../ui/OverlayController';
 
 export function AppHeader({ data, rows, refreshing, onRefresh }: { data: DashboardData; rows: TenantRow[]; refreshing: boolean; onRefresh: () => void }) {
   const reset = useDashboardStore((state) => state.reset);
+  const setActivePage = useDashboardStore((state) => state.setActivePage);
+  const overlays = useOverlayController();
   const copyLink = async () => navigator.clipboard.writeText(window.location.href);
+  const openOverview = () => {
+    overlays.close({ restoreFocus: false });
+    setActivePage('overview');
+  };
   return <header className="app-header">
     <div className="header-top">
-      <div className="brand"><span className="brand-mark"><Building2 size={20} /></span><div><strong>Tenant Mix Analytics</strong><small>Срез данных: {data.meta.snapshotDate}</small></div></div>
+      <button type="button" className="brand brand-home-action" aria-label="Tenant Mix Analytics" onClick={openOverview}><span className="brand-mark" aria-hidden="true"><Building2 size={20} /></span><span className="brand-copy" aria-hidden="true"><strong>Tenant Mix Analytics</strong><small>Срез данных: {data.meta.snapshotDate}</small></span></button>
       <div className="header-actions">
         <SavedViewsMenu snapshotDate={data.meta.snapshotDate} />
         <ExportActionsMenu rows={rows} snapshotDate={data.meta.snapshotDate} />
