@@ -28,7 +28,9 @@ export function AppHeader({ data, rows, refreshing, onRefresh }: { data: Dashboa
     const syncOffset = () => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        root.style.setProperty('--mobile-header-offset', `${Math.ceil(header.getBoundingClientRect().height)}px`);
+        const usesMobileHeaderOffset = window.innerWidth <= 760 || window.innerHeight <= 500;
+        const offset = usesMobileHeaderOffset ? Math.ceil(header.getBoundingClientRect().height) : 0;
+        root.style.setProperty('--mobile-header-offset', `${offset}px`);
       });
     };
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(syncOffset);

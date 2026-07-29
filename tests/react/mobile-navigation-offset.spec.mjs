@@ -67,6 +67,17 @@ async function assertTargetAlignedBelowHeader(page, selector) {
 test.describe('Issue #83 mobile header/navigation offset', () => {
   test.skip(({ browserName }) => !['chromium', 'webkit'].includes(browserName));
 
+  test('ordinary desktop keeps the mobile offset disabled', async ({ page }) => {
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await page.goto('?focus=Фантастика&tab=overview');
+    await page.waitForSelector('.app-header');
+
+    await expect.poll(() => readHeaderContract(page)).toMatchObject({
+      canonicalOffset: 0,
+      scrollPaddingTop: 0,
+    });
+  });
+
   for (const size of mobileSizes) {
     test(`${size.width}x${size.height} ${size.orientation}: one measured offset protects anchor targets`, async ({ page }) => {
       await page.setViewportSize(size);
