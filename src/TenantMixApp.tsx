@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useLayoutEffect, useRef, useState } from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useDashboardData } from './hooks/useDashboardData';
 import { useAnalysisContext } from './hooks/useAnalysisContext';
@@ -26,9 +26,38 @@ export function App() {
 
 function Dashboard({ data, refreshing, refetch }: { data: NonNullable<ReturnType<typeof useDashboardData>['data']>; refreshing: boolean; refetch: () => Promise<unknown> }) {
   const activePage = useDashboardStore((state) => state.activePage);
+  const previousPage = useRef(activePage);
   const context = useAnalysisContext(data);
   const [toast, setToast] = useState<string | null>(null);
   const refresh = async () => { await refetch(); setToast(`Данные обновлены: ${new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`); window.setTimeout(() => setToast(null), 2800); };
+
+  useLayoutEffect(() => {
+    if (previousPage.current === activePage) return;
+    previousPage.current = activePage;
+    let firstFrame = 0;
+    let secondFrame = 0;
+    const alignMain = () => {
+      const main = document.getElementById('main-content');
+      if (!main) return;
+      const offset = Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--mobile-header-offset'),
+      ) || 0;
+      window.scrollTo({
+        top: Math.max(0, main.getBoundingClientRect().top + window.scrollY - offset),
+        behavior: 'auto',
+      });
+    };
+    alignMain();
+    firstFrame = window.requestAnimationFrame(() => {
+      alignMain();
+      secondFrame = window.requestAnimationFrame(alignMain);
+    });
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+    };
+  }, [activePage]);
+
   return <div className="app-shell"><a className="skip-link" href="#main-content">Перейти к содержимому</a><AppHeader data={data} rows={context.filteredRows} refreshing={refreshing} onRefresh={refresh} /><GlobalFilters data={data} context={context} /><main id="main-content" tabIndex={-1}><div className="pdf-only-heading"><div><h1>Tenant Mix Analytics</h1><p>Фокусный объект: {context.focusMall.mall}</p></div><small>Срез данных: {data.meta.snapshotDate}<br />Объектов в группе сравнения: {context.peerMalls.length}</small></div><Breadcrumbs context={context} snapshot={data.meta.snapshotDate} /><Suspense fallback={<PageSkeleton />}>
     {activePage === 'overview' ? <OverviewPage context={context} loading={refreshing} /> : null}
     {activePage === 'comparability' ? <ComparabilityPage context={context} data={data} /> : null}

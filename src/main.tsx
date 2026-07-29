@@ -22,6 +22,7 @@ import './styles/category-benchmark.css';
 import './styles/export-actions.css';
 import './styles/upcoming-table-responsive.css';
 import './styles/interactive-controls.css';
+import './styles/mobile-navigation-offset.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {

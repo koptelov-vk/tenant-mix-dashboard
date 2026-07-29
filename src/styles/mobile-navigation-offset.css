@@ -1,0 +1,16 @@
+:root {
+  --mobile-header-offset: 0px;
+}
+
+html {
+  scroll-padding-top: var(--mobile-header-offset);
+}
+
+.app-header {
+  padding-top: env(safe-area-inset-top);
+}
+
+#main-content,
+#main-content :where([id], [tabindex], button, a, input, select, summary, th, tr) {
+  scroll-margin-top: var(--mobile-header-offset);
+}
