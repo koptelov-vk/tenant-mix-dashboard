@@ -41,6 +41,15 @@ async function readHeaderContract(page) {
   });
 }
 
+async function assertTargetBelowHeader(page, selector) {
+  await page.locator(selector).first().evaluate((element) => element.scrollIntoView({ block: 'start' }));
+  await expect.poll(() => page.locator(selector).first().evaluate((target) => {
+    const header = document.querySelector('.app-header');
+    if (!(header instanceof HTMLElement) || !(target instanceof HTMLElement)) return false;
+    return target.getBoundingClientRect().top >= header.getBoundingClientRect().bottom - 1;
+  })).toBe(true);
+}
+
 test.describe('Issue #83 mobile header/navigation offset', () => {
   test.skip(({ browserName }) => !['chromium', 'webkit'].includes(browserName));
 
@@ -93,6 +102,8 @@ test.describe('Issue #83 mobile header/navigation offset', () => {
     expect(targetGeometry.targetTop).toBeGreaterThanOrEqual(targetGeometry.headerBottom);
     await disclosure.click();
     await expect(page.getByRole('region', { name: 'Метод расчёта сопоставимости' })).toBeVisible();
+    await disclosure.click();
+    await expect(page.getByRole('region', { name: 'Метод расчёта сопоставимости' })).toBeHidden();
 
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await page.locator('.app-header').getByRole('button', { name: 'Категории', exact: true }).click();
@@ -115,5 +126,26 @@ test.describe('Issue #83 mobile header/navigation offset', () => {
     await page.goForward();
     await expect(page.locator('.app-header').getByRole('button', { name: 'Категории', exact: true })).toHaveAttribute('aria-current', 'page');
     await assertMainBelowHeader();
+  });
+
+  test('breadcrumbs, headings, global filters and table rows are protected scroll targets', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('?focus=Фантастика&tab=overview');
+    await page.waitForSelector('.app-header');
+
+    await assertTargetBelowHeader(page, '.filter-shell');
+    await assertTargetBelowHeader(page, '.filter-shell .filter-control');
+
+    await page.locator('.app-header').getByRole('button', { name: 'Категории', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Категории', exact: true })).toBeVisible();
+    await assertTargetBelowHeader(page, '.page-heading h1');
+
+    await page.locator('.app-header').getByRole('button', { name: 'Сопоставимость', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Сопоставимость объектов', exact: true })).toBeVisible();
+    await assertTargetBelowHeader(page, '.comparison-table tbody tr');
+
+    await page.setViewportSize({ width: 844, height: 390 });
+    await expect(page.locator('.breadcrumbs')).toBeVisible();
+    await assertTargetBelowHeader(page, '.breadcrumbs');
   });
 });
