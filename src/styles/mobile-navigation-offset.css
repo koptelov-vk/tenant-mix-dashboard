@@ -9,10 +9,3 @@ html {
 .app-header {
   padding-top: env(safe-area-inset-top);
 }
-
-.filter-shell,
-.filter-shell :where([id], [tabindex], button, a, input, select, summary),
-#main-content,
-#main-content :where([id], [tabindex], button, a, input, select, summary, th, tr, h1, h2, h3, .breadcrumbs) {
-  scroll-margin-top: var(--mobile-header-offset);
-}

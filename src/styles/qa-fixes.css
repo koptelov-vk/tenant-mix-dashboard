@@ -159,20 +159,17 @@
   .app-header .navigation { display: grid; grid-template-columns: repeat(6, minmax(44px, 1fr)); width: 100%; padding: 0 6px; overflow: visible; }
   .app-header .navigation > button, .app-header .nav-more > button { justify-content: center; min-width: 0; padding: 0 4px; }
   .app-header .navigation > button span, .app-header .nav-more > button span { display: none; }
-  .nav-more > div { position: fixed; left: 12px; right: 12px; top: 106px; }
-  .filter-shell { position: sticky; top: 106px; max-height: calc(100vh - 106px); overflow: auto; }
+  .nav-more > div { position: fixed; left: 12px; right: 12px; top: var(--mobile-header-offset); }
+  .filter-shell { position: sticky; top: var(--mobile-header-offset); max-height: calc(100dvh - var(--mobile-header-offset)); overflow: auto; }
   .modal-backdrop { isolation: isolate; }
   .comparison-selector { min-height: 0; height: min(94dvh, 760px); overflow: hidden; }
   .selector-list { min-height: 0; scroll-padding-block: 8px; }
 }
 
-/* A sticky multi-row filter consumes most of a short viewport and intercepts
-   the content it visually covers. The available vertical space is what
-   determines whether it fits, not the viewport width — a wide-but-short
-   landscape phone (e.g. 932x430) is just as constrained as a narrow one, so
-   this rule keys on max-height alone. Keep it in normal flow when vertical
-   space is compressed; the header remains sticky. */
-@media (max-height: 500px) {
+/* A sticky multi-row filter consumes most of a short viewport or a narrow
+   single-column layout and intercepts the content it visually covers. Keep it
+   in normal flow in either constrained layout; the header remains sticky. */
+@media (max-height: 500px), (max-width: 430px) {
   .filter-shell { position: static; max-height: none; overflow: visible; }
 }
 
@@ -444,8 +441,6 @@ h1, h2, h3, .brand strong { font-family: var(--font-display); }
   .registry-head { display: grid; }
   .registry-row { grid-template-columns: minmax(230px,1.35fr) minmax(180px,1fr) minmax(150px,.8fr) minmax(210px,1.15fr) minmax(170px,.9fr) minmax(120px,.65fr) minmax(125px,.7fr); align-content: stretch; min-height: 58px; }
   .registry-row > span:nth-child(3), .registry-row > span:nth-child(4) { font-size: inherit; }
-  .filter-shell { position: static; max-height: none; overflow: visible; }
-  .table-column-sort, .registry-filter-header summary { scroll-margin-top: 112px; }
   .registry-filter-portal {
     top: auto!important;
     left: 12px!important;

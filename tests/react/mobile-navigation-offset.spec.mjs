@@ -45,9 +45,23 @@ async function assertTargetBelowHeader(page, selector) {
   await page.locator(selector).first().evaluate((element) => element.scrollIntoView({ block: 'start' }));
   await expect.poll(() => page.locator(selector).first().evaluate((target) => {
     const header = document.querySelector('.app-header');
-    if (!(header instanceof HTMLElement) || !(target instanceof HTMLElement)) return false;
-    return target.getBoundingClientRect().top >= header.getBoundingClientRect().bottom - 1;
-  })).toBe(true);
+    if (!(header instanceof HTMLElement) || !(target instanceof HTMLElement)) return null;
+    return target.getBoundingClientRect().top - header.getBoundingClientRect().bottom;
+  })).toBeGreaterThanOrEqual(-1);
+}
+
+async function assertTargetAlignedBelowHeader(page, selector) {
+  await page.locator(selector).first().evaluate((element) => element.scrollIntoView({ block: 'start' }));
+  await expect.poll(() => page.locator(selector).first().evaluate((target) => {
+    const header = document.querySelector('.app-header');
+    if (!(header instanceof HTMLElement) || !(target instanceof HTMLElement)) return null;
+    return target.getBoundingClientRect().top - header.getBoundingClientRect().bottom;
+  })).toBeGreaterThanOrEqual(-1);
+  await expect.poll(() => page.locator(selector).first().evaluate((target) => {
+    const header = document.querySelector('.app-header');
+    if (!(header instanceof HTMLElement) || !(target instanceof HTMLElement)) return null;
+    return target.getBoundingClientRect().top - header.getBoundingClientRect().bottom;
+  })).toBeLessThanOrEqual(2);
 }
 
 test.describe('Issue #83 mobile header/navigation offset', () => {
@@ -73,11 +87,58 @@ test.describe('Issue #83 mobile header/navigation offset', () => {
       );
       expect.soft(geometry.canonicalOffset).toBeCloseTo(geometry.headerHeight, 0);
       expect.soft(geometry.scrollPaddingTop).toBeCloseTo(geometry.canonicalOffset, 0);
-      expect.soft(geometry.mainScrollMarginTop).toBeCloseTo(geometry.canonicalOffset, 0);
-      expect.soft(geometry.mainTop).toBeGreaterThanOrEqual(geometry.headerBottom);
+      expect.soft(geometry.mainScrollMarginTop).toBe(0);
+      expect.soft(geometry.mainTop - geometry.headerBottom).toBeGreaterThanOrEqual(-1);
+      expect.soft(geometry.mainTop - geometry.headerBottom).toBeLessThanOrEqual(2);
       expect.soft(geometry.bodyOverflow).toBeLessThanOrEqual(0);
     });
   }
+
+  test('fitting mobile sticky filter and navigation menu consume the measured offset', async ({ page }) => {
+    await page.setViewportSize({ width: 760, height: 844 });
+    await page.goto('?focus=Фантастика&tab=overview');
+    await page.waitForSelector('.app-header');
+
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await expect.poll(() => page.evaluate(() => {
+      const header = document.querySelector('.app-header');
+      const filter = document.querySelector('.filter-shell');
+      if (!(header instanceof HTMLElement) || !(filter instanceof HTMLElement)) return null;
+      return {
+        position: getComputedStyle(filter).position,
+        delta: filter.getBoundingClientRect().top - header.getBoundingClientRect().bottom,
+        bottom: filter.getBoundingClientRect().bottom,
+        viewportHeight: window.visualViewport?.height ?? window.innerHeight,
+      };
+    })).toMatchObject({
+      position: 'sticky',
+      delta: 0,
+    });
+
+    const filterGeometry = await page.evaluate(() => {
+      const filter = document.querySelector('.filter-shell');
+      if (!(filter instanceof HTMLElement)) throw new Error('Sticky filter is unavailable');
+      return {
+        bottom: filter.getBoundingClientRect().bottom,
+        viewportHeight: window.visualViewport?.height ?? window.innerHeight,
+      };
+    });
+    expect(filterGeometry.bottom).toBeLessThanOrEqual(filterGeometry.viewportHeight + 1);
+
+    const more = page.getByRole('button', { name: 'Ещё', exact: true });
+    await more.click();
+    const menuGeometry = await page.getByRole('menu').evaluate((menu) => {
+      const header = document.querySelector('.app-header');
+      if (!(header instanceof HTMLElement) || !(menu instanceof HTMLElement)) {
+        throw new Error('Mobile navigation menu geometry is unavailable');
+      }
+      return {
+        delta: menu.getBoundingClientRect().top - header.getBoundingClientRect().bottom,
+      };
+    });
+    expect(menuGeometry.delta).toBeGreaterThanOrEqual(-1);
+    expect(menuGeometry.delta).toBeLessThanOrEqual(1);
+  });
 
   test('section navigation, Back/Forward and disclosure targets use the same offset', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -142,10 +203,10 @@ test.describe('Issue #83 mobile header/navigation offset', () => {
 
     await page.locator('.app-header').getByRole('button', { name: 'Сопоставимость', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Сопоставимость объектов', exact: true })).toBeVisible();
-    await assertTargetBelowHeader(page, '.comparison-table tbody tr');
+    await assertTargetAlignedBelowHeader(page, '.comparison-table tbody tr');
 
     await page.setViewportSize({ width: 844, height: 390 });
     await expect(page.locator('.breadcrumbs')).toBeVisible();
-    await assertTargetBelowHeader(page, '.breadcrumbs');
+    await assertTargetAlignedBelowHeader(page, '.breadcrumbs');
   });
 });
