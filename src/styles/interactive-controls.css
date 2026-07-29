@@ -1,5 +1,26 @@
 /* CP-1 shared interactive geometry. This file is loaded after consumer styles
    so breakpoint-specific rules cannot shrink the usable target below 44px. */
+.brand-home-action {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.brand-copy {
+  display: grid;
+  min-width: 0;
+}
+
+@media (max-width: 350px) {
+  .brand-copy {
+    display: none;
+  }
+}
+
 .header-actions .button,
 .header-actions > .saved-views-root > .button,
 .header-actions > .export-actions-root > .button {
