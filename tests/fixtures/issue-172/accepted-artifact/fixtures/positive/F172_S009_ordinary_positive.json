@@ -1,0 +1,191 @@
+{
+  "artifactPhase": "SPECIFICATION_FIXTURE_ONLY",
+  "canonicalPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "comparisonState": "unavailable",
+      "deviationRaw": null,
+      "deviationUnit": "brands",
+      "focusValue": null,
+      "peerMedian": null,
+      "peerValues": []
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F172_S009_ordinary_positive",
+    "payloadVersion": "2.0.0",
+    "peerObjectIds": [
+      "peer-1"
+    ],
+    "provenance": {
+      "ownerDecisionCommentId": 5085245278,
+      "rawInputSha256": "3baa566db85e9cd5ab35168650c7fd08f668cea13bb93d4b7d0ec5ff15b4eaa3",
+      "sourceFixtureId": "F172_S009_ordinary_positive"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "ok"
+    },
+    "share": {
+      "comparisonState": "above",
+      "deviationRaw": 1.2,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": 0.112,
+      "peerMedianShareExact": 0.1,
+      "peerSharesExact": [
+        0.1
+      ],
+      "shareExactDelta": 0.012
+    },
+    "state": "ok"
+  },
+  "caseKey": "share_ordinary_positive",
+  "expectedExportProjection": {
+    "fixtureId": "F172_S009_ordinary_positive",
+    "payloadVersion": "2.0.0",
+    "projection": {
+      "accessibleRelationText": "Фокусный объект выше медианы на 1,2 процентного пункта.",
+      "boundaryApplied": false,
+      "comparisonState": "above",
+      "consumerCalculations": [],
+      "cssState": "above",
+      "deviationRaw": 1.2,
+      "displayDeviation": 1.2,
+      "displayRelationText": "выше медианы на 1,2 п.п.",
+      "displayUnit": "percentage_points",
+      "glyph": "▲",
+      "mode": "share"
+    },
+    "surface": "CategoryBenchmarkExportManifest/PDF-sidecar"
+  },
+  "expectedProjection": {
+    "accessibleRelationText": "Фокусный объект выше медианы на 1,2 процентного пункта.",
+    "boundaryApplied": false,
+    "comparisonState": "above",
+    "consumerCalculations": [],
+    "cssState": "above",
+    "deviationRaw": 1.2,
+    "displayDeviation": 1.2,
+    "displayRelationText": "выше медианы на 1,2 п.п.",
+    "displayUnit": "percentage_points",
+    "glyph": "▲",
+    "mode": "share"
+  },
+  "expectedSurfaces": {
+    "accessibility": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы на 1,2 процентного пункта.",
+        "boundaryApplied": false,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 1.2,
+        "displayDeviation": 1.2,
+        "displayRelationText": "выше медианы на 1,2 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "css": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы на 1,2 процентного пункта.",
+        "boundaryApplied": false,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 1.2,
+        "displayDeviation": 1.2,
+        "displayRelationText": "выше медианы на 1,2 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "csv": {
+      "applicable": false,
+      "consumerCalculations": [],
+      "projection": null,
+      "reason": "NO_DEDICATED_CATEGORY_BENCHMARK_EXPORT_SURFACE_ON_BASELINE"
+    },
+    "desktop": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы на 1,2 процентного пункта.",
+        "boundaryApplied": false,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 1.2,
+        "displayDeviation": 1.2,
+        "displayRelationText": "выше медианы на 1,2 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "mobile": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы на 1,2 процентного пункта.",
+        "boundaryApplied": false,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 1.2,
+        "displayDeviation": 1.2,
+        "displayRelationText": "выше медианы на 1,2 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "pdf": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы на 1,2 процентного пункта.",
+        "boundaryApplied": false,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 1.2,
+        "displayDeviation": 1.2,
+        "displayRelationText": "выше медианы на 1,2 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "xlsx": {
+      "applicable": false,
+      "consumerCalculations": [],
+      "projection": null,
+      "reason": "NO_DEDICATED_CATEGORY_BENCHMARK_EXPORT_SURFACE_ON_BASELINE"
+    }
+  },
+  "fixtureId": "F172_S009_ordinary_positive",
+  "implementationEvidenceAvailable": false,
+  "kind": "positive",
+  "mode": "share",
+  "productionConformanceClaimed": false,
+  "rawInput": {
+    "focusShareExact": 0.112,
+    "mode": "share",
+    "peerMedianShareExact": 0.1,
+    "signedZeroSource": false,
+    "sourceDeviationRaw": 1.2
+  },
+  "sourceIssue": "#172"
+}

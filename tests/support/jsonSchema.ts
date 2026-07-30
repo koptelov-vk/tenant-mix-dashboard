@@ -11,7 +11,7 @@
  */
 
 export type JsonSchema = {
-  type?: string;
+  type?: string | string[];
   const?: unknown;
   enum?: unknown[];
   required?: string[];
@@ -20,6 +20,8 @@ export type JsonSchema = {
   items?: JsonSchema;
   pattern?: string;
   minLength?: number;
+  minimum?: number;
+  maxItems?: number;
 };
 
 function typeOf(value: unknown): string {
@@ -45,8 +47,9 @@ function deepEqual(a: unknown, b: unknown): boolean {
 export function validateAgainstSchema(schema: JsonSchema, data: unknown, path = '$'): string[] {
   const errors: string[] = [];
 
-  if (schema.type && typeOf(data) !== schema.type) {
-    errors.push(`${path}: expected type "${schema.type}", got "${typeOf(data)}"`);
+  const acceptedTypes = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : [];
+  if (acceptedTypes.length && !acceptedTypes.includes(typeOf(data))) {
+    errors.push(`${path}: expected type ${JSON.stringify(schema.type)}, got "${typeOf(data)}"`);
     return errors; // further checks are meaningless against the wrong type
   }
 
@@ -66,7 +69,15 @@ export function validateAgainstSchema(schema: JsonSchema, data: unknown, path = 
     errors.push(`${path}: string shorter than minLength ${schema.minLength}`);
   }
 
-  if (schema.type === 'object' && data && typeof data === 'object') {
+  if (schema.minimum != null && typeof data === 'number' && data < schema.minimum) {
+    errors.push(`${path}: number smaller than minimum ${schema.minimum}`);
+  }
+
+  if (schema.maxItems != null && Array.isArray(data) && data.length > schema.maxItems) {
+    errors.push(`${path}: array longer than maxItems ${schema.maxItems}`);
+  }
+
+  if (acceptedTypes.includes('object') && data && typeof data === 'object' && !Array.isArray(data)) {
     const record = data as Record<string, unknown>;
     for (const key of schema.required ?? []) {
       if (!(key in record)) errors.push(`${path}: missing required property "${key}"`);
@@ -82,7 +93,7 @@ export function validateAgainstSchema(schema: JsonSchema, data: unknown, path = 
     }
   }
 
-  if (schema.type === 'array' && Array.isArray(data) && schema.items) {
+  if (acceptedTypes.includes('array') && Array.isArray(data) && schema.items) {
     data.forEach((item, index) => errors.push(...validateAgainstSchema(schema.items as JsonSchema, item, `${path}[${index}]`)));
   }
 

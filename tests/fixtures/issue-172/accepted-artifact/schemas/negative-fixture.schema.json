@@ -1,0 +1,34 @@
+{
+  "$id": "https://tenant-mix.local/issue-172/negative-fixture.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "baseFixtureId": {
+      "type": "string"
+    },
+    "candidate": {
+      "type": "object"
+    },
+    "expectedRejectionCode": {
+      "type": "string"
+    },
+    "fixtureId": {
+      "type": "string"
+    },
+    "kind": {
+      "const": "negative"
+    },
+    "sourceIssue": {
+      "const": "#172"
+    }
+  },
+  "required": [
+    "baseFixtureId",
+    "candidate",
+    "expectedRejectionCode",
+    "fixtureId",
+    "kind",
+    "sourceIssue"
+  ],
+  "type": "object"
+}

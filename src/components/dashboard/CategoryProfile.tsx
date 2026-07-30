@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { AnalysisContext, CategoryBenchmarkPayload, CategoryProfileStats } from '../../types/dashboard';
 import { buildCategoryBenchmarkExportManifest, sortCategoryBenchmarkPayloads } from '../../lib/analysis';
+import { projectCategoryBenchmark } from '../../lib/categoryBenchmarkProjection';
 import { useDashboardStore } from '../../stores/dashboardStore';
 import { useControlledOverlay } from '../ui/OverlayController';
 import { Tooltip } from '../ui/Tooltip';
@@ -51,25 +52,7 @@ function pluralize(value: number, one: string, few: string, many: string): strin
 
 const brandWord = (count: number) => pluralize(count, 'бренд', 'бренда', 'брендов');
 const exclusiveWord = (count: number) => pluralize(count, 'эксклюзивный', 'эксклюзивных', 'эксклюзивных');
-const pointWord = (count: number) => pluralize(count, 'процентный пункт', 'процентных пункта', 'процентных пунктов');
 const peerWord = (count: number) => pluralize(count, 'объект', 'объекта', 'объектов');
-
-function comparisonWording(deviation: number | null): string | null {
-  if (deviation == null) return null;
-  if (deviation > 0) return 'выше медианы группы';
-  if (deviation < 0) return 'ниже медианы группы';
-  return 'на уровне медианы группы';
-}
-
-function deviationText(benchmark: CategoryBenchmarkPayload, mode: 'count' | 'share'): string {
-  const stats = mode === 'count' ? benchmark.count : benchmark.share;
-  if (stats.deviation == null) return `Отклонение недоступно (${stateText[benchmark.state]})`;
-  const rounded = mode === 'count' ? stats.deviation : Math.round(stats.deviation * 10) / 10;
-  const unit = mode === 'count' ? brandWord(rounded) : 'п.п.';
-  const sign = rounded > 0 ? '+' : '';
-  const direction = rounded > 0 ? '▲ выше' : rounded < 0 ? '▼ ниже' : '● на уровне';
-  return `${direction} медианы группы на ${sign}${rounded.toLocaleString('ru-RU', { maximumFractionDigits: 1 })} ${unit}`;
-}
 
 /**
  * Full accessible name for the benchmark bar. Every value carries a human-readable Russian
@@ -80,7 +63,7 @@ function deviationText(benchmark: CategoryBenchmarkPayload, mode: 'count' | 'sha
 function accessibleBenchmarkText(benchmark: CategoryBenchmarkPayload, mode: 'count' | 'share'): string {
   const focusValue = mode === 'count' ? benchmark.count.focusValue : benchmark.share.focusShareExact;
   const peerMedian = mode === 'count' ? benchmark.count.peerMedian : benchmark.share.peerMedianShareExact;
-  const deviation = mode === 'count' ? benchmark.count.deviation : benchmark.share.deviation;
+  const projection = projectCategoryBenchmark(benchmark, mode);
 
   const focusSentence = focusValue == null
     ? 'В фокусном объекте нет данных.'
@@ -94,28 +77,15 @@ function accessibleBenchmarkText(benchmark: CategoryBenchmarkPayload, mode: 'cou
       ? `Медиана группы ${formatCount(peerMedian)} ${brandWord(peerMedian)}.`
       : `Медиана группы ${formatShare(peerMedian)}.`;
 
-  const comparison = comparisonWording(deviation);
-  let deviationSentence: string;
-  if (deviation == null || comparison == null) {
-    deviationSentence = 'Отклонение недоступно.';
-  } else if (deviation === 0) {
-    deviationSentence = `Отклонение отсутствует. Фокусный объект ${comparison}.`;
-  } else {
-    const magnitude = Math.abs(mode === 'count' ? deviation : Math.round(deviation * 10) / 10);
-    const sign = deviation > 0 ? 'плюс' : 'минус';
-    const unitWord = mode === 'count' ? brandWord(magnitude) : pointWord(magnitude);
-    deviationSentence = `Отклонение ${sign} ${magnitude.toLocaleString('ru-RU', { maximumFractionDigits: 1 })} ${unitWord}. Фокусный объект ${comparison}.`;
-  }
-
   const stateSentence = `${dataQualityStateSentence[benchmark.state]}.`;
   const limitationSentence = benchmark.quality.limitations.length ? ` ${benchmark.quality.limitations.join(' ')}` : '';
   const peerContextSentence = benchmark.peerCount > 0 ? ` Группа сравнения: ${benchmark.peerCount} ${peerWord(benchmark.peerCount)}.` : '';
 
-  return `Категория «${benchmark.categoryId}». ${focusSentence} ${peerSentence} ${deviationSentence} ${stateSentence}${limitationSentence}${peerContextSentence}`;
+  return `Категория «${benchmark.categoryId}». ${focusSentence} ${peerSentence} ${projection.accessibleRelationText} ${stateSentence}${limitationSentence}${peerContextSentence}`;
 }
 
 function CategoryBenchmarkBar({ benchmark, mode }: { benchmark: CategoryBenchmarkPayload; mode: 'count' | 'share' }) {
-  const stats = mode === 'count' ? benchmark.count : benchmark.share;
+  const projection = projectCategoryBenchmark(benchmark, mode);
   const focusValue = mode === 'count' ? benchmark.count.focusValue : (benchmark.share.focusShareExact == null ? null : benchmark.share.focusShareExact * 100);
   const peerMedian = mode === 'count' ? benchmark.count.peerMedian : (benchmark.share.peerMedianShareExact == null ? null : benchmark.share.peerMedianShareExact * 100);
   const peerScaleValues = mode === 'count' ? benchmark.count.peerValues : benchmark.share.peerSharesExact.map((value) => value * 100);
@@ -128,8 +98,8 @@ function CategoryBenchmarkBar({ benchmark, mode }: { benchmark: CategoryBenchmar
       <div className="category-benchmark-focus" style={{ width: `${focusPercent}%` }} />
       {medianPercent != null ? <div className="category-benchmark-median-marker" style={{ left: `${medianPercent}%` }} aria-hidden="true" /> : null}
     </div>
-    <span className={`category-benchmark-deviation${stats.deviation != null && stats.deviation > 0 ? ' is-above' : stats.deviation != null && stats.deviation < 0 ? ' is-below' : ''}`}>
-      {deviationText(benchmark, mode)}
+    <span className={`category-benchmark-deviation is-${projection.cssState}`}>
+      {projection.glyph ? `${projection.glyph} ` : ''}{projection.displayRelationText}
     </span>
   </div>;
 }

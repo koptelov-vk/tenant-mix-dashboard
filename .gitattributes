@@ -1,1 +1,2 @@
 tests/fixtures/issue-141/** -text
+tests/fixtures/issue-172/accepted-artifact/** -text

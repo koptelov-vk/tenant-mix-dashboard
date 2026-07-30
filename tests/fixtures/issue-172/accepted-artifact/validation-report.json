@@ -1,0 +1,72 @@
+{
+  "artifact": "issue-172-immutable-fixture-artifact-v2",
+  "artifactVersion": "2.0.0",
+  "baselineSha": "9dc471e28c567f41c81853843f6b417ae6bb6ce6",
+  "commands": [
+    {
+      "command": "python validators/validate-schema.py",
+      "exitCode": 0,
+      "result": {
+        "errors": [],
+        "negativeFixtureWrapperSchemasPassed": 9,
+        "positiveFixtureSchemasPassed": 24,
+        "schemaCount": 5,
+        "status": "PASS"
+      },
+      "stderr": ""
+    },
+    {
+      "command": "python validators/validate-fixtures.py",
+      "exitCode": 0,
+      "result": {
+        "errors": [],
+        "fixtureCount": 33,
+        "negativeCaseMatrixComplete": true,
+        "negativeFixtureCount": 9,
+        "positiveCaseMatrixComplete": true,
+        "positiveFixtureCount": 24,
+        "schemaCount": 5,
+        "status": "PASS"
+      },
+      "stderr": ""
+    },
+    {
+      "command": "python validators/validate-semantics.py",
+      "exitCode": 0,
+      "result": {
+        "errors": [],
+        "f142_017DispositionVerified": true,
+        "negativeCorrectlyRejected": 9,
+        "negativeFixtures": 9,
+        "positiveFixtures": 24,
+        "positivePassed": 24,
+        "rawEqualityIsExact": true,
+        "status": "PASS",
+        "toleranceMethodologyIntroduced": false
+      },
+      "stderr": ""
+    },
+    {
+      "command": "python validators/validate-checksums.py",
+      "exitCode": 0,
+      "result": {
+        "checksumMismatches": [],
+        "errors": [],
+        "extraFiles": [],
+        "fileCount": 53,
+        "integrityFileCount": 50,
+        "missingFiles": [],
+        "status": "PASS",
+        "zeroLengthFiles": []
+      },
+      "stderr": ""
+    }
+  ],
+  "fixtureCount": 33,
+  "lifecycleGate": "PASS",
+  "negativeFixtureCount": 9,
+  "positiveFixtureCount": 24,
+  "productionImplementationEvidenceAvailable": false,
+  "schemaCount": 5,
+  "status": "PASS"
+}

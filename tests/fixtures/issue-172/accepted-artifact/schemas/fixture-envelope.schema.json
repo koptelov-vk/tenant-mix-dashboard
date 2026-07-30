@@ -1,0 +1,68 @@
+{
+  "$id": "https://tenant-mix.local/issue-172/fixture-envelope.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifactPhase": {
+      "const": "SPECIFICATION_FIXTURE_ONLY"
+    },
+    "canonicalPayload": {
+      "type": "object"
+    },
+    "caseKey": {
+      "type": "string"
+    },
+    "disposition": {
+      "type": "string"
+    },
+    "expectedExportProjection": {
+      "type": "object"
+    },
+    "expectedProjection": {
+      "type": "object"
+    },
+    "expectedSurfaces": {
+      "type": "object"
+    },
+    "fixtureId": {
+      "type": "string"
+    },
+    "implementationEvidenceAvailable": {
+      "const": false
+    },
+    "kind": {
+      "const": "positive"
+    },
+    "mode": {
+      "enum": [
+        "count",
+        "share"
+      ]
+    },
+    "productionConformanceClaimed": {
+      "const": false
+    },
+    "rawInput": {
+      "type": "object"
+    },
+    "sourceIssue": {
+      "const": "#172"
+    }
+  },
+  "required": [
+    "artifactPhase",
+    "caseKey",
+    "canonicalPayload",
+    "expectedExportProjection",
+    "expectedProjection",
+    "expectedSurfaces",
+    "fixtureId",
+    "implementationEvidenceAvailable",
+    "kind",
+    "mode",
+    "productionConformanceClaimed",
+    "rawInput",
+    "sourceIssue"
+  ],
+  "type": "object"
+}

@@ -181,43 +181,45 @@ export interface BenchmarkStats {
 /** Comparison/data/quality state shared by count and share modes — matches the accepted #141 contract's `state`/`quality.state` values. */
 export type CategoryBenchmarkState = 'ok' | 'no_peers' | 'no_data' | 'partial_quality' | 'quality_excluded' | 'conflicting';
 export type CategoryBenchmarkMode = 'count' | 'share';
+export type CategoryBenchmarkComparisonState = 'above' | 'below' | 'equal' | 'unavailable';
 
 export interface CategoryBenchmarkCountStats {
   focusValue: number | null;
   peerMedian: number | null;
-  deviation: number | null;
+  deviationRaw: number | null;
   deviationUnit: 'brands';
   peerValues: number[];
+  comparisonState: CategoryBenchmarkComparisonState;
 }
 
 export interface CategoryBenchmarkShareStats {
   focusShareExact: number | null;
   peerMedianShareExact: number | null;
   shareExactDelta: number | null;
-  deviation: number | null;
+  deviationRaw: number | null;
   deviationUnit: 'percentage_points';
   peerSharesExact: number[];
+  comparisonState: CategoryBenchmarkComparisonState;
 }
 
 /**
- * Exact-schema canonical payload per the accepted, immutable #141 contract
- * (schema/canonical-benchmark-payload.schema.json, SHA-256
- * bb94c627bd27fd8aa83b6a3ca9763af17e2c36dfec82ebaab27eba0067912ebf):
- * additionalProperties:false, exactly these 13 top-level keys, no more.
- * `count`/`share`/`quality`/`provenance` are `{type: object}` in the schema
- * (no further top-level constraint) — their de facto shape here matches the
- * accepted fixtures' `expectedPayload`.
+ * Exact runtime contract accepted for Issue #172. The historical #141 v1
+ * fixture package remains test evidence only; production has one v2 payload.
  */
-export interface CanonicalCategoryBenchmarkPayload141 {
+export interface CanonicalCategoryBenchmarkPayload172 {
   payloadId: string;
-  payloadVersion: '1.0.0';
+  payloadVersion: '2.0.0';
   categoryId: string;
   focusObjectId: string;
   peerObjectIds: string[];
   count: CategoryBenchmarkCountStats;
   share: CategoryBenchmarkShareStats;
   quality: { state: CategoryBenchmarkState; limitations: string[] };
-  provenance: Record<string, never>;
+  provenance: {
+    sourceFixtureId: string;
+    ownerDecisionCommentId: 5085245278;
+    rawInputSha256: string;
+  };
   state: CategoryBenchmarkState;
   defaultMode: 'count';
   availableModes: CategoryBenchmarkMode[];
@@ -225,14 +227,14 @@ export interface CanonicalCategoryBenchmarkPayload141 {
 }
 
 /**
- * Internal calculation model — a strict superset of CanonicalCategoryBenchmarkPayload141.
+ * Internal calculation model — a strict superset of CanonicalCategoryBenchmarkPayload172.
  * Carries additional metadata (methodology identity, peer/inclusion counts) that
  * Issue #170's minimum-fields contract requires as semantics, but which the immutable
- * #141 schema's `additionalProperties:false` does not allow as top-level payload keys.
+ * #172 schema's `additionalProperties:false` does not allow as top-level payload keys.
  * `toCanonicalBenchmarkPayload()` is the one pure adapter that strips this down to the
- * exact schema shape for anything that must validate against #141 directly.
+ * exact v2 schema shape.
  */
-export interface CategoryBenchmarkPayload extends CanonicalCategoryBenchmarkPayload141 {
+export interface CategoryBenchmarkPayload extends CanonicalCategoryBenchmarkPayload172 {
   peerCount: number;
   includedCount: number;
   excludedCount: number;
@@ -240,6 +242,20 @@ export interface CategoryBenchmarkPayload extends CanonicalCategoryBenchmarkPayl
   methodologyVersion: string;
   dataVersion: string;
   dataSnapshotAt: string;
+}
+
+export interface CategoryBenchmarkDisplayProjection {
+  mode: CategoryBenchmarkMode;
+  deviationRaw: number | null;
+  comparisonState: CategoryBenchmarkComparisonState;
+  displayDeviation: number | null;
+  displayRelationText: string;
+  displayUnit: 'brands' | 'percentage_points';
+  accessibleRelationText: string;
+  glyph: '▲' | '▼' | '●' | null;
+  cssState: CategoryBenchmarkComparisonState;
+  boundaryApplied: boolean;
+  consumerCalculations: [];
 }
 
 /** One row of the PDF/export quality summary — built only from real per-category canonical states, no invented metrics. */
@@ -252,6 +268,7 @@ export interface CategoryBenchmarkExportRow {
   deviationUnit: 'brands' | 'percentage_points';
   state: CategoryBenchmarkState;
   limitations: string[];
+  projection: CategoryBenchmarkDisplayProjection;
 }
 
 /** Category counts by state — the PDF quality summary is rendered directly from this, never a separately-invented metric. */
