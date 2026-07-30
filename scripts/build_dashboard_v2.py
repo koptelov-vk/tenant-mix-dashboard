@@ -10,7 +10,7 @@ from build_aggregates import build, write_outputs
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
 LEGACY_DIST = ROOT / "dist-legacy"
-STYLE_FILES = ["tokens.css", "layout.css", "components.css"]
+STYLE_FILES = ["tokens-legacy.css", "layout.css", "components.css"]
 SCRIPT_FILES = [
     "analytics.js", "navigation.js", "filters.js", "kpi.js", "executive-summary.js",
     "tenant-mix-chart.js", "heatmap.js", "tenant-table.js", "brand-card.js", "mall-card.js",
@@ -40,7 +40,8 @@ def main() -> None:
     (LEGACY_DIST / "assets" / "components").mkdir(parents=True, exist_ok=True)
     (LEGACY_DIST / "data").mkdir(parents=True, exist_ok=True)
     for name in STYLE_FILES:
-        shutil.copy2(SRC / "styles" / name, LEGACY_DIST / "assets" / "styles" / name)
+        output_name = "tokens.css" if name == "tokens-legacy.css" else name
+        shutil.copy2(SRC / "styles" / name, LEGACY_DIST / "assets" / "styles" / output_name)
     for name in SCRIPT_FILES:
         shutil.copy2(SRC / "components" / name, LEGACY_DIST / "assets" / "components" / name)
     shutil.copy2(SRC / "app.js", LEGACY_DIST / "assets" / "app.js")

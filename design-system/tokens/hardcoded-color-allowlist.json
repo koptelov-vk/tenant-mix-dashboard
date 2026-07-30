@@ -1,0 +1,285 @@
+{
+  "version": 1,
+  "scope": "src/**/*.{css,ts,tsx,js,jsx}",
+  "reason": "Pre-W1-01 shipped-color baseline. New path/value pairs fail validation; component color migration is out of scope.",
+  "files": {
+    "src/components/charts/TenantMixStackedBar.tsx": [
+      "#047857",
+      "#0891b2",
+      "#2563eb",
+      "#475569",
+      "#4f46e5",
+      "#65a30d",
+      "#7c3aed",
+      "#a16207",
+      "#be123c",
+      "#ea580c"
+    ],
+    "src/components/heatmap.js": [
+      "#10213f",
+      "#ffffff"
+    ],
+    "src/components/tenant-mix-chart.js": [
+      "#07883f",
+      "#0d9488",
+      "#2867d8",
+      "#4f46a5",
+      "#64748b",
+      "#6b8e23",
+      "#8b5cf6",
+      "#b76a00",
+      "#c24178",
+      "#dc6b36"
+    ],
+    "src/lib/export/pdf.ts": [
+      "#f8fafc"
+    ],
+    "src/pages/CategoriesPage.tsx": [
+      "#0f172a",
+      "#f8fafc",
+      "#ffffff"
+    ],
+    "src/pages/DataQualityPage.tsx": [
+      "#059669",
+      "#dc2626"
+    ],
+    "src/styles/accessibility.css": [
+      "#0f172a",
+      "#fff"
+    ],
+    "src/styles/category-benchmark.css": [
+      "#0f172a",
+      "#166534",
+      "#1d4ed8",
+      "#2563eb",
+      "#334155",
+      "#475569",
+      "#92400e",
+      "#cbd5e1",
+      "#e2e8f0",
+      "#f8fafc",
+      "#fff"
+    ],
+    "src/styles/category-heatmap.css": [
+      "#047857",
+      "#0f172a",
+      "#475569",
+      "#64748b",
+      "#92400e",
+      "#e2e8f0",
+      "#ecfdf5",
+      "#f1f5f9",
+      "#fffbeb"
+    ],
+    "src/styles/category-profile-quality.css": [
+      "#0f172a",
+      "#334155",
+      "#475569",
+      "#92400e",
+      "#94a3b8",
+      "#cbd5e1",
+      "#e2e8f0",
+      "#f59e0b",
+      "#f8fafc",
+      "#fef3c7",
+      "#fff",
+      "#fffbeb"
+    ],
+    "src/styles/category-profile.css": [
+      "#0f172a",
+      "#334155",
+      "#3730a3",
+      "#475569",
+      "#64748b",
+      "#92400e",
+      "#94a3b8",
+      "#cbd5e1",
+      "#e2e8f0",
+      "#eef2ff",
+      "#f59e0b",
+      "#f8fafc",
+      "#fbbf24",
+      "#fff",
+      "#fffbeb"
+    ],
+    "src/styles/comparison-field.css": [
+      "#047857",
+      "#0f172a",
+      "#2563eb",
+      "#64748b",
+      "#6ee7b7",
+      "#94a3b8",
+      "#cbd5e1",
+      "#d1fae5",
+      "#dbe3ee",
+      "#e2e8f0",
+      "#ecfdf5",
+      "#eef2f7",
+      "#fff"
+    ],
+    "src/styles/components.css": [
+      "#ccd6e5",
+      "#cfd7e4",
+      "#e9edf3",
+      "#edf0f5",
+      "#edf1f6",
+      "#f1f3f6",
+      "#f1f5f9",
+      "#f7f9fc",
+      "#f8fafc",
+      "#fff"
+    ],
+    "src/styles/export-actions.css": [
+      "#0f172a",
+      "#334155",
+      "#64748b",
+      "#cbd5e1",
+      "#f8fafc",
+      "#fff"
+    ],
+    "src/styles/globals.css": [
+      "#047857",
+      "#064e3b",
+      "#065f46",
+      "#0f172a",
+      "#1d4ed8",
+      "#1e40af",
+      "#2563eb",
+      "#334155",
+      "#475569",
+      "#64748b",
+      "#92400e",
+      "#94a3b8",
+      "#b91c1c",
+      "#bfdbfe",
+      "#cbd5e1",
+      "#d1fae5",
+      "#dbeafe",
+      "#dc2626",
+      "#e2e8f0",
+      "#e7ebf1",
+      "#ecfdf5",
+      "#eff6ff",
+      "#f1f5f9",
+      "#f59e0b",
+      "#f8fafc",
+      "#fde68a",
+      "#fecaca",
+      "#fef2f2",
+      "#fef3c7",
+      "#fff",
+      "#fff7f7",
+      "#fffbeb"
+    ],
+    "src/styles/layout.css": [
+      "#cfd8e6",
+      "#d6deea",
+      "#fff"
+    ],
+    "src/styles/tokens-legacy.css": [
+      "#034a22",
+      "#05652f",
+      "#10213f",
+      "#2867d8",
+      "#60708d",
+      "#8996aa",
+      "#8b98ad",
+      "#b76a00",
+      "#c43d3d",
+      "#e4e9f1",
+      "#eaf7ef",
+      "#edf4ff",
+      "#f5f7fa",
+      "#fff",
+      "#fff0f0",
+      "#fff5df"
+    ],
+    "src/styles/mall-sheet.css": [
+      "#0f172a",
+      "#1d4ed8",
+      "#64748b"
+    ],
+    "src/styles/package3-final.css": [
+      "#64748b"
+    ],
+    "src/styles/package3-table-ux.css": [
+      "#059669",
+      "#064e3b",
+      "#0f172a",
+      "#0f766e",
+      "#334155",
+      "#34d399",
+      "#64748b",
+      "#94a3b8",
+      "#cbd5e1",
+      "#dbe3ee",
+      "#ecfdf5",
+      "#f1f5f9",
+      "#f8fafc",
+      "#ffffff"
+    ],
+    "src/styles/package4-methodology.css": [
+      "#0f5132",
+      "#475569",
+      "#e2e8f0"
+    ],
+    "src/styles/pdf-export.css": [
+      "#64748b",
+      "#cbd5e1",
+      "#f8fafc"
+    ],
+    "src/styles/qa-fixes.css": [
+      "#047857",
+      "#0f172a",
+      "#1d4ed8",
+      "#1e3a5f",
+      "#1e40af",
+      "#334155",
+      "#475569",
+      "#64748b",
+      "#6d28d9",
+      "#86b7a2",
+      "#92400e",
+      "#94a3b8",
+      "#bfdbfe",
+      "#cbd5e1",
+      "#dbe3ed",
+      "#dbeafe",
+      "#dcfce7",
+      "#e2e8f0",
+      "#e8f0ff",
+      "#ecfdf5",
+      "#eef2f7",
+      "#eef3f8",
+      "#eff6ff",
+      "#f1f5f9",
+      "#f3e8ff",
+      "#f3f6fa",
+      "#f5f8fc",
+      "#f8fafc",
+      "#fbfcfe",
+      "#fef3c7",
+      "#fff"
+    ],
+    "src/styles/saved-views.css": [
+      "#047857",
+      "#64748b",
+      "#93c5fd",
+      "#cbd5e1",
+      "#dbe3ee"
+    ],
+    "src/styles/tooltip.css": [
+      "#172033",
+      "#475569",
+      "#94a3b8",
+      "#eef2f7",
+      "#fff"
+    ],
+    "src/styles/upcoming-table-responsive.css": [
+      "#cbd5e1",
+      "#e2e8f0",
+      "#f8fafc",
+      "#fff"
+    ]
+  }
+}

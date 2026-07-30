@@ -1,0 +1,31 @@
+{
+  "totalRows": 367,
+  "validatedRows": 307,
+  "excludedRows": 3,
+  "decorativeExemptRows": 30,
+  "informationalRows": 27,
+  "surfaces": [
+    "surface-base",
+    "surface-subtle",
+    "surface-elevated",
+    "surface-overlay",
+    "surface-selected"
+  ],
+  "decorativeTokens": [
+    "border-subtle",
+    "border-default",
+    "border-strong"
+  ],
+  "forbidden": {
+    "dark": {
+      "text-muted": [
+        "surface-overlay",
+        "surface-selected"
+      ],
+      "quality-unknown-mark": [
+        "surface-selected"
+      ]
+    },
+    "light": {}
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "sourceArchive": "Tenant Mix Design System v3 - residual governance correction.zip",
+  "sourceArchiveSha256": "DF27A0D98F89705230355AAE3AE822DAD70DA8666D0EB82A2F4769CC0AC0AD7C",
+  "ownerGateMarker": "CODEX_COWORK_DESIGN_OWNER_2026-07-30_W0_ARCHIVE_HASH_ACCEPTANCE",
+  "canonicalTextSha256": {
+    "schema.json": "4f6f1ef1e6259465269954fa58c1230af3ef5675f5dc743cca3d83011842ed01",
+    "dark.tokens.json": "8b292b6a64aa88c5d7eea35c341dbc70d5dfde93c193411afb09187758ed24c5",
+    "light.tokens.json": "72f1d9ad18e1091919b850f7587039a349c10dd51d63efb49a63f6c4869fcd6d",
+    "print.tokens.json": "c68777ce6514a9fac528fd33364ca8ccf8ca4408b3275f964f988276ef0de959"
+  },
+  "canonicalization": "UTF-8 text, CRLF normalized to LF, trailing whitespace removed before SHA-256"
+}
