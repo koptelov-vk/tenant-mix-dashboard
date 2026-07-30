@@ -2,7 +2,7 @@ import type {
   AnalysisContext,
   BenchmarkStats,
   BrandGap,
-  CanonicalCategoryBenchmarkPayload141,
+  CanonicalCategoryBenchmarkPayload172,
   CategoryBenchmarkExportManifest,
   CategoryBenchmarkPayload,
   CategoryBenchmarkQualitySummary,
@@ -18,6 +18,11 @@ import type {
   TenantRow,
   UniquenessStats,
 } from '../types/dashboard';
+import {
+  deriveCategoryBenchmarkComparisonState,
+  normalizeCategoryBenchmarkDeviationRaw,
+  projectCategoryBenchmark,
+} from './categoryBenchmarkProjection';
 
 /** Static methodology identity for the category peer-benchmark — matches issue #141 manifest's `methodologyIds`/`methodologyVersions` exactly; not a new methodology decision. */
 export const CATEGORY_BENCHMARK_METHODOLOGY = {
@@ -263,8 +268,8 @@ function categoryBenchmarkState(sourceRowCount: number, focusFullyExcludedByQual
 
 /**
  * Joins CategorySliceStats (raw peer values/medians) with CategoryProfileStats (quality state) into
- * the canonical CategoryBenchmarkPayload per the accepted #141 contract. Deviation is computed here
- * from raw exact values only — no consumer-side median, no intermediate rounding.
+ * the canonical CategoryBenchmarkPayload v2. Raw deviation and comparison state are
+ * computed together here — consumers never derive direction or equality.
  */
 export function buildCategoryBenchmarkPayloads(
   categoryStats: CategorySliceStats[],
@@ -297,29 +302,41 @@ export function buildCategoryBenchmarkPayloads(
     const peerMedianShareExact = noData ? null : stats.shareMedian;
     const shareExactDelta = focusShareExact != null && peerMedianShareExact != null ? focusShareExact - peerMedianShareExact : null;
 
+    const countDeviationRaw = normalizeCategoryBenchmarkDeviationRaw(
+      focusValue != null && peerMedian != null ? focusValue - peerMedian : null,
+    );
+    const shareDeviationRaw = normalizeCategoryBenchmarkDeviationRaw(
+      shareExactDelta != null ? shareExactDelta * 100 : null,
+    );
     return {
       payloadId: `category-benchmark:${stats.category}`,
-      payloadVersion: '1.0.0',
+      payloadVersion: '2.0.0',
       categoryId: stats.category,
       focusObjectId: focusMall.mall,
       peerObjectIds: peerMalls.map((mall) => mall.mall),
       count: {
         focusValue,
         peerMedian,
-        deviation: focusValue != null && peerMedian != null ? focusValue - peerMedian : null,
+        deviationRaw: countDeviationRaw,
         deviationUnit: 'brands',
         peerValues,
+        comparisonState: deriveCategoryBenchmarkComparisonState(countDeviationRaw),
       },
       share: {
         focusShareExact,
         peerMedianShareExact,
         shareExactDelta,
-        deviation: shareExactDelta != null ? shareExactDelta * 100 : null,
+        deviationRaw: shareDeviationRaw,
         deviationUnit: 'percentage_points',
         peerSharesExact,
+        comparisonState: deriveCategoryBenchmarkComparisonState(shareDeviationRaw),
       },
       quality: { state, limitations: profile?.qualityIssues ?? [] },
-      provenance: {},
+      provenance: {
+        sourceFixtureId: `runtime:${stats.category}`,
+        ownerDecisionCommentId: 5085245278,
+        rawInputSha256: dataVersion.replace(/^sha256-/, ''),
+      },
       state,
       defaultMode: 'count',
       availableModes: ['count', 'share'],
@@ -341,8 +358,8 @@ export function buildCategoryBenchmarkPayloads(
  */
 export function sortCategoryBenchmarkPayloads(payloads: CategoryBenchmarkPayload[], mode: 'count' | 'share'): CategoryBenchmarkPayload[] {
   return [...payloads].sort((a, b) => {
-    const deviationA = mode === 'count' ? a.count.deviation : a.share.deviation;
-    const deviationB = mode === 'count' ? b.count.deviation : b.share.deviation;
+    const deviationA = mode === 'count' ? a.count.deviationRaw : a.share.deviationRaw;
+    const deviationB = mode === 'count' ? b.count.deviationRaw : b.share.deviationRaw;
     if (deviationA == null && deviationB == null) return a.categoryId.localeCompare(b.categoryId, 'ru');
     if (deviationA == null) return 1;
     if (deviationB == null) return -1;
@@ -352,13 +369,10 @@ export function sortCategoryBenchmarkPayloads(payloads: CategoryBenchmarkPayload
 }
 
 /**
- * The one pure canonical adapter: internal calculation model -> exact #141 schema shape.
- * Whitelists only the 13 keys schema/canonical-benchmark-payload.schema.json allows
- * (additionalProperties:false) — methodologyId/Version, dataVersion/SnapshotAt, and the
- * peer/inclusion counts are Issue #170 minimum-fields semantics that live on the internal
- * model but are not valid top-level canonical-payload keys under the immutable schema.
+ * The one pure canonical adapter: internal calculation model -> exact #172 v2 shape.
+ * Runtime has no v1 adapter or parallel canonical payload.
  */
-export function toCanonicalBenchmarkPayload(payload: CategoryBenchmarkPayload): CanonicalCategoryBenchmarkPayload141 {
+export function toCanonicalBenchmarkPayload(payload: CategoryBenchmarkPayload): CanonicalCategoryBenchmarkPayload172 {
   return {
     payloadId: payload.payloadId,
     payloadVersion: payload.payloadVersion,
@@ -384,12 +398,8 @@ export function toCanonicalBenchmarkPayload(payload: CategoryBenchmarkPayload): 
  * the canonical payload it was built from.
  */
 export function buildCategoryBenchmarkExportManifest(payloads: CategoryBenchmarkPayload[], mode: 'count' | 'share'): CategoryBenchmarkExportManifest {
-  // Every per-category row is a projection of the ONE canonical payload (via
-  // toCanonicalBenchmarkPayload) — the manifest performs no calculation of its own and
-  // reads no field that isn't already on the canonical, schema-validated shape. Only the
-  // wrapper-level identity fields (mode, dataVersion, methodologyId, ...) come from the
-  // richer internal model, because the immutable #141 schema itself carries no
-  // methodology/versioning identity at all (see PR #171 Tier 3 canonical-payload finding).
+  // Every row carries the same canonical projection consumed by UI/accessibility/CSS.
+  // The manifest performs no relation, sign, equality, or rounding calculation.
   const categories = payloads.map((payload) => {
     const canonical = toCanonicalBenchmarkPayload(payload);
     const stats = mode === 'count' ? canonical.count : canonical.share;
@@ -398,10 +408,11 @@ export function buildCategoryBenchmarkExportManifest(payloads: CategoryBenchmark
       mode,
       focusValueRaw: mode === 'count' ? canonical.count.focusValue : canonical.share.focusShareExact,
       peerMedianRaw: mode === 'count' ? canonical.count.peerMedian : canonical.share.peerMedianShareExact,
-      deviationRaw: stats.deviation,
+      deviationRaw: stats.deviationRaw,
       deviationUnit: stats.deviationUnit,
       state: canonical.state,
       limitations: canonical.quality.limitations,
+      projection: projectCategoryBenchmark(payload, mode),
     };
   });
   const qualitySummary: CategoryBenchmarkQualitySummary = {
@@ -424,46 +435,6 @@ export function buildCategoryBenchmarkExportManifest(payloads: CategoryBenchmark
     categories,
     qualitySummary,
   };
-}
-
-const CANONICAL_PAYLOAD_141_ALLOWED_KEYS = new Set([
-  'payloadId', 'payloadVersion', 'categoryId', 'focusObjectId', 'peerObjectIds',
-  'count', 'share', 'quality', 'provenance', 'state', 'defaultMode', 'availableModes', 'focusExcludedFromMedian',
-]);
-const CANONICAL_PAYLOAD_141_REQUIRED_KEYS = [...CANONICAL_PAYLOAD_141_ALLOWED_KEYS];
-
-/**
- * Structural validation mirroring schema/canonical-benchmark-payload.schema.json
- * (SHA-256 bb94c627bd27fd8aa83b6a3ca9763af17e2c36dfec82ebaab27eba0067912ebf) exactly:
- * additionalProperties:false, the same 13 required keys, and the same `const` values.
- * The literal schema.json file lives only in the externally-supplied immutable acceptance
- * artifact (no reproducible CI-fetchable location exists for it — see PR #171 Tier 3
- * review), so this function encodes the identical constraints read directly from that
- * file rather than re-deriving or guessing them, and is validated against real fixture
- * values in categoryBenchmarkSchema.test.ts.
- */
-export function validateCanonicalPayload141(value: unknown): string[] {
-  const errors: string[] = [];
-  if (typeof value !== 'object' || value === null) return ['payload is not an object'];
-  const record = value as Record<string, unknown>;
-  const keys = Object.keys(record);
-  for (const key of keys) if (!CANONICAL_PAYLOAD_141_ALLOWED_KEYS.has(key)) errors.push(`additionalProperties:false violated by "${key}"`);
-  for (const key of CANONICAL_PAYLOAD_141_REQUIRED_KEYS) if (!(key in record)) errors.push(`missing required "${key}"`);
-  if (typeof record.categoryId !== 'string') errors.push('categoryId must be string');
-  if (typeof record.focusObjectId !== 'string') errors.push('focusObjectId must be string');
-  if (!Array.isArray(record.peerObjectIds) || record.peerObjectIds.some((item) => typeof item !== 'string')) errors.push('peerObjectIds must be string[]');
-  if (typeof record.count !== 'object' || record.count === null) errors.push('count must be object');
-  if (typeof record.share !== 'object' || record.share === null) errors.push('share must be object');
-  if (typeof record.quality !== 'object' || record.quality === null) errors.push('quality must be object');
-  if (typeof record.provenance !== 'object' || record.provenance === null) errors.push('provenance must be object');
-  if (typeof record.state !== 'string') errors.push('state must be string');
-  if (record.payloadVersion !== '1.0.0') errors.push('payloadVersion must const "1.0.0"');
-  if (record.defaultMode !== 'count') errors.push('defaultMode must const "count"');
-  if (record.focusExcludedFromMedian !== true) errors.push('focusExcludedFromMedian must const true');
-  if (!Array.isArray(record.availableModes) || record.availableModes.length !== 2 || record.availableModes[0] !== 'count' || record.availableModes[1] !== 'share') {
-    errors.push('availableModes must const ["count","share"]');
-  }
-  return errors;
 }
 
 function buildIntersections(rows: TenantRow[], focusMall: MallSummary): IntersectionStats {

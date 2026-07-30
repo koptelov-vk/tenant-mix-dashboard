@@ -46,9 +46,9 @@ function renderProfile() {
 afterEach(() => { document.body.innerHTML = ''; useDashboardStore.getState().reset(); });
 
 describe('CategoryProfile benchmark accessibility and PDF contract (F141_019/F141_020)', () => {
-  it('exposes an accessible name containing category, focus value, peer median, deviation, human-readable unit and state — never the raw canonical enum tokens (PR #171 Tier 3 finding)', () => {
+  it('exposes the canonical v2 accessible relation with category, focus value, peer median and human-readable state', () => {
     renderProfile();
-    const bar = screen.getByRole('img', { name: /Категория «Одежда»\..*В фокусном объекте 99 брендов\..*Медиана группы 20 брендов\..*Отклонение плюс 79 брендов\..*Фокусный объект выше медианы группы\..*Данные подтверждены\./ });
+    const bar = screen.getByRole('img', { name: /Категория «Одежда»\..*В фокусном объекте 99 брендов\..*Медиана группы 20 брендов\..*Фокусный объект выше медианы на 79 брендов\..*Данные подтверждены\./ });
     expect(bar).toBeTruthy();
     const name = bar.getAttribute('aria-label') ?? '';
     expect(name).not.toContain('brands');
@@ -214,23 +214,21 @@ describe('CategoryProfile accessible text — required states, human wording, no
     FORBIDDEN_TOKENS.forEach((token) => expect(name).not.toContain(token));
   });
 
-  it('negative deviation: announces "ниже медианы группы" with the magnitude, singular/plural brand form correct', () => {
+  it('negative deviation: announces the canonical below relation with the accepted brand form', () => {
     renderScenario([
       row('Focus', 'f1', 'Одежда'),
       ...Array.from({ length: 5 }, (_, i) => row('Peer1', `p1-${i}`, 'Одежда')),
     ], ['Одежда'], ['Focus', 'Peer1'], 'Focus', ['Peer1']);
     const bar = document.querySelector('.category-benchmark-bar');
     const name = bar?.getAttribute('aria-label') ?? '';
-    expect(name).toMatch(/ниже медианы группы/);
-    expect(name).toMatch(/Отклонение минус 4 бренда/); // correct Russian "few" form for magnitude 4 (2-4 -> "бренда")
+    expect(name).toMatch(/Фокусный объект ниже медианы на 4 бренда\./);
   });
 
-  it('zero/equal deviation: announces "на уровне медианы группы" and "отклонение отсутствует"', () => {
+  it('zero/equal deviation: announces the canonical equal relation', () => {
     renderScenario([closedRow('Focus', 'x0', 'Одежда'), closedRow('Peer1', 'x1', 'Одежда')], ['Одежда'], ['Focus', 'Peer1'], 'Focus', ['Peer1']);
     const bar = document.querySelector('.category-benchmark-bar');
     const name = bar?.getAttribute('aria-label') ?? '';
-    expect(name).toMatch(/Отклонение отсутствует/);
-    expect(name).toMatch(/на уровне медианы группы/);
+    expect(name).toMatch(/Фокусный объект на уровне медианы\./);
   });
 
   it('singular brand form: focus value of exactly 1 uses "1 бренд", not "1 брендов"', () => {

@@ -1,0 +1,215 @@
+{
+  "$id": "https://tenant-mix.local/issue-172/canonical-comparison-state.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "availableModes": {
+      "const": [
+        "count",
+        "share"
+      ]
+    },
+    "categoryId": {
+      "type": "string"
+    },
+    "count": {
+      "additionalProperties": false,
+      "properties": {
+        "comparisonState": {
+          "enum": [
+            "above",
+            "below",
+            "equal",
+            "unavailable"
+          ]
+        },
+        "deviationRaw": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "deviationUnit": {
+          "const": "brands"
+        },
+        "focusValue": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "peerMedian": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "peerValues": {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "focusValue",
+        "peerMedian",
+        "deviationRaw",
+        "deviationUnit",
+        "peerValues",
+        "comparisonState"
+      ],
+      "type": "object"
+    },
+    "defaultMode": {
+      "const": "count"
+    },
+    "focusExcludedFromMedian": {
+      "const": true
+    },
+    "focusObjectId": {
+      "type": "string"
+    },
+    "payloadId": {
+      "type": "string"
+    },
+    "payloadVersion": {
+      "const": "2.0.0"
+    },
+    "peerObjectIds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "ownerDecisionCommentId": {
+          "const": 5085245278
+        },
+        "rawInputSha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "sourceFixtureId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "sourceFixtureId",
+        "ownerDecisionCommentId",
+        "rawInputSha256"
+      ],
+      "type": "object"
+    },
+    "quality": {
+      "additionalProperties": false,
+      "properties": {
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "state": {
+          "enum": [
+            "ok",
+            "partial_quality",
+            "conflicting",
+            "quality_excluded",
+            "no_data",
+            "no_peers"
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "limitations"
+      ],
+      "type": "object"
+    },
+    "share": {
+      "additionalProperties": false,
+      "properties": {
+        "comparisonState": {
+          "enum": [
+            "above",
+            "below",
+            "equal",
+            "unavailable"
+          ]
+        },
+        "deviationRaw": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "deviationUnit": {
+          "const": "percentage_points"
+        },
+        "focusShareExact": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "peerMedianShareExact": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "peerSharesExact": {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
+        "shareExactDelta": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "focusShareExact",
+        "peerMedianShareExact",
+        "shareExactDelta",
+        "deviationRaw",
+        "deviationUnit",
+        "peerSharesExact",
+        "comparisonState"
+      ],
+      "type": "object"
+    },
+    "state": {
+      "enum": [
+        "ok",
+        "partial_quality",
+        "conflicting",
+        "quality_excluded",
+        "no_data",
+        "no_peers"
+      ]
+    }
+  },
+  "required": [
+    "payloadId",
+    "payloadVersion",
+    "categoryId",
+    "focusObjectId",
+    "peerObjectIds",
+    "count",
+    "share",
+    "quality",
+    "provenance",
+    "state",
+    "defaultMode",
+    "availableModes",
+    "focusExcludedFromMedian"
+  ],
+  "type": "object"
+}

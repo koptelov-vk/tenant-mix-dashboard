@@ -1,0 +1,191 @@
+{
+  "artifactPhase": "SPECIFICATION_FIXTURE_ONLY",
+  "canonicalPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "comparisonState": "unavailable",
+      "deviationRaw": null,
+      "deviationUnit": "brands",
+      "focusValue": null,
+      "peerMedian": null,
+      "peerValues": []
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F172_S005_neighbor_below_positive_0_05",
+    "payloadVersion": "2.0.0",
+    "peerObjectIds": [
+      "peer-1"
+    ],
+    "provenance": {
+      "ownerDecisionCommentId": 5085245278,
+      "rawInputSha256": "4558a7c3aac1fabfd60b2fa6e9a68363f5f05853e185f0c45bfe7e5a4ad0658b",
+      "sourceFixtureId": "F172_S005_neighbor_below_positive_0_05"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "ok"
+    },
+    "share": {
+      "comparisonState": "above",
+      "deviationRaw": 0.049999999999,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": 0.10049999999999,
+      "peerMedianShareExact": 0.1,
+      "peerSharesExact": [
+        0.1
+      ],
+      "shareExactDelta": 0.00049999999999
+    },
+    "state": "ok"
+  },
+  "caseKey": "share_neighbor_below_positive_0_05",
+  "expectedExportProjection": {
+    "fixtureId": "F172_S005_neighbor_below_positive_0_05",
+    "payloadVersion": "2.0.0",
+    "projection": {
+      "accessibleRelationText": "Фокусный объект выше медианы менее чем на 0,1 процентного пункта.",
+      "boundaryApplied": true,
+      "comparisonState": "above",
+      "consumerCalculations": [],
+      "cssState": "above",
+      "deviationRaw": 0.049999999999,
+      "displayDeviation": null,
+      "displayRelationText": "выше медианы менее чем на 0,1 п.п.",
+      "displayUnit": "percentage_points",
+      "glyph": "▲",
+      "mode": "share"
+    },
+    "surface": "CategoryBenchmarkExportManifest/PDF-sidecar"
+  },
+  "expectedProjection": {
+    "accessibleRelationText": "Фокусный объект выше медианы менее чем на 0,1 процентного пункта.",
+    "boundaryApplied": true,
+    "comparisonState": "above",
+    "consumerCalculations": [],
+    "cssState": "above",
+    "deviationRaw": 0.049999999999,
+    "displayDeviation": null,
+    "displayRelationText": "выше медианы менее чем на 0,1 п.п.",
+    "displayUnit": "percentage_points",
+    "glyph": "▲",
+    "mode": "share"
+  },
+  "expectedSurfaces": {
+    "accessibility": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы менее чем на 0,1 процентного пункта.",
+        "boundaryApplied": true,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 0.049999999999,
+        "displayDeviation": null,
+        "displayRelationText": "выше медианы менее чем на 0,1 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "css": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы менее чем на 0,1 процентного пункта.",
+        "boundaryApplied": true,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 0.049999999999,
+        "displayDeviation": null,
+        "displayRelationText": "выше медианы менее чем на 0,1 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "csv": {
+      "applicable": false,
+      "consumerCalculations": [],
+      "projection": null,
+      "reason": "NO_DEDICATED_CATEGORY_BENCHMARK_EXPORT_SURFACE_ON_BASELINE"
+    },
+    "desktop": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы менее чем на 0,1 процентного пункта.",
+        "boundaryApplied": true,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 0.049999999999,
+        "displayDeviation": null,
+        "displayRelationText": "выше медианы менее чем на 0,1 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "mobile": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы менее чем на 0,1 процентного пункта.",
+        "boundaryApplied": true,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 0.049999999999,
+        "displayDeviation": null,
+        "displayRelationText": "выше медианы менее чем на 0,1 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "pdf": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект выше медианы менее чем на 0,1 процентного пункта.",
+        "boundaryApplied": true,
+        "comparisonState": "above",
+        "consumerCalculations": [],
+        "cssState": "above",
+        "deviationRaw": 0.049999999999,
+        "displayDeviation": null,
+        "displayRelationText": "выше медианы менее чем на 0,1 п.п.",
+        "displayUnit": "percentage_points",
+        "glyph": "▲",
+        "mode": "share"
+      }
+    },
+    "xlsx": {
+      "applicable": false,
+      "consumerCalculations": [],
+      "projection": null,
+      "reason": "NO_DEDICATED_CATEGORY_BENCHMARK_EXPORT_SURFACE_ON_BASELINE"
+    }
+  },
+  "fixtureId": "F172_S005_neighbor_below_positive_0_05",
+  "implementationEvidenceAvailable": false,
+  "kind": "positive",
+  "mode": "share",
+  "productionConformanceClaimed": false,
+  "rawInput": {
+    "focusShareExact": 0.10049999999999,
+    "mode": "share",
+    "peerMedianShareExact": 0.1,
+    "signedZeroSource": false,
+    "sourceDeviationRaw": 0.049999999999
+  },
+  "sourceIssue": "#172"
+}

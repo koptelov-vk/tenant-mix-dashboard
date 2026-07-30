@@ -1,0 +1,194 @@
+{
+  "artifactPhase": "SPECIFICATION_FIXTURE_ONLY",
+  "canonicalPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "comparisonState": "below",
+      "deviationRaw": -2.0,
+      "deviationUnit": "brands",
+      "focusValue": 8,
+      "peerMedian": 10,
+      "peerValues": [
+        10
+      ]
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F172_C002_negative_integer",
+    "payloadVersion": "2.0.0",
+    "peerObjectIds": [
+      "peer-1"
+    ],
+    "provenance": {
+      "ownerDecisionCommentId": 5085245278,
+      "rawInputSha256": "9617fd446b69c2400f5407b72d369e0672b805a4b1973bf4ee456d563ef4c86d",
+      "sourceFixtureId": "F172_C002_negative_integer"
+    },
+    "quality": {
+      "limitations": [],
+      "state": "ok"
+    },
+    "share": {
+      "comparisonState": "unavailable",
+      "deviationRaw": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "ok"
+  },
+  "caseKey": "count_negative_integer",
+  "expectedExportProjection": {
+    "fixtureId": "F172_C002_negative_integer",
+    "payloadVersion": "2.0.0",
+    "projection": {
+      "accessibleRelationText": "Фокусный объект ниже медианы на 2 бренда.",
+      "boundaryApplied": false,
+      "comparisonState": "below",
+      "consumerCalculations": [],
+      "cssState": "below",
+      "deviationRaw": -2.0,
+      "displayDeviation": 2.0,
+      "displayRelationText": "ниже медианы на 2 бренда",
+      "displayUnit": "brands",
+      "glyph": "▼",
+      "mode": "count"
+    },
+    "surface": "CategoryBenchmarkExportManifest/PDF-sidecar"
+  },
+  "expectedProjection": {
+    "accessibleRelationText": "Фокусный объект ниже медианы на 2 бренда.",
+    "boundaryApplied": false,
+    "comparisonState": "below",
+    "consumerCalculations": [],
+    "cssState": "below",
+    "deviationRaw": -2.0,
+    "displayDeviation": 2.0,
+    "displayRelationText": "ниже медианы на 2 бренда",
+    "displayUnit": "brands",
+    "glyph": "▼",
+    "mode": "count"
+  },
+  "expectedSurfaces": {
+    "accessibility": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект ниже медианы на 2 бренда.",
+        "boundaryApplied": false,
+        "comparisonState": "below",
+        "consumerCalculations": [],
+        "cssState": "below",
+        "deviationRaw": -2.0,
+        "displayDeviation": 2.0,
+        "displayRelationText": "ниже медианы на 2 бренда",
+        "displayUnit": "brands",
+        "glyph": "▼",
+        "mode": "count"
+      }
+    },
+    "css": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект ниже медианы на 2 бренда.",
+        "boundaryApplied": false,
+        "comparisonState": "below",
+        "consumerCalculations": [],
+        "cssState": "below",
+        "deviationRaw": -2.0,
+        "displayDeviation": 2.0,
+        "displayRelationText": "ниже медианы на 2 бренда",
+        "displayUnit": "brands",
+        "glyph": "▼",
+        "mode": "count"
+      }
+    },
+    "csv": {
+      "applicable": false,
+      "consumerCalculations": [],
+      "projection": null,
+      "reason": "NO_DEDICATED_CATEGORY_BENCHMARK_EXPORT_SURFACE_ON_BASELINE"
+    },
+    "desktop": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект ниже медианы на 2 бренда.",
+        "boundaryApplied": false,
+        "comparisonState": "below",
+        "consumerCalculations": [],
+        "cssState": "below",
+        "deviationRaw": -2.0,
+        "displayDeviation": 2.0,
+        "displayRelationText": "ниже медианы на 2 бренда",
+        "displayUnit": "brands",
+        "glyph": "▼",
+        "mode": "count"
+      }
+    },
+    "mobile": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект ниже медианы на 2 бренда.",
+        "boundaryApplied": false,
+        "comparisonState": "below",
+        "consumerCalculations": [],
+        "cssState": "below",
+        "deviationRaw": -2.0,
+        "displayDeviation": 2.0,
+        "displayRelationText": "ниже медианы на 2 бренда",
+        "displayUnit": "brands",
+        "glyph": "▼",
+        "mode": "count"
+      }
+    },
+    "pdf": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Фокусный объект ниже медианы на 2 бренда.",
+        "boundaryApplied": false,
+        "comparisonState": "below",
+        "consumerCalculations": [],
+        "cssState": "below",
+        "deviationRaw": -2.0,
+        "displayDeviation": 2.0,
+        "displayRelationText": "ниже медианы на 2 бренда",
+        "displayUnit": "brands",
+        "glyph": "▼",
+        "mode": "count"
+      }
+    },
+    "xlsx": {
+      "applicable": false,
+      "consumerCalculations": [],
+      "projection": null,
+      "reason": "NO_DEDICATED_CATEGORY_BENCHMARK_EXPORT_SURFACE_ON_BASELINE"
+    }
+  },
+  "fixtureId": "F172_C002_negative_integer",
+  "implementationEvidenceAvailable": false,
+  "kind": "positive",
+  "mode": "count",
+  "productionConformanceClaimed": false,
+  "rawInput": {
+    "focusCount": 8,
+    "mode": "count",
+    "peerCounts": [
+      10
+    ],
+    "peerMedianCount": 10,
+    "signedZeroSource": false,
+    "sourceDeviationRaw": -2
+  },
+  "sourceIssue": "#172"
+}

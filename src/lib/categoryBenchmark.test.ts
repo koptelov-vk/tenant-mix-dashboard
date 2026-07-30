@@ -56,7 +56,8 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
     const benchmark = context.categoryBenchmarks.find((item) => item.categoryId === 'Одежда');
     expect(benchmark?.count.focusValue).toBe(99);
     expect(benchmark?.count.peerMedian).toBe(20);
-    expect(benchmark?.count.deviation).toBe(79);
+    expect(benchmark?.count.deviationRaw).toBe(79);
+    expect(benchmark?.count.comparisonState).toBe('above');
     expect(benchmark?.count.deviationUnit).toBe('brands');
     expect(benchmark?.focusExcludedFromMedian).toBe(true);
     expect(benchmark?.state).toBe('ok');
@@ -73,7 +74,7 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
     const benchmark = context.categoryBenchmarks.find((item) => item.categoryId === 'Одежда');
     expect(benchmark?.count.focusValue).toBe(0);
     expect(benchmark?.count.peerMedian).toBe(10);
-    expect(benchmark?.count.deviation).toBe(-10);
+    expect(benchmark?.count.deviationRaw).toBe(-10);
     expect(benchmark?.state).toBe('ok');
   });
 
@@ -88,7 +89,7 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
     const benchmark = context.categoryBenchmarks.find((item) => item.categoryId === 'Одежда');
     expect(benchmark?.count.focusValue).toBe(5);
     expect(benchmark?.count.peerMedian).toBe(0);
-    expect(benchmark?.count.deviation).toBe(5);
+    expect(benchmark?.count.deviationRaw).toBe(5);
     expect(benchmark?.state).toBe('ok');
   });
 
@@ -99,7 +100,8 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
     const benchmark = context.categoryBenchmarks.find((item) => item.categoryId === 'Одежда');
     expect(benchmark?.count.focusValue).toBe(0);
     expect(benchmark?.count.peerMedian).toBe(0);
-    expect(benchmark?.count.deviation).toBe(0);
+    expect(benchmark?.count.deviationRaw).toBe(0);
+    expect(benchmark?.count.comparisonState).toBe('equal');
     expect(benchmark?.state).toBe('ok');
   });
 
@@ -157,12 +159,12 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
     const conflicting = buildScenario(conflictingRow('Focus', 'conflicting-extra', 'Одежда'));
 
     expect(partial?.count.focusValue).toBe(12);
-    expect(partial?.count.deviation).toBe(0);
+    expect(partial?.count.deviationRaw).toBe(0);
     expect(partial?.state).toBe('partial_quality');
     expect(partial?.quality.state).toBe('partial_quality');
 
     expect(conflicting?.count.focusValue).toBe(12);
-    expect(conflicting?.count.deviation).toBe(0);
+    expect(conflicting?.count.deviationRaw).toBe(0);
     expect(conflicting?.state).toBe('conflicting');
     expect(conflicting?.quality.state).toBe('conflicting');
 
@@ -177,7 +179,8 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
     const benchmark = context.categoryBenchmarks.find((item) => item.categoryId === 'Одежда');
     expect(benchmark?.count.focusValue).toBe(10);
     expect(benchmark?.count.peerMedian).toBeNull();
-    expect(benchmark?.count.deviation).toBeNull();
+    expect(benchmark?.count.deviationRaw).toBeNull();
+    expect(benchmark?.count.comparisonState).toBe('unavailable');
     expect(benchmark?.state).toBe('no_peers');
   });
 
@@ -199,7 +202,7 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
     expect(benchmark?.share.focusShareExact).toBeCloseTo(0.255, 10);
     expect(benchmark?.share.peerMedianShareExact).toBeCloseTo(0.2, 10);
     expect(benchmark?.share.deviationUnit).toBe('percentage_points');
-    expect(benchmark?.share.deviation).toBeCloseTo(5.5, 9);
+    expect(benchmark?.share.deviationRaw).toBeCloseTo(5.5, 9);
   });
 
   it('F141_001: count is the default mode and both modes are available', () => {
@@ -221,7 +224,7 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
     const context = createAnalysisContext(data, { focusMall: 'Focus', category: 'Все категории', peerMalls: ['Peer1', 'Peer2'] });
     const benchmark = context.categoryBenchmarks.find((item) => item.categoryId === 'Одежда');
     expect(benchmark?.count.peerMedian).toBe(20); // (10+30)/2, focus's own 50 excluded from the median set
-    expect(benchmark?.count.deviation).toBe(30);
+    expect(benchmark?.count.deviationRaw).toBe(30);
   });
 
   it('F141_019: canonical payload is deterministic/pure — identical inputs produce a structurally identical payload regardless of call context (proves no desktop/mobile-specific branch exists in the selector consumed by both)', () => {
@@ -244,8 +247,8 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
       const data = buildData(rows, ['Одежда', 'Обувь'], ['Focus', 'Peer1']);
       const context = createAnalysisContext(data, { focusMall: 'Focus', category: 'Все категории', peerMalls: ['Peer1'] });
       const benchmark = context.categoryBenchmarks.find((item) => item.categoryId === 'Одежда');
-      if (benchmark?.share.shareExactDelta != null && benchmark.share.deviation != null) {
-        expect(benchmark.share.deviation).toBeCloseTo(benchmark.share.shareExactDelta * 100, 9);
+      if (benchmark?.share.shareExactDelta != null && benchmark.share.deviationRaw != null) {
+        expect(benchmark.share.deviationRaw).toBeCloseTo(benchmark.share.shareExactDelta * 100, 9);
       }
     });
   });
@@ -262,7 +265,7 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
     // median([4,6]) = 5, deviation = 8-5 = 3 — computed purely from CategorySliceStats.countMedian
     // (itself computed once, inside buildCategoryStats/median()), never passed in or overridable by a caller.
     expect(benchmark?.count.peerMedian).toBe(5);
-    expect(benchmark?.count.deviation).toBe(3);
+    expect(benchmark?.count.deviationRaw).toBe(3);
   });
 
   it('exposes a canonical CategoryBenchmarkMethodology id/version matching the accepted #141 manifest, not a newly invented methodology', () => {
@@ -277,10 +280,10 @@ describe('buildCategoryBenchmarkPayloads (#134/#141 contract)', () => {
 
 describe('sortCategoryBenchmarkPayloads (#141 F141_015/016/017)', () => {
   const payload = (categoryId: string, deviation: number | null): CategoryBenchmarkPayload => ({
-    payloadId: `category-benchmark:${categoryId}`, payloadVersion: '1.0.0', categoryId, focusObjectId: 'focus', peerObjectIds: [],
-    count: { focusValue: null, peerMedian: null, deviation, deviationUnit: 'brands', peerValues: [] },
-    share: { focusShareExact: null, peerMedianShareExact: null, shareExactDelta: null, deviation: null, deviationUnit: 'percentage_points', peerSharesExact: [] },
-    provenance: {},
+    payloadId: `category-benchmark:${categoryId}`, payloadVersion: '2.0.0', categoryId, focusObjectId: 'focus', peerObjectIds: [],
+    count: { focusValue: null, peerMedian: null, deviationRaw: deviation, deviationUnit: 'brands', peerValues: [], comparisonState: deviation == null ? 'unavailable' : deviation > 0 ? 'above' : deviation < 0 ? 'below' : 'equal' },
+    share: { focusShareExact: null, peerMedianShareExact: null, shareExactDelta: null, deviationRaw: null, deviationUnit: 'percentage_points', peerSharesExact: [], comparisonState: 'unavailable' },
+    provenance: { sourceFixtureId: 'test', ownerDecisionCommentId: 5085245278, rawInputSha256: '0'.repeat(64) },
     defaultMode: 'count', availableModes: ['count', 'share'], focusExcludedFromMedian: true,
     state: 'ok', quality: { state: 'ok', limitations: [] },
     peerCount: 0, includedCount: 0, excludedCount: 0,

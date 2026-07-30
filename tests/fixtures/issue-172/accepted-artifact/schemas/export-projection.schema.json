@@ -1,0 +1,26 @@
+{
+  "$id": "https://tenant-mix.local/issue-172/export-projection.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "fixtureId": {
+      "type": "string"
+    },
+    "payloadVersion": {
+      "const": "2.0.0"
+    },
+    "projection": {
+      "type": "object"
+    },
+    "surface": {
+      "const": "CategoryBenchmarkExportManifest/PDF-sidecar"
+    }
+  },
+  "required": [
+    "fixtureId",
+    "payloadVersion",
+    "projection",
+    "surface"
+  ],
+  "type": "object"
+}

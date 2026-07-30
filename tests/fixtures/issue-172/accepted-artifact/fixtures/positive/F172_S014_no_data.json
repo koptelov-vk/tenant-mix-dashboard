@@ -1,0 +1,191 @@
+{
+  "artifactPhase": "SPECIFICATION_FIXTURE_ONLY",
+  "canonicalPayload": {
+    "availableModes": [
+      "count",
+      "share"
+    ],
+    "categoryId": "fixture-category",
+    "count": {
+      "comparisonState": "unavailable",
+      "deviationRaw": null,
+      "deviationUnit": "brands",
+      "focusValue": null,
+      "peerMedian": null,
+      "peerValues": []
+    },
+    "defaultMode": "count",
+    "focusExcludedFromMedian": true,
+    "focusObjectId": "focus",
+    "payloadId": "category-benchmark:F172_S014_no_data",
+    "payloadVersion": "2.0.0",
+    "peerObjectIds": [
+      "peer-1"
+    ],
+    "provenance": {
+      "ownerDecisionCommentId": 5085245278,
+      "rawInputSha256": "437454a37bbce60554ae977bf839430aab9d1cd6b48948cced490ca57bae422f",
+      "sourceFixtureId": "F172_S014_no_data"
+    },
+    "quality": {
+      "limitations": [
+        "no_data"
+      ],
+      "state": "no_data"
+    },
+    "share": {
+      "comparisonState": "unavailable",
+      "deviationRaw": null,
+      "deviationUnit": "percentage_points",
+      "focusShareExact": null,
+      "peerMedianShareExact": null,
+      "peerSharesExact": [],
+      "shareExactDelta": null
+    },
+    "state": "no_data"
+  },
+  "caseKey": "share_no_data",
+  "expectedExportProjection": {
+    "fixtureId": "F172_S014_no_data",
+    "payloadVersion": "2.0.0",
+    "projection": {
+      "accessibleRelationText": "Сравнение недоступно.",
+      "boundaryApplied": false,
+      "comparisonState": "unavailable",
+      "consumerCalculations": [],
+      "cssState": "unavailable",
+      "deviationRaw": null,
+      "displayDeviation": null,
+      "displayRelationText": "Сравнение недоступно",
+      "displayUnit": "percentage_points",
+      "glyph": null,
+      "mode": "share"
+    },
+    "surface": "CategoryBenchmarkExportManifest/PDF-sidecar"
+  },
+  "expectedProjection": {
+    "accessibleRelationText": "Сравнение недоступно.",
+    "boundaryApplied": false,
+    "comparisonState": "unavailable",
+    "consumerCalculations": [],
+    "cssState": "unavailable",
+    "deviationRaw": null,
+    "displayDeviation": null,
+    "displayRelationText": "Сравнение недоступно",
+    "displayUnit": "percentage_points",
+    "glyph": null,
+    "mode": "share"
+  },
+  "expectedSurfaces": {
+    "accessibility": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Сравнение недоступно.",
+        "boundaryApplied": false,
+        "comparisonState": "unavailable",
+        "consumerCalculations": [],
+        "cssState": "unavailable",
+        "deviationRaw": null,
+        "displayDeviation": null,
+        "displayRelationText": "Сравнение недоступно",
+        "displayUnit": "percentage_points",
+        "glyph": null,
+        "mode": "share"
+      }
+    },
+    "css": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Сравнение недоступно.",
+        "boundaryApplied": false,
+        "comparisonState": "unavailable",
+        "consumerCalculations": [],
+        "cssState": "unavailable",
+        "deviationRaw": null,
+        "displayDeviation": null,
+        "displayRelationText": "Сравнение недоступно",
+        "displayUnit": "percentage_points",
+        "glyph": null,
+        "mode": "share"
+      }
+    },
+    "csv": {
+      "applicable": false,
+      "consumerCalculations": [],
+      "projection": null,
+      "reason": "NO_DEDICATED_CATEGORY_BENCHMARK_EXPORT_SURFACE_ON_BASELINE"
+    },
+    "desktop": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Сравнение недоступно.",
+        "boundaryApplied": false,
+        "comparisonState": "unavailable",
+        "consumerCalculations": [],
+        "cssState": "unavailable",
+        "deviationRaw": null,
+        "displayDeviation": null,
+        "displayRelationText": "Сравнение недоступно",
+        "displayUnit": "percentage_points",
+        "glyph": null,
+        "mode": "share"
+      }
+    },
+    "mobile": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Сравнение недоступно.",
+        "boundaryApplied": false,
+        "comparisonState": "unavailable",
+        "consumerCalculations": [],
+        "cssState": "unavailable",
+        "deviationRaw": null,
+        "displayDeviation": null,
+        "displayRelationText": "Сравнение недоступно",
+        "displayUnit": "percentage_points",
+        "glyph": null,
+        "mode": "share"
+      }
+    },
+    "pdf": {
+      "applicable": true,
+      "consumerCalculations": [],
+      "projection": {
+        "accessibleRelationText": "Сравнение недоступно.",
+        "boundaryApplied": false,
+        "comparisonState": "unavailable",
+        "consumerCalculations": [],
+        "cssState": "unavailable",
+        "deviationRaw": null,
+        "displayDeviation": null,
+        "displayRelationText": "Сравнение недоступно",
+        "displayUnit": "percentage_points",
+        "glyph": null,
+        "mode": "share"
+      }
+    },
+    "xlsx": {
+      "applicable": false,
+      "consumerCalculations": [],
+      "projection": null,
+      "reason": "NO_DEDICATED_CATEGORY_BENCHMARK_EXPORT_SURFACE_ON_BASELINE"
+    }
+  },
+  "fixtureId": "F172_S014_no_data",
+  "implementationEvidenceAvailable": false,
+  "kind": "positive",
+  "mode": "share",
+  "productionConformanceClaimed": false,
+  "rawInput": {
+    "focusShareExact": null,
+    "mode": "share",
+    "peerMedianShareExact": null,
+    "signedZeroSource": false,
+    "sourceDeviationRaw": null
+  },
+  "sourceIssue": "#172"
+}

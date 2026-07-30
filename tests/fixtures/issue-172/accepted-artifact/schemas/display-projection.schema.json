@@ -1,0 +1,89 @@
+{
+  "$id": "https://tenant-mix.local/issue-172/display-projection.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "accessibleRelationText": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "boundaryApplied": {
+      "type": "boolean"
+    },
+    "comparisonState": {
+      "enum": [
+        "above",
+        "below",
+        "equal",
+        "unavailable"
+      ]
+    },
+    "consumerCalculations": {
+      "maxItems": 0,
+      "type": "array"
+    },
+    "cssState": {
+      "enum": [
+        "above",
+        "below",
+        "equal",
+        "unavailable"
+      ]
+    },
+    "deviationRaw": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "displayDeviation": {
+      "minimum": 0,
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "displayRelationText": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "displayUnit": {
+      "enum": [
+        "brands",
+        "percentage_points"
+      ]
+    },
+    "glyph": {
+      "enum": [
+        "▲",
+        "▼",
+        "●",
+        null
+      ]
+    },
+    "mode": {
+      "enum": [
+        "count",
+        "share"
+      ]
+    }
+  },
+  "required": [
+    "mode",
+    "deviationRaw",
+    "comparisonState",
+    "displayDeviation",
+    "displayRelationText",
+    "displayUnit",
+    "accessibleRelationText",
+    "glyph",
+    "cssState",
+    "boundaryApplied",
+    "consumerCalculations"
+  ],
+  "type": "object"
+}
