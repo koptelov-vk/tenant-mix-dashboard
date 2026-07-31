@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './TenantMixApp';
 import { OverlayControllerProvider } from './components/ui/OverlayController';
+import './styles/tokens.css';
 import './styles/globals.css';
 import './styles/accessibility.css';
 import './styles/mall-sheet.css';

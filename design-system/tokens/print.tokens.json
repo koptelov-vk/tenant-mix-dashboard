@@ -1,0 +1,11 @@
+{
+  "print-surface": "#ffffff",
+  "print-surface-subtle": "#f3f4f7",
+  "print-text": "#171b2a",
+  "print-text-muted": "#4c5468",
+  "print-accent": "#3a56c8",
+  "print-border": "#b9bfd1",
+  "print-positive": "#0f7a54",
+  "print-negative": "#c8433f",
+  "print-warning": "#8a6c1f"
+}

@@ -38,6 +38,10 @@ jobs:
               - 'requirements.txt'
             frontend:
               - 'src/**'
+              - 'design-system/tokens/**'
+              - 'scripts/generate-design-tokens.mjs'
+              - 'scripts/validate-design-tokens.mjs'
+              - 'tests/design-token-contract.test.mjs'
               - 'public/**'
               - 'index-react.html'
               - 'package.json'
@@ -48,6 +52,10 @@ jobs:
               - 'src/pages/**'
               - 'src/components/**'
               - 'src/styles/**'
+              - 'design-system/tokens/**'
+              - 'scripts/generate-design-tokens.mjs'
+              - 'scripts/validate-design-tokens.mjs'
+              - 'tests/design-token-contract.test.mjs'
               - 'tests/react/**'
               - 'playwright.react.config.mjs'
             performance:
@@ -124,6 +132,11 @@ jobs:
           pnpm install --frozen-lockfile
       - name: Build canonical aggregates for packaging
         run: pnpm build:aggregates
+      - name: Validate canonical design tokens
+        run: |
+          pnpm tokens:check
+          pnpm validate:tokens
+          pnpm test:tokens
       - name: TypeScript noEmit
         run: pnpm exec tsc --noEmit
       - name: Unit tests
